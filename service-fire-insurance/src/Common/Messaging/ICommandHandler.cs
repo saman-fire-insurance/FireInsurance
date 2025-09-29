@@ -1,4 +1,5 @@
 ﻿using Ardalis.Result;
+using Common.Messaging;
 using MediatR;
 
 namespace FireInsurance.Identity.Domain.Common.Messaging;

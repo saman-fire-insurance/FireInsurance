@@ -1,4 +1,5 @@
 ﻿using Ardalis.Result;
+using Common.Messaging;
 using FireInsurance.Identity.Application.Services;
 using FireInsurance.Identity.Domain.Common.Messaging;
 using FireInsurance.Identity.Domain.Entities;
@@ -11,11 +12,13 @@ using System.Data.Entity;
 
 namespace FireInsurance.Identity.Application.UseCases.Commands
 {
-    public sealed class RequestOtpCommand(string phoneNumber, string captchaToken) : ICommand<bool>
-    {
-        public string PhoneNumber { get; set; } = phoneNumber;
+    public record OtpRequest(string PhoneNumber/*, string CaptchaToken*/);
 
-        public string CaptchaToken { get; set; } = captchaToken;
+    public sealed class RequestOtpCommand(OtpRequest request) : ICommand
+    {
+        public string PhoneNumber { get; set; } = request.PhoneNumber;
+
+        //public string CaptchaToken { get; set; } = request.CaptchaToken;
 
         internal sealed class Validator : AbstractValidator<RequestOtpCommand>
         {
@@ -38,9 +41,9 @@ namespace FireInsurance.Identity.Application.UseCases.Commands
             IMediator _mediator,
             ISmsService smsService,
             //ICaptchaValidator captchaValidator,
-            ILogger<RequestOtpCommand> logger) : ICommandHandler<RequestOtpCommand, bool>
+            ILogger<RequestOtpCommand> logger) : ICommandHandler<RequestOtpCommand>
         {
-            public async Task<Result<bool>> Handle(RequestOtpCommand request, CancellationToken cancellationToken)
+            public async Task<Result> Handle(RequestOtpCommand request, CancellationToken cancellationToken)
             {
                 //if (!(await captchaValidator.ValidateTokenAsync(request.CaptchaToken, CaptchaActions.SignUp)))
                 //{

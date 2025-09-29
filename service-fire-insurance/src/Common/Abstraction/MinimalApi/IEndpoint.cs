@@ -4,7 +4,7 @@ namespace Common.Abstraction.MinimalApi;
 
 public interface IBaseEndpoint
 {
-    void MapEndpoint(IRouteBuilder app);
+    void MapEndpoint(IEndpointRouteBuilder app);
 }
 
 public interface IEndpoint : IBaseEndpoint

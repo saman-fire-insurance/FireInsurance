@@ -2,7 +2,7 @@
 using FireInsurance.Identity.Domain.Common;
 using FireInsurance.Identity.Domain.Common.Enums;
 using FireInsurance.Identity.Domain.Errors;
-using FireInsurance.Insurance.Domain.Events.UserEvents;
+using FireInsurance.Identity.Domain.Events.UserEvents;
 using Microsoft.AspNetCore.Identity;
 
 namespace FireInsurance.Identity.Domain.Entities

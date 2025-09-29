@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
@@ -21,7 +22,7 @@ public static class EndpointExtensions
         return services;
     }
 
-    public static IApplicationBuilder MapEndpoints<TEndpoint>(this WebApplication app, RouteGroupBuilder routeGroupBuilder = null)
+    public static IApplicationBuilder MapEndpoints<TEndpoint>(this WebApplication app, RouteGroupBuilder? routeGroupBuilder = null)
         where TEndpoint : IBaseEndpoint
     {
         var endpoints = app.Services.GetRequiredService<IEnumerable<TEndpoint>>();

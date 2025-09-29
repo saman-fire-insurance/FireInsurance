@@ -1,7 +1,7 @@
 ﻿using Ardalis.Result;
 using MediatR;
 
-namespace FireInsurance.Identity.Domain.Common.Messaging;
+namespace Common.Messaging;
 
 public interface ICommand : IRequest<Result>
 {

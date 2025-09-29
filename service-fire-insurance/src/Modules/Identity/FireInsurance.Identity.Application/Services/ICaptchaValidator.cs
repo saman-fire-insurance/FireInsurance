@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FireInsurance.Insurance.Application.Services
+namespace FireInsurance.Identity.Application.Services
 {
     public interface ICaptchaValidator
     {
