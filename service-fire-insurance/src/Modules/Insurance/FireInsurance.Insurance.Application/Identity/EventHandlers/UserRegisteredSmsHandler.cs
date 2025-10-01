@@ -1,4 +1,5 @@
-﻿using FireInsurance.Insurance.Domain.Events.UserEvents;
+﻿using FireInsurance.Insurance.Application.Services;
+using FireInsurance.Insurance.Domain.Events.UserEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -22,7 +23,7 @@ namespace FireInsurance.Insurance.Application.Identity.EventHandlers
                 _logger.LogInformation("Sending welcome SMS to user {UserId} at {PhoneNumber}",
                     notification.UserId, notification.PhoneNumber);
 
-                await _smsService.SendWelcomeMessage(notification.PhoneNumber);
+                //await _smsService.SendWelcomeMessage(notification.PhoneNumber);
 
                 _logger.LogInformation("Welcome SMS sent successfully to user {UserId}", notification.UserId);
             }

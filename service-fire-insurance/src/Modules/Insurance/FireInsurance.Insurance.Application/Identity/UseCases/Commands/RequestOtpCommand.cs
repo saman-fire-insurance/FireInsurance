@@ -1,6 +1,6 @@
 ﻿using Ardalis.Result;
 using FireInsurance.Insurance.Application.Services;
-using FireInsurance.Insurance.Domain.Common.Messaging;
+using Common.Messaging;
 using FireInsurance.Insurance.Domain.Entities;
 using FireInsurance.Insurance.Domain.Errors;
 using FluentValidation;

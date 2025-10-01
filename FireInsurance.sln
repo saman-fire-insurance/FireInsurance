@@ -23,15 +23,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{7A1E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gateway", "service-fire-insurance\src\Gateway\Gateway.csproj", "{AF6253FC-E94F-4D50-AB8B-8EEAB61E7CA7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Identity", "Identity", "{329555E6-BD3F-4322-A863-ACCE7EE6203C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Users", "Users", "{329555E6-BD3F-4322-A863-ACCE7EE6203C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FireInsurance.Identity.API", "service-fire-insurance\src\Modules\Identity\FireInsurance.Identity.API\FireInsurance.Identity.API.csproj", "{2CC0D129-B399-49D0-A26E-247CA97EB0CA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FireInsurance.Users.API", "service-fire-insurance\src\Modules\Users\FireInsurance.Users.API\FireInsurance.Users.API.csproj", "{2CC0D129-B399-49D0-A26E-247CA97EB0CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FireInsurance.Identity.Application", "service-fire-insurance\src\Modules\Identity\FireInsurance.Identity.Application\FireInsurance.Identity.Application.csproj", "{0DB07404-FF66-4BD7-82A8-A35F4C5BC684}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FireInsurance.Users.Application", "service-fire-insurance\src\Modules\Users\FireInsurance.Users.Application\FireInsurance.Users.Application.csproj", "{0DB07404-FF66-4BD7-82A8-A35F4C5BC684}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FireInsurance.Identity.Domain", "service-fire-insurance\src\Modules\Identity\FireInsurance.Identity.Domain\FireInsurance.Identity.Domain.csproj", "{24FE9DE3-44F0-4A06-BE32-10D0731B2097}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FireInsurance.Users.Domain", "service-fire-insurance\src\Modules\Users\FireInsurance.Users.Domain\FireInsurance.Users.Domain.csproj", "{24FE9DE3-44F0-4A06-BE32-10D0731B2097}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FireInsurance.Identity.Infrastructure", "service-fire-insurance\src\Modules\Identity\FireInsurance.Identity.Infrastructure\FireInsurance.Identity.Infrastructure.csproj", "{D41C55FD-E0AA-4B42-AC7A-CBA5780C6271}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FireInsurance.Users.Infrastructure", "service-fire-insurance\src\Modules\Users\FireInsurance.Users.Infrastructure\FireInsurance.Users.Infrastructure.csproj", "{D41C55FD-E0AA-4B42-AC7A-CBA5780C6271}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Insurance", "Insurance", "{C06A6FC7-0498-4552-BED8-A03516731842}"
 EndProject

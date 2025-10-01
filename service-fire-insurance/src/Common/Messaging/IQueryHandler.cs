@@ -1,8 +1,9 @@
 ﻿using Ardalis.Result;
+using Common.Messaging;
 using MediatR;
 
 
-namespace FireInsurance.Identity.Domain.Common.Messaging;
+namespace Common.Messaging;
 
 public interface IQueryHandler<TQuery, TResponse> : IRequestHandler<TQuery, Result<TResponse>> where TQuery : IQuery<TResponse>
 {
