@@ -1,8 +1,7 @@
-using FireInsurance.Users.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace FireInsurance.Users.Infrastructure.Services.Sms;
+namespace FireInsurance.Users.Infrastructure.Services.Saman.Sms;
 
 internal sealed class SmsProviderOptionsSetup(IConfiguration configuration) : IConfigureOptions<SmsProviderOptions>
 {

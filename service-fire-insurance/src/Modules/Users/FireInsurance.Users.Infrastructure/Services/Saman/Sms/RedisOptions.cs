@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace FireInsurance.Users.Infrastructure.Services.Sms;
+namespace FireInsurance.Users.Infrastructure.Services.Saman.Sms;
 
 public sealed class RedisOptions
 {

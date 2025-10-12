@@ -11,7 +11,7 @@ using Refit;
 using System.Net;
 
 
-namespace FireInsurance.Users.Infrastructure.Services.Sms
+namespace FireInsurance.Users.Infrastructure.Services.Saman.Sms
 {
     public static class NotificationServiceInstaller
     {

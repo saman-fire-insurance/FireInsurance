@@ -22,6 +22,7 @@ namespace FireInsurance.Users.Domain.Entities
         public DateTime? CreatedAt { get; private set; }
         public DateTime? LoggedInAt { get; private set; }
         public DateTime? DeletedAt { get; private set; }
+        public bool IdentityConfirmed { get; private set; }
         public bool Admin { get; private set; }
         public bool SuperAdmin { get; private set; }
 
@@ -101,6 +102,7 @@ namespace FireInsurance.Users.Domain.Entities
             NationalID = nationalID ?? NationalID;
             Gender = gender;
             FatherName = fatherName;
+            IdentityConfirmed = true;
 
             _domainEvents.Add(new InquiryResultAppliedDomainEvent(Id, firstName, lastName, fatherName, nationalID, gender));
         }
@@ -124,14 +126,14 @@ namespace FireInsurance.Users.Domain.Entities
                 return Result.Invalid(new ValidationError(UserErrors.PhoneNumber.Empty));
             }
 
-            if (!CanSendCode(3))
+            if (!CanSendCode(0))
             {
                 return Result.Invalid(new ValidationError(UserErrors.CodeSentRecently(3)));
             }
 
             CodeSentAt = DateTime.UtcNow;
 
-            //_domainEvents.Add(new VerificationCodeSentDomainEvent(Id, PhoneNumber, DateTime.UtcNow));
+            _domainEvents.Add(new VerificationCodeSentDomainEvent(Id, PhoneNumber, DateTime.UtcNow));
 
             return Result.Success();
         }

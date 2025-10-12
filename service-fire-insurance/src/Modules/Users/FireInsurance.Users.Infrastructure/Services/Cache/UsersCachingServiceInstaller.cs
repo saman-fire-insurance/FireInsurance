@@ -1,5 +1,5 @@
 ﻿using FireInsurance.Users.Application.Services;
-using FireInsurance.Users.Infrastructure.Services.Sms;
+using FireInsurance.Users.Infrastructure.Services.Saman.Sms;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;

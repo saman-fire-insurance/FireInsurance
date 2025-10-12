@@ -40,4 +40,8 @@
 		<ProjectReference Include="..\FireInsurance.Users.Domain\FireInsurance.Users.Domain.csproj" />
 		<ProjectReference Include="..\FireInsurance.Users.Application\FireInsurance.Users.Application.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Dtos\" />
+	</ItemGroup>
 </Project>

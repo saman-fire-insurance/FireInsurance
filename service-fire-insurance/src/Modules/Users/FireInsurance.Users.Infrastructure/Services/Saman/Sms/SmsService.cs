@@ -4,7 +4,7 @@ using FireInsurance.Users.Domain.Common.Utilities;
 using Microsoft.Extensions.Logging;
 using System.Net;
 
-namespace FireInsurance.Users.Infrastructure.Services.Sms
+namespace FireInsurance.Users.Infrastructure.Services.Saman.Sms
 {
     public sealed class SmsService(
     ISmsProviderApi smsApi,
@@ -83,7 +83,7 @@ namespace FireInsurance.Users.Infrastructure.Services.Sms
                     SmsBody = message
                 });
 
-                return response.Code == ((int)HttpStatusCode.OK) ?
+                return response.Code == (int)HttpStatusCode.OK ?
                     Result.Success() :
                     Result.CriticalError(["خطا در ارسال کد. لطفا در صورت دریافت مجدد خطا با پشتیبانی تماس بگیرید."]);    
             }

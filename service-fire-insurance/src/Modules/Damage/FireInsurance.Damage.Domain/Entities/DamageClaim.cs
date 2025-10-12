@@ -27,6 +27,6 @@ namespace FireInsurance.Damage.Domain.Entities
         public OwnershipType OwnershipType { get; set; }
         public Guid? StakeHolderId { get; set; }
         public StakeHolder? StakeHolder { get; set; }
-        public ThirdPartyInsuranceItem 
+        //public ThirdPartyInsuranceItem ThirdPartyInsuranceItem { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ardalis.Result;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,6 +33,10 @@ namespace FireInsurance.Users.Domain.Errors
             public static readonly string Empty = "کد اجباری است";
 
             public static readonly string NotSent = "مشکلی در ارسال کد پیش آمده دوباره سعی کنید";
+
+            public static readonly string InvalidCodeError = new("کد صحیح نمی‌باشد لطفا دوباره تلاش کنید");
+
+            public static readonly string ExpiredCodeError = new("کد منقضی شده است، لطفا کد جدید دریافت کنید");
         }
 
         public static class Link
@@ -91,10 +96,7 @@ namespace FireInsurance.Users.Domain.Errors
 
         public static readonly string AlreadyExists = "این نام کاربری قبلا استفاده شده است";
 
-        public static string NotFound()
-        {
-            return $"کاربری یافت نشد";
-        }
+        public static string NotFound() => "کاربری یافت نشد";
 
         public static string NotFound(string phoneNumber)
         {

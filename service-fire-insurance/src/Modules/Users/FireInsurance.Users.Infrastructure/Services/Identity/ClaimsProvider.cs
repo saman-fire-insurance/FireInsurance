@@ -12,4 +12,6 @@ public class ClaimsProvider(IHttpContextAccessor httpContextAccessor) : IClaimsP
     public string? UserId => Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
 
     public bool IsAdmin => Claims.FirstOrDefault(c => c.Type == CustomClaimType.IsAdmin)?.Value == true.ToString();
+
+    public bool IsSuperAdmin => Claims.FirstOrDefault(c => c.Type == CustomClaimType.IsSuperAdmin)?.Value == true.ToString();
 }

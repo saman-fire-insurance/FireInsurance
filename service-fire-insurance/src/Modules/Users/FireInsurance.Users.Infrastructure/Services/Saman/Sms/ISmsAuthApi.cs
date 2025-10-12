@@ -1,7 +1,7 @@
 using Refit;
 using System.Text.Json.Serialization;
 
-namespace FireInsurance.Users.Infrastructure.Services.Sms;
+namespace FireInsurance.Users.Infrastructure.Services.Saman.Sms;
 
 public interface ISmsAuthApi
 {

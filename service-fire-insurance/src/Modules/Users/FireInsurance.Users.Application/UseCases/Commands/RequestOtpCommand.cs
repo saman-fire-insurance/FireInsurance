@@ -6,14 +6,14 @@ using FireInsurance.Users.Domain.Errors;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Data.Entity;
 
 namespace FireInsurance.Users.Application.UseCases.Commands
 {
-    public record OtpRequest(string PhoneNumber/*, string CaptchaToken*/);
+    public record OtpRequestDto(string PhoneNumber/*, string CaptchaToken*/);
 
-    public sealed class RequestOtpCommand(OtpRequest request) : ICommand
+    public sealed class RequestOtpCommand(OtpRequestDto request) : ICommand
     {
         public string PhoneNumber { get; set; } = request.PhoneNumber;
 
@@ -36,7 +36,7 @@ namespace FireInsurance.Users.Application.UseCases.Commands
         }
 
         internal sealed class Handler(
-            UserManager<Domain.Entities.User> userManager,
+            UserManager<User> userManager,
             IMediator _mediator,
             ISmsService smsService,
             //ICaptchaValidator captchaValidator,
@@ -54,7 +54,7 @@ namespace FireInsurance.Users.Application.UseCases.Commands
                 if (user is null)
                 {
                     // SignUp
-                    var userResult = Domain.Entities.User.SignUp(request.PhoneNumber);
+                    var userResult = User.SignUp(request.PhoneNumber);
                     if (!userResult.IsSuccess)
                     {
                         logger.LogWarning("User registration failed validation for phone: {PhoneNumber}. Errors: {Errors}",
@@ -78,14 +78,9 @@ namespace FireInsurance.Users.Application.UseCases.Commands
                     return Result.Error(UserErrors.Code.NotSent);
                 }
 
-                if (!user.CanSendCode(3))
-                {
-                    return Result.Error(UserErrors.CodeSentRecently(3));
-                }
-
                 logger.LogInformation("Sending OTP to user {UserId} at {PhoneNumber}", user.Id, user.PhoneNumber);
-
                 var code = await userManager.GenerateChangePhoneNumberTokenAsync(user, user.PhoneNumber);
+
                 var sendCodeResult = await smsService.SendCodeAsync(user.PhoneNumber, code);
                 if (!sendCodeResult.IsSuccess)
                 {
@@ -93,19 +88,19 @@ namespace FireInsurance.Users.Application.UseCases.Commands
                 }
 
                 logger.LogInformation("OTP sent successfully to user {UserId}", user.Id);
-
                 user.SendCode();
 
+                // Publish domain events
                 var domainEvents = user.GetDomainEvents();
                 logger.LogInformation("Processing {EventCount} domain events for user {UserId}", domainEvents.Count, user.Id);
-
-                // Publish domain events
                 foreach (var domainEvent in domainEvents)
                 {
                     await _mediator.Publish(domainEvent, cancellationToken);
                 }
 
                 user.ClearDomainEvents();
+
+                await userManager.UpdateAsync(user);
 
                 return Result.Success();
             }

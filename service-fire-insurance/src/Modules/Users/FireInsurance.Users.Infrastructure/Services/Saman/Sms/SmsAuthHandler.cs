@@ -1,11 +1,10 @@
-using FireInsurance.Users.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
 using Refit;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace FireInsurance.Users.Infrastructure.Services.Sms;
+namespace FireInsurance.Users.Infrastructure.Services.Saman.Sms;
 
 public sealed class SmsAuthHandler(
     ISmsAuthApi authApi,

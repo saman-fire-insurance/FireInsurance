@@ -16,7 +16,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddDefaultOpenApi();
-builder.AddDefaultOpenApi();
 
 builder.Services.AddAuthorization();
 
@@ -101,8 +100,6 @@ app
     //.UseJwtRevocation<JwtBlackListValidator>()
     .UseAuthentication()
     .UseAuthorization();
-
-app.UseDefaultOpenApi();
 
     //.UseFastEndpoints(config =>
     //{

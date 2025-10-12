@@ -7,7 +7,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace FireInsurance.Insurance.Application.Identity.UseCases.Commands
 {

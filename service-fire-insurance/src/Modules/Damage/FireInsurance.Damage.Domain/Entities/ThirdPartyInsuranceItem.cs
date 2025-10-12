@@ -2,7 +2,7 @@
 
 namespace FireInsurance.Damage.Domain.Entities
 {
-    internal class ThirdPartyInsuranceItem : BaseEntity
+    public class ThirdPartyInsuranceItem : BaseEntity
     {
     }
 }

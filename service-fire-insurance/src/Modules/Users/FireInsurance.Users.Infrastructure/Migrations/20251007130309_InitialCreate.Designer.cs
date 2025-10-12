@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FireInsurance.Users.Infrastructure.Migrations
 {
     [DbContext(typeof(UsersDbContext))]
-    [Migration("20251001123302_InitialCreate")]
+    [Migration("20251007130309_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -79,12 +79,18 @@ namespace FireInsurance.Users.Infrastructure.Migrations
                         .HasColumnName("first_name");
 
                     b.Property<string>("FullName")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("text")
-                        .HasColumnName("full_name");
+                        .HasColumnName("full_name")
+                        .HasComputedColumnSql("translate(\"first_name\" || ' ' || \"last_name\",  'يىكۀؤ', 'یکههو')", true);
 
                     b.Property<int?>("Gender")
                         .HasColumnType("integer")
                         .HasColumnName("gender");
+
+                    b.Property<bool>("IdentityConfirmed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("identity_confirmed");
 
                     b.Property<string>("LastName")
                         .HasColumnType("text")

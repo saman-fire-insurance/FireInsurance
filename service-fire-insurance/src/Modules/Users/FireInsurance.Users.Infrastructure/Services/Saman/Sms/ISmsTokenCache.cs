@@ -1,4 +1,4 @@
-namespace FireInsurance.Users.Infrastructure.Services.Sms;
+namespace FireInsurance.Users.Infrastructure.Services.Saman.Sms;
 
 public interface ISmsTokenCache
 {

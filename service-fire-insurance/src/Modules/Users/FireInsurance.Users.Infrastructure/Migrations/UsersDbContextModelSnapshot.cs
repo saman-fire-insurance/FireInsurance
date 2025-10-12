@@ -76,12 +76,18 @@ namespace FireInsurance.Users.Infrastructure.Migrations
                         .HasColumnName("first_name");
 
                     b.Property<string>("FullName")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("text")
-                        .HasColumnName("full_name");
+                        .HasColumnName("full_name")
+                        .HasComputedColumnSql("translate(\"first_name\" || ' ' || \"last_name\",  'يىكۀؤ', 'یکههو')", true);
 
                     b.Property<int?>("Gender")
                         .HasColumnType("integer")
                         .HasColumnName("gender");
+
+                    b.Property<bool>("IdentityConfirmed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("identity_confirmed");
 
                     b.Property<string>("LastName")
                         .HasColumnType("text")

@@ -1,4 +1,5 @@
 ﻿using Common.Interfaces;
+using FireInsurance.Users.Application.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -111,5 +112,7 @@ public static class JwtAuthenticationInstaller
             .ValidateOnStart();
 
         services.TryAddSingleton(sp => sp.GetRequiredService<IOptions<JwtOptions>>().Value);
+
+        services.TryAddScoped<IJwtTokenService, JwtTokenService>();
     }
 }

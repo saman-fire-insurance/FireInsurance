@@ -17,7 +17,7 @@ namespace FireInsurance.Users.API.Endpoints.Identity.Shared
               .WithTags(Tags.Identity_Otp_Request);
         }
 
-        public static async Task<IResult> RequestOtpAsync(OtpRequest request, ISender sender, CancellationToken cancellationToken)
+        public static async Task<IResult> RequestOtpAsync(OtpRequestDto request, ISender sender, CancellationToken cancellationToken)
         {
             var command = new RequestOtpCommand(request);
             var result = await sender.Send(command, cancellationToken);

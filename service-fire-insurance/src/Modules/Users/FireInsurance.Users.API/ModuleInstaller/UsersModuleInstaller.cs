@@ -7,7 +7,8 @@ using FireInsurance.Users.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using FireInsurance.Users.Domain.Entities;
 using FireInsurance.Users.Infrastructure.Services.Identity;
-using FireInsurance.Users.Infrastructure.Services.Sms;
+using FireInsurance.Users.Infrastructure.Services.Saman.Sms;
+using FireInsurance.Users.Infrastructure.Services.Cache;
 
 namespace FireInsurance.Users.API.ModuleInstaller
 {
@@ -18,6 +19,8 @@ namespace FireInsurance.Users.API.ModuleInstaller
             services.AddValidators(AssemblyReference.Assembly);
 
             services.AddDatabase(configuration);
+
+            services.AddUsersCache();
 
             services.AddIdentityProvider(environment);
 

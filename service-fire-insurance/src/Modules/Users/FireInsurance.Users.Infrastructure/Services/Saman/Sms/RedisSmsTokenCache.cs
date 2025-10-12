@@ -1,9 +1,8 @@
-using FireInsurance.Users.Infrastructure.Services.Sms;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
-namespace FireInsurance.Users.Infrastructure.Services.Sms;
+namespace FireInsurance.Users.Infrastructure.Services.Saman.Sms;
 
 public sealed class RedisSmsTokenCache(
     IDistributedCache distributedCache,
