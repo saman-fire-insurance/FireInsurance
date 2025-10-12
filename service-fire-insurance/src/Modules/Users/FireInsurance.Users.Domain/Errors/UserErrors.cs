@@ -96,6 +96,8 @@ namespace FireInsurance.Users.Domain.Errors
 
         public static readonly string AlreadyExists = "این نام کاربری قبلا استفاده شده است";
 
+        public static readonly string NotLoggedIn = "باید ابتدا وارد حساب کاربری خود شوید";
+
         public static string NotFound() => "کاربری یافت نشد";
 
         public static string NotFound(string phoneNumber)

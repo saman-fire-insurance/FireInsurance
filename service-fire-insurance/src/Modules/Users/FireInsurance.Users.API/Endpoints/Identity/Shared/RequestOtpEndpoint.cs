@@ -14,7 +14,7 @@ namespace FireInsurance.Users.API.Endpoints.Identity.Shared
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
             app.MapPost("/Users/RequestOtp", RequestOtpAsync)
-              .WithTags(Tags.Identity_Otp_Request);
+              .WithTags(Tags.User_Authentication_Otp);
         }
 
         public static async Task<IResult> RequestOtpAsync(OtpRequestDto request, ISender sender, CancellationToken cancellationToken)

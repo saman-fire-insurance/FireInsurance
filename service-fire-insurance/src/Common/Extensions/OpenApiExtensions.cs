@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Writers;
 using SwaggerHierarchySupport;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Runtime;
 using System.Text.Json;
 
 namespace Common.Extensions;
@@ -107,9 +108,8 @@ public static partial class Extensions
         var services = builder.Services;
         var configuration = builder.Configuration;
 
-        var openApi = configuration.GetSection("OpenApi");
-
-        if (!openApi.Exists())
+        var openApiSection = configuration.GetSection("OpenApi");
+        if (!openApiSection.Exists())
         {
             return builder;
         }
@@ -127,7 +127,7 @@ public static partial class Extensions
             ///     }
             ///   }
             /// }
-            var document = openApi.GetRequiredSection("Document");
+            var document = openApiSection.GetRequiredSection("Document");
 
             var version = document.GetRequiredValue("Version") ?? "v1";
 
@@ -135,7 +135,7 @@ public static partial class Extensions
             {
                 Title = document.GetRequiredValue("Title"),
                 Version = version,
-                Description = document.GetRequiredValue("Description")
+                Description = document.GetRequiredValue("Description"),
             });
 
             var identitySection = configuration.GetSection("Identity");
