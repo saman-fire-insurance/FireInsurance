@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FireInsurance.Insurance.Application.Data
 {
-    internal interface IUsersDbContext
+    public interface IInsuranceDbContext
     {
     }
 }

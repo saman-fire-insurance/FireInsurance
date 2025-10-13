@@ -7,14 +7,8 @@ using FireInsurance.Users.Domain.Common.Enums;
 using FireInsurance.Users.Domain.Entities;
 using FireInsurance.Users.Domain.Errors;
 using FluentValidation;
-using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FireInsurance.Users.Application.UseCases.Commands
 {

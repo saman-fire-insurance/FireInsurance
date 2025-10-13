@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FireInsurance.Insurance.Application.Data;
 
 namespace FireInsurance.Insurance.Infrastructure.Data
 {
-    public interface IInsuranceDbContext
+    public class InsuranceDbContext : IInsuranceDbContext
     {
     }
 }

@@ -8,8 +8,29 @@
 
   <ItemGroup>
     <Folder Include="EventHandlers\" />
-    <Folder Include="UseCases\" />
     <Folder Include="Services\" />
+    <Folder Include="UseCases\Queries\" />
   </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Ardalis.Result.FluentValidation" Version="10.1.0" />
+		<PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
+		<PackageReference Include="Mapster" Version="7.4.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.3.0" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Routing.Abstractions" Version="" />
+		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="9.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\Common\Common.csproj" />
+		<ProjectReference Include="..\FireInsurance.Damage.Application\FireInsurance.Damage.Application.csproj" />
+		<ProjectReference Include="..\FireInsurance.Damage.Infrastructure\FireInsurance.Damage.Infrastructure.csproj" />
+		<ProjectReference Include="..\FireInsurance.Damage.Domain\FireInsurance.Damage.Domain.csproj" />
+	</ItemGroup>
 
 </Project>

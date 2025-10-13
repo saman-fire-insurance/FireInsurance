@@ -1,13 +1,11 @@
-﻿using FireInsurance.Damage.Domain.Common;
-
-namespace FireInsurance.Damage.Domain.Entities
+namespace FireInsurance.Damage.Application.Dtos
 {
-    public class StakeHolder : BaseEntity
+    public class StakeHolderDto : BaseDto
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string AccountNumber { get; set; } = string.Empty;
         public string Iban { get; set; } = string.Empty;
-        public bool IsOwner { get; set; } = true;
+        public bool IsOwner { get; set; }
     }
 }

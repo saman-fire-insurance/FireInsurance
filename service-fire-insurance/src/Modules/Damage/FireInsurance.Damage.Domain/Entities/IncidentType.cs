@@ -9,6 +9,6 @@ namespace FireInsurance.Damage.Domain.Entities
 {
     public class IncidentType : BaseEntity
     {
-
+        public required string Title { get; set; }
     }
 }

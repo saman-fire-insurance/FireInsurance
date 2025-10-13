@@ -4,8 +4,8 @@ namespace FireInsurance.Damage.Domain.Entities
 {
     public class DamagedObject : BaseEntity
     {
-        public Guid ClaimId { get; set; }
-        public DamageClaim DamageClaim { get; set; }
+        public Guid DamageClaimId { get; set; }
+        public DamageClaim? DamageClaim { get; set; }
         public Guid InsurableObjectId { get; set; }
         public InsurableObject InsurableObject { get; set; }
         public Guid CoverageId { get; set; }
