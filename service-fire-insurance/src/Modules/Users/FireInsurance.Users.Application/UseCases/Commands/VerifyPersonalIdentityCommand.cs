@@ -73,7 +73,7 @@ namespace FireInsurance.Users.Application.UseCases.Commands
                 }
 
                 var personInfo = inquiryResult.Value;
-                user.ApplyInquiryResult(personInfo.FirstName, personInfo.LastName, personInfo.NationalCode!, personInfo.FatherName, personInfo.Gender ? Gender.Male : Gender.Female);
+                user.ApplyInquiryResult(personInfo.FirstName, personInfo.LastName, personInfo.FatherName, request.NationalCode, request.DateOfBirth, personInfo.Gender ? Gender.Male : Gender.Female);
 
                 return Result.Success(inquiryResult.Value);
             }
