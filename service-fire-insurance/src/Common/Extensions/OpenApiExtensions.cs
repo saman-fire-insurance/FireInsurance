@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -107,9 +109,8 @@ public static partial class Extensions
         var services = builder.Services;
         var configuration = builder.Configuration;
 
-        var openApi = configuration.GetSection("OpenApi");
-
-        if (!openApi.Exists())
+        var openApiSection = configuration.GetSection("OpenApi");
+        if (!openApiSection.Exists())
         {
             return builder;
         }
@@ -127,7 +128,7 @@ public static partial class Extensions
             ///     }
             ///   }
             /// }
-            var document = openApi.GetRequiredSection("Document");
+            var document = openApiSection.GetRequiredSection("Document");
 
             var version = document.GetRequiredValue("Version") ?? "v1";
 
@@ -135,97 +136,73 @@ public static partial class Extensions
             {
                 Title = document.GetRequiredValue("Title"),
                 Version = version,
-                Description = document.GetRequiredValue("Description")
+                Description = document.GetRequiredValue("Description"),
             });
 
-            var identitySection = configuration.GetSection("Identity");
+            //var identitySection = configuration.GetSection("Identity");
+            //if (!identitySection.Exists())
+            //{
+            //    return;
+            //}
 
-            if (!identitySection.Exists())
+            //var identityUrlExternal = identitySection.GetRequiredValue("Issuer");
+
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                // No identity section, so no authentication open api definition
-                return;
-            }
+                Type = SecuritySchemeType.Http,
+                Scheme = JwtBearerDefaults.AuthenticationScheme,
+                BearerFormat = "JWT",
+                Description = "Enter your JWT token in the format: Bearer {your token}"
+            });
 
-            // {
-            //   "Identity": {
-            //     "Url": "http://identity",
-            //     "Scopes": {
-            //         "basket": "Basket API"
-            //      }
-            //    }
-            // }
-
-            var identityUrlExternal = identitySection.GetRequiredValue("Issuer");
-            var scopes = identitySection.GetRequiredSection("Scopes").GetChildren().ToDictionary(p => p.Key, p => p.Value);
-
-            if (scopes.ContainsKey("gatewayapi"))
-            {
-                options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-                {
-                    Type = SecuritySchemeType.OAuth2,
-                    Flows = new OpenApiOAuthFlows()
-                    {
-                        // TODO: Change this to use Authorization Code flow with PKCE
-                        AuthorizationCode = new OpenApiOAuthFlow()
-                        {
-                            AuthorizationUrl = new Uri($"{identityUrlExternal}/connect/authorize"),
-                            TokenUrl = new Uri($"{identityUrlExternal}/connect/token"),
-                            Scopes = scopes,
-                        }
-                    }
-                });
-            }
-
-            if (scopes.ContainsKey("automation"))
-            {
-                options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-                {
-                    Type = SecuritySchemeType.OAuth2,
-                    Flows = new OpenApiOAuthFlows()
-                    {
-                        Password = new OpenApiOAuthFlow()
-                        {
-                            AuthorizationUrl = new Uri($"{identityUrlExternal}/connect/authorize"),
-                            TokenUrl = new Uri($"{identityUrlExternal}/connect/token"),
-                            Scopes = scopes,
-                        }
-                    }
-                });
-            }
-
-            options.OperationFilter<AuthorizeCheckOperationFilter>([scopes.Keys.ToArray()]);
+            options.OperationFilter<AuthorizeCheckOperationFilter>(/*[scopes.Keys.ToArray()]*/);
             options.SchemaFilter<EnumerationSchemaFilter>();
         });
 
         return builder;
     }
 
-    private sealed class AuthorizeCheckOperationFilter(string[] scopes) : IOperationFilter
+    private sealed class AuthorizeCheckOperationFilter() : IOperationFilter
     {
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            //var metadata = context.ApiDescription.ActionDescriptor.EndpointMetadata;
-
-            //if (!metadata.OfType<IAuthorizeData>().Any())
-            //{
-            //    return;
-            //}
+            var hasAuthorization = context.ApiDescription.ActionDescriptor.EndpointMetadata.Any(em => em is IAuthorizeData);
+            if (!hasAuthorization)
+            {
+                return;
+            }
 
             operation.Responses.TryAdd("401", new OpenApiResponse { Description = "Unauthorized" });
             operation.Responses.TryAdd("403", new OpenApiResponse { Description = "Forbidden" });
 
-            var oAuthScheme = new OpenApiSecurityScheme
+            var bearerScheme = new OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "oauth2" }
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
             };
 
-            operation.Security = new List<OpenApiSecurityRequirement>
-            {
+            operation.Security =
+            [
                 new()
                 {
-                    [ oAuthScheme ] = scopes
+                    [bearerScheme] = Array.Empty<string>()
                 }
-            };
+            ];
+
+            /*
+            //var oAuthScheme = new OpenApiSecurityScheme
+            //{
+            //    Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "oauth2" }
+            //};
+
+
+            //operation.Security = new List<OpenApiSecurityRequirement>
+            //{
+            //    new()
+            //    {
+            //        [ oAuthScheme ] = scopes
+            //    }
+            //};
+            */
         }
     }
 
@@ -244,14 +221,9 @@ public static partial class Extensions
         }
     }
 
-    public class EnumerationOpenApiExtension : IOpenApiExtension
+    public class EnumerationOpenApiExtension(SchemaFilterContext context) : IOpenApiExtension
     {
-        private readonly SchemaFilterContext _context;
-
-        public EnumerationOpenApiExtension(SchemaFilterContext context)
-        {
-            _context = context;
-        }
+        private readonly SchemaFilterContext _context = context;
 
         public void Write(IOpenApiWriter writer, OpenApiSpecVersion specVersion)
         {

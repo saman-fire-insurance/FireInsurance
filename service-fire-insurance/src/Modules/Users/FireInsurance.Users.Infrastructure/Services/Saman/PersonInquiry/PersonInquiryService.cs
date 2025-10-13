@@ -12,7 +12,7 @@ namespace FireInsurance.Users.Infrastructure.Services.Saman.PersonInquiry;
 
 public sealed class PersonInquiryService (IPersonInquiryApi inquiryApi, UserManager<User> userManager, IClaimsProvider claimsProvider, ILogger<PersonInquiryService> logger) : IPersonInquiryService
 {
-    public async Task<Result<PersonInquiryResponse>> GetPersonInfoAsync(string nationalCode, string birthDate)
+    public async Task<Result<PersonInquiryResponse>> GetPersonInfoAsync(string nationalCode, string dateOfBirth)
 {
     logger.LogInformation("[GetPersonInfoAsync]: Calling Saman inquiry service");
 
@@ -21,7 +21,7 @@ public sealed class PersonInquiryService (IPersonInquiryApi inquiryApi, UserMana
         var request = new PersonInquiryRequest
         {
             NationalCode = nationalCode,
-            BirthDate = birthDate
+            BirthDate = dateOfBirth
         };
 
         var apiResponse = await inquiryApi.GetPersonInfoAsync(request);
@@ -70,24 +70,24 @@ public sealed class PersonInquiryService (IPersonInquiryApi inquiryApi, UserMana
     }
 }
 
-public async Task<Result> ApplyInquiryResultToUser(PersonInquiryResponse response)
-{
-    var userId = claimsProvider.UserId ?? throw new("UserId was null");
-    var user = await userManager.FindByIdAsync(userId) ?? throw new("User was null");
-    user.ApplyInquiryResult(response.FirstName, response.LastName, response.FatherName, response.NationalCode, response.Gender ? Gender.Male : Gender.Female);
-    await userManager.UpdateAsync(user);
+    public async Task<Result> ApplyInquiryResultToUser(PersonInquiryResponse response)
+    {
+        var userId = claimsProvider.UserId ?? throw new("UserId was null");
+        var user = await userManager.FindByIdAsync(userId) ?? throw new("User was null");
+        user.ApplyInquiryResult(response.FirstName, response.LastName, response.FatherName, response.NationalCode, response.Gender ? Gender.Male : Gender.Female);
+        await userManager.UpdateAsync(user);
 
-    //await ownerService.ApplyInquiryResult(..);
+        //await ownerService.ApplyInquiryResult(..);
 
-    return Result.Success();
-}
+        return Result.Success();
+    }
 
-private static string NormalizeNationalCode(long code)
+    private static string NormalizeNationalCode(long code)
 {
     return code.ToString().PadLeft(10, '0') ?? throw new Exception($"Couldn't normalize national code: {code}");
 }
 
-    //private async Task<SamanResultDto<PersonInquiryResponse>?> ManualInquiry(string nationalCode, string birthDate)
+    //private async Task<SamanResultDto<PersonInquiryResponse>?> ManualInquiry(string nationalCode, string dateOfBirth)
     //{
        
     //    var handler = new HttpClientHandler
@@ -107,7 +107,7 @@ private static string NormalizeNationalCode(long code)
     //    var request = new PersonInquiryRequest
     //    {
     //        NationalCode = nationalCode,
-    //        BirthDate = birthDate
+    //        BirthDate = dateOfBirth
     //    };
 
     //    var builder = new UriBuilder(client.BaseAddress);

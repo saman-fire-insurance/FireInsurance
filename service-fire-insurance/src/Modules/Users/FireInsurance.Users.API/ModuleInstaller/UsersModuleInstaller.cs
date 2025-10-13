@@ -9,6 +9,8 @@ using FireInsurance.Users.Domain.Entities;
 using FireInsurance.Users.Infrastructure.Services.Identity;
 using FireInsurance.Users.Infrastructure.Services.Saman.Sms;
 using FireInsurance.Users.Infrastructure.Services.Cache;
+using FireInsurance.Users.Infrastructure.Services.Saman;
+using FireInsurance.Users.Infrastructure.Services.ProxyServer;
 
 namespace FireInsurance.Users.API.ModuleInstaller
 {
@@ -26,7 +28,10 @@ namespace FireInsurance.Users.API.ModuleInstaller
 
             services.AddJwtAuthentication();
 
-            services.AddSmsProvider(environment);
+            services.AddProxyServer();
+
+            services.AddSamanServices(environment);
+
         }
     }
 }
