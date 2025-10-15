@@ -21,7 +21,7 @@ namespace FireInsurance.Damage.Domain.Entities
         public Guid? StakeHolderId { get; set; }
         public StakeHolder? StakeHolder { get; set; }
         public DamageClaimStatus Status { get; set; }
-        //public ThirdPartyInsuranceItem ThirdPartyInsuranceItem { get; set; }
+        //public ThirdPartyInsurableObject ThirdPartyInsurableObject { get; set; }
 
         public static Result<DamageClaim> Create(Guid userId, string phoneNumber)
         {
