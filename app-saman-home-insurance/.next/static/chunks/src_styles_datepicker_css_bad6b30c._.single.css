@@ -1,0 +1,109 @@
+/* [project]/src/styles/datepicker.css [app-client] (css) */
+.responsive-calendar {
+  z-index: 50;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: .5rem;
+  padding: 1rem;
+  position: absolute;
+  top: calc(100% + .5rem);
+  left: 0;
+  right: 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1), 0 2px 4px -2px rgba(0, 0, 0, .1);
+}
+
+.Calendar__header {
+  text-align: center;
+  padding: .5rem;
+}
+
+.Calendar__day {
+  color: #1a202c;
+  border-radius: .375rem;
+  justify-content: center;
+  align-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: .875rem;
+  transition: all .2s;
+  display: flex;
+}
+
+.Calendar__day:hover {
+  background-color: #e5edff;
+}
+
+.Calendar__day.-selected {
+  color: #fff !important;
+  background-color: #3b82f6 !important;
+}
+
+.Calendar__day.-today {
+  border: 1px solid #3b82f6;
+}
+
+.Calendar__weekDays {
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: .5rem;
+  display: grid;
+}
+
+.Calendar__weekDay {
+  color: #64748b;
+  text-align: center;
+  padding: .5rem;
+  font-size: .875rem;
+  font-weight: 500;
+}
+
+.Calendar__monthArrowWrapper {
+  cursor: pointer;
+  border-radius: .375rem;
+  padding: .5rem;
+  transition: background-color .2s;
+}
+
+.Calendar__monthArrowWrapper:hover {
+  background-color: #e5edff;
+}
+
+.Calendar__monthYear {
+  padding: .5rem;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .responsive-calendar {
+    border-radius: 1rem 1rem 0 0;
+    width: 100%;
+    padding: 1rem;
+    animation: .3s ease-out slideUp;
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .Calendar__day {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: .875rem;
+  }
+
+  .Calendar__weekDay {
+    font-size: .75rem;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+
+    to {
+      transform: translateY(0);
+    }
+  }
+}
+
+/*# sourceMappingURL=src_styles_datepicker_css_bad6b30c._.single.css.map*/

@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/matta/Desktop/Projects/saman-home-insurance/src/app/%28auth%29/login/layout.tsx"],"sourcesContent":["import { Metadata, Viewport } from \"next\";\r\nimport { RecaptchaProvider } from \"./components/recaptcha-provider\";\r\n\r\nexport const metadata: Metadata = {\r\n  title: \"ورود | بیمه سامان\",\r\n  description: \"ورود به پنل کاربری بیمه سامان\",\r\n};\r\n\r\nexport const viewport: Viewport = {\r\n  themeColor: \"#1A56DB\",\r\n  width: \"device-width\",\r\n  initialScale: 1,\r\n};\r\n\r\nexport default function LoginLayout({\r\n  children,\r\n}: {\r\n  children: React.ReactNode;\r\n}) {\r\n  return (\r\n    <>{children}</>\r\n    // <RecaptchaProvider>\r\n    //   <>{children}</>\r\n    // </RecaptchaProvider>\r\n  );\r\n}\r\n"],"names":[],"mappings":";;;;;;;;;;AAGO,MAAM,WAAqB;IAChC,OAAO;IACP,aAAa;AACf;AAEO,MAAM,WAAqB;IAChC,YAAY;IACZ,OAAO;IACP,cAAc;AAChB;AAEe,SAAS,YAAY,EAClC,QAAQ,EAGT;IACC,qBACE;kBAAG;;AAKP","debugId":null}}]
+}

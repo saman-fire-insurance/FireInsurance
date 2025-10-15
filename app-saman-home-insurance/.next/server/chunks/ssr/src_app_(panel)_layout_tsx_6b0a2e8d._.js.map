@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/matta/Desktop/Projects/saman-home-insurance/src/app/%28panel%29/layout.tsx"],"sourcesContent":["import { Header } from \"@/components/header\";\r\nimport * as React from \"react\";\r\n\r\n// Force dynamic rendering for landing routes\r\nexport const dynamic = \"force-dynamic\";\r\n\r\nconst Main = ({\r\n  children,\r\n}: Readonly<{\r\n  children: React.ReactNode;\r\n}>) => {\r\n  return (\r\n    <>\r\n      {/* <Header /> */}\r\n      <main className=\"min-h-[65dvh] sm:px-4 sm:pt-4 lg:px-0 lg:pt-4 mx-auto\">\r\n        {children}\r\n      </main>\r\n    </>\r\n  );\r\n};\r\nexport default Main;\r\n"],"names":[],"mappings":";;;;;;;;AAIO,MAAM,UAAU;AAEvB,MAAM,OAAO,CAAC,EACZ,QAAQ,EAGR;IACA,qBACE;kBAEE,cAAA,6WAAC;YAAK,WAAU;sBACb;;;;;;;AAIT;uCACe","debugId":null}}]
+}
