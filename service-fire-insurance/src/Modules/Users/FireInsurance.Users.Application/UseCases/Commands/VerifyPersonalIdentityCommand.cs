@@ -1,9 +1,9 @@
 ﻿using Ardalis.Result;
+using FireInsurance.Users.Contracts.Enums;
 using Common.Interfaces;
 using Common.Messaging;
 using FireInsurance.Users.Application.Dtos.SamanService;
 using FireInsurance.Users.Application.Services;
-using FireInsurance.Users.Domain.Common.Enums;
 using FireInsurance.Users.Domain.Entities;
 using FireInsurance.Users.Domain.Errors;
 using FluentValidation;

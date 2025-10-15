@@ -13,7 +13,7 @@ namespace FireInsurance.Damage.Application.Dtos
         
         public List<DamagedObjectDto> DamagedObjects { get; set; } = [];
         
-        public IncidentType IncidentType { get; set; }
+        public IncidentTypeDto IncidentType { get; set; }
         public string IncidentCause { get; set; } = string.Empty;
         public string SuppressionAction { get; set; } = string.Empty;
         

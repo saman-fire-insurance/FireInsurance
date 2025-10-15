@@ -1,5 +1,5 @@
-﻿using FireInsurance.Users.Domain.Common;
-using FireInsurance.Users.Domain.Common.Enums;
+﻿using FireInsurance.Users.Contracts.Enums;
+using FireInsurance.Users.Domain.Common;
 
 namespace FireInsurance.Users.Domain.Events.UserEvents
 {

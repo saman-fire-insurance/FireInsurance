@@ -1,4 +1,4 @@
-﻿using FireInsurance.Users.Domain.Common.Enums;
+﻿using FireInsurance.Users.Contracts.Enums;
 
 namespace FireInsurance.Users.Application.Dtos
 {

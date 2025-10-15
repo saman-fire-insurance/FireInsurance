@@ -7,6 +7,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Folder Include="Identity\EventHandlers\" />
+		<Folder Include="Identity\UseCases\Commands\" />
 		<Folder Include="Identity\UseCases\Queries\" />
 	</ItemGroup>
 

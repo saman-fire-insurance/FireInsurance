@@ -11,6 +11,8 @@ using FireInsurance.Users.Infrastructure.Services.Saman.Sms;
 using FireInsurance.Users.Infrastructure.Services.Cache;
 using FireInsurance.Users.Infrastructure.Services.Saman;
 using FireInsurance.Users.Infrastructure.Services.ProxyServer;
+using FireInsurance.Users.Contracts.ModuleServices;
+using FireInsurance.Users.Application.Services;
 
 namespace FireInsurance.Users.API.ModuleInstaller
 {
@@ -31,6 +33,9 @@ namespace FireInsurance.Users.API.ModuleInstaller
             services.AddProxyServer();
 
             services.AddSamanServices(environment);
+
+            // Register ModuleService for inter-module communication
+            services.AddScoped<IUsersModuleService, UsersModuleService>();
 
         }
     }

@@ -34,6 +34,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Common\Common.csproj" />
     <ProjectReference Include="..\FireInsurance.Users.Domain\FireInsurance.Users.Domain.csproj" />
+    <ProjectReference Include="..\FireInsurance.Users.Contracts\FireInsurance.Users.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

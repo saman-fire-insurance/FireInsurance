@@ -28,9 +28,9 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\Common\Common.csproj" />
-		<ProjectReference Include="..\FireInsurance.Damage.Application\FireInsurance.Damage.Application.csproj" />
 		<ProjectReference Include="..\FireInsurance.Damage.Infrastructure\FireInsurance.Damage.Infrastructure.csproj" />
 		<ProjectReference Include="..\FireInsurance.Damage.Domain\FireInsurance.Damage.Domain.csproj" />
+		<ProjectReference Include="..\..\Users\FireInsurance.Users.Contracts\FireInsurance.Users.Contracts.csproj" />
 	</ItemGroup>
 
 </Project>

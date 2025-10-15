@@ -1,5 +1,4 @@
-﻿
-namespace FireInsurance.Users.Domain.Common.Enums
+﻿namespace FireInsurance.Users.Contracts.Enums
 {
     public enum Gender
     {
