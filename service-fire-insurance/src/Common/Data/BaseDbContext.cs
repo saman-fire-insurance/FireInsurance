@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Common.Data
 {
     public abstract class BaseDbContext<TContext>(DbContextOptions<TContext> options)
-    : DbContext(options), IBaseDbContext where TContext
-    : DbContext
+        : DbContext(options), IBaseDbContext where TContext
+        : DbContext
     {
         public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
         {

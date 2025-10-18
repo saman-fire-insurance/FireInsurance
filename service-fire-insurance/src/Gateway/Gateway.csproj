@@ -41,6 +41,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Modules\Insurance\FireInsurance.Insurance.API\FireInsurance.Insurance.API.csproj" />
 		<ProjectReference Include="..\Modules\Users\FireInsurance.Users.API\FireInsurance.Users.API.csproj" />
+		<ProjectReference Include="..\Modules\Damage\FireInsurance.Damage.API\FireInsurance.Damage.API.csproj" />
 		<ProjectReference Include="..\Common\Common.csproj" />
 	</ItemGroup>
 

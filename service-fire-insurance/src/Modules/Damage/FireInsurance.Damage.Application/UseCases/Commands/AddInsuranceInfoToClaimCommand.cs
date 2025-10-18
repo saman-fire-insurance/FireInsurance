@@ -5,6 +5,7 @@ using FireInsurance.Damage.Application.Dtos;
 using FireInsurance.Damage.Domain.Entities;
 using FireInsurance.Damage.Domain.Errors;
 using FluentValidation;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace FireInsurance.Damage.Application.UseCases.Commands
@@ -53,7 +54,7 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
 
                 await dbContext.SaveChangesAsync(cancellationToken);
 
-                return Result.Success(damageClaim);
+                return Result.Success(damageClaim.Adapt<DamageClaimDto>());
             }
         }
     }

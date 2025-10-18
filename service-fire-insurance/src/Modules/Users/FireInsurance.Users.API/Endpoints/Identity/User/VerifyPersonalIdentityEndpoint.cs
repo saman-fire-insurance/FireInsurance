@@ -15,7 +15,7 @@ namespace FireInsurance.Users.API.Endpoints.Identity.User
         {
             app.MapPost("/Users/VerifyIdentity", VerifyOtpAsync)
                 .RequireAuthorization()
-                .WithTags(Tags.User_Profile_VerifyIdentity);
+                .WithTags(Tags.User_Profile);
         }
 
         public static async Task<IResult> VerifyOtpAsync(PersonInquiryRequest request, ISender sender, CancellationToken cancellationToken)

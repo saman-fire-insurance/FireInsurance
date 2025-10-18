@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FireInsurance.Damage.Domain\FireInsurance.Damage.Domain.csproj" />
+    <ProjectReference Include="..\FireInsurance.Damage.Application\FireInsurance.Damage.Application.csproj" />
   </ItemGroup>
 
 </Project>

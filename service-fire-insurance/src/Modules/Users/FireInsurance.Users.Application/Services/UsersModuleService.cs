@@ -35,7 +35,7 @@ namespace FireInsurance.Users.Application.Services
                 NationalID = user.NationalID,
                 DateOfBirth = user.DateOfBirth,
                 Gender = user.Gender.HasValue
-                    ? (FireInsurance.Users.Contracts.Enums.Gender)user.Gender.Value
+                    ? user.Gender.Value
                     : null,
                 CodeSentAt = user.CodeSentAt,
                 CreatedAt = user.CreatedAt,

@@ -12,8 +12,9 @@ namespace FireInsurance.Damage.API.Endpoints
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("/Users/RequestOtp", CreateDamageClaimAsync)
-              .WithTags(Tags.DamageClaim_Create);
+            app.MapPost("/DamageClaim/Create", CreateDamageClaimAsync)
+                .RequireAuthorization()
+                .WithTags(Tags.DamageClaim);
         }
 
         public static async Task<IResult> CreateDamageClaimAsync(CreateDamageClaimRequest request, ISender sender, CancellationToken cancellationToken)
