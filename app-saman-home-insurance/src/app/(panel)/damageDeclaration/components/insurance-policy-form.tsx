@@ -32,8 +32,7 @@ const insurancePolicySchema = z
   .object({
     policyNumber: z
       .string()
-      .min(1, "شماره بیمه‌نامه الزامی است")
-      .max(16, "شماره بیمه‌نامه نمی‌تواند بیشتر از 16 کاراکتر باشد"),
+      .length(16, "شماره بیمه‌نامه باید 16 کاراکتر باشد"),
     policyFiles: z.array(z.any()).optional(),
     hasOtherInsurance: z.enum(["yes", "no"]).optional(),
     otherInsuranceCompany: z.string().optional(),
@@ -58,16 +57,10 @@ const insurancePolicySchema = z
           message: "شماره بیمه‌نامه الزامی است",
           path: ["otherPolicyNumber"],
         });
-      } else if (data.otherPolicyNumber.trim().length < 1) {
+      } else if (data.otherPolicyNumber.trim().length !== 16) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "شماره بیمه‌نامه نمی‌تواند خالی باشد",
-          path: ["otherPolicyNumber"],
-        });
-      } else if (data.otherPolicyNumber.trim().length > 16) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "شماره بیمه‌نامه نمی‌تواند بیشتر از 16 کاراکتر باشد",
+          message: "شماره بیمه‌نامه باید دقیقا 16 کاراکتر باشد",
           path: ["otherPolicyNumber"],
         });
       }

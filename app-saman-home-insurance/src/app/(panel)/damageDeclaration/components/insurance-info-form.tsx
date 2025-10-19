@@ -23,14 +23,18 @@ import VerificationIdentityResponse from "./verificationIdentityResponse";
 
 // Form validation schema
 const insuranceInfoSchema = z.object({
-  mobileNumber: z.string().min(11, "شماره موبایل باید 11 رقم باشد"),
-  nationalId: z.string().min(10, "کد ملی باید 10 رقم باشد"),
+  mobileNumber: z.string().length(11, "شماره موبایل باید 11 رقم باشد"),
+  nationalId: z.string().length(10, "کد ملی باید 10 رقم باشد"),
   insuranceApprovalPhone: z.string().optional(),
-  birthDate: z.object({
-    day: z.number().nullable(),
-    month: z.number().nullable(),
-    year: z.number().nullable(),
-  }),
+  birthDate: z
+    .object({
+      day: z.number().nullable(),
+      month: z.number().nullable(),
+      year: z.number().nullable(),
+    })
+    .refine((date) => date.day !== null && date.month !== null && date.year !== null, {
+      message: "تاریخ تولد الزامی است",
+    }),
 });
 
 type InsuranceInfoFormData = z.infer<typeof insuranceInfoSchema>;
@@ -163,7 +167,7 @@ export default function InsuranceInfoForm({
                   <Input
                     {...field}
                     placeholder="09121234567"
-                    className={cn("text-center placeholder:text-right")}
+                    className={cn("text-right placeholder:text-right")}
                   />
                 </FormControl>
                 <FormMessage />
@@ -185,7 +189,7 @@ export default function InsuranceInfoForm({
                   <Input
                     {...field}
                     placeholder="کد ملی ده رقمی"
-                    className={cn("text-center placeholder:text-right")}
+                    className={cn("text-right placeholder:text-right")}
                   />
                 </FormControl>
                 <FormMessage />
@@ -206,7 +210,7 @@ export default function InsuranceInfoForm({
                   <Input
                     {...field}
                     placeholder="تلفن ثابت با کد شهر"
-                    className="text-center placeholder:text-right"
+                    className="text-right placeholder:text-right"
                   />
                 </FormControl>
                 <FormMessage />
