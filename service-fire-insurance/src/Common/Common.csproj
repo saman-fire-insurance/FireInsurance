@@ -25,4 +25,8 @@
     <PackageReference Include="WilderMinds.SwaggerHierarchySupport" Version="1.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Abstraction\ServiceInstaller\" />
+  </ItemGroup>
+
 </Project>

@@ -9,6 +9,7 @@ using FireInsurance.Users.Infrastructure.Services.Saman.Sms;
 using FireInsurance.Users.Infrastructure.Services.ProxyServer;
 using Refit;
 using System;
+using FireInsurance.Users.Infrastructure.Mocks;
 
 namespace FireInsurance.Users.Infrastructure.Services.Saman
 {
@@ -45,17 +46,16 @@ namespace FireInsurance.Users.Infrastructure.Services.Saman
 
         public static void AddPersonInquiryService(this IServiceCollection services, IHostEnvironment environment, SamanServicesOptions samanServicesOptions, ProxyOptions proxyOptions)
         {
-            services.AddScoped<IPersonInquiryService, PersonInquiryService>();
-
             if (environment.IsDevelopment())
             {
-                services.AddScoped<IPersonInquiryService, PersonInquiryService>();
-                //services.AddScoped<ISmsSender, FakeSmsSender>();
+                //services.AddScoped<IPersonInquiryService, PersonInquiryService>();
+                services.AddScoped<IPersonInquiryService, MockPersonInquiryService>();
             }
             else
             {
-                services.AddScoped<IPersonInquiryService, PersonInquiryService>();
+                services.AddScoped<IPersonInquiryService, MockPersonInquiryService>();
             }
+
             services
                 .AddRefitClient<IPersonInquiryApi>()
                 .ConfigureHttpClient((sp, httpClient) =>

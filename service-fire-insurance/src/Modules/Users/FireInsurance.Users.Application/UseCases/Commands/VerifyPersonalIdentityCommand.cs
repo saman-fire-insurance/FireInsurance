@@ -66,8 +66,13 @@ namespace FireInsurance.Users.Application.UseCases.Commands
                     return inquiryResult;
                 }
 
+                inquiryResult.Value.NationalCode = request.NationalCode;
+                inquiryResult.Value.DateOfBirth = request.DateOfBirth;
+
                 var personInfo = inquiryResult.Value;
                 user.ApplyInquiryResult(personInfo.FirstName, personInfo.LastName, personInfo.FatherName, request.NationalCode, request.DateOfBirth, personInfo.Gender ? Gender.Male : Gender.Female);
+
+                await userManager.UpdateAsync(user);
 
                 return Result.Success(inquiryResult.Value);
             }

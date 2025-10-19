@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Common\Common.csproj" />
+    <ProjectReference Include="..\..\Damage\FireInsurance.Damage.Infrastructure\FireInsurance.Damage.Infrastructure.csproj" />
     <ProjectReference Include="..\FireInsurance.Users.Application\FireInsurance.Users.Application.csproj" />
     <ProjectReference Include="..\FireInsurance.Users.Infrastructure\FireInsurance.Users.Infrastructure.csproj" />
     <ProjectReference Include="..\FireInsurance.Users.Contracts\FireInsurance.Users.Contracts.csproj" />
