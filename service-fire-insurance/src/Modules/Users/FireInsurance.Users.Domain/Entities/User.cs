@@ -1,6 +1,6 @@
 ﻿using Ardalis.Result;
+using FireInsurance.Users.Contracts.Enums;
 using FireInsurance.Users.Domain.Common;
-using FireInsurance.Users.Domain.Common.Enums;
 using FireInsurance.Users.Domain.Errors;
 using FireInsurance.Users.Domain.Events.UserEvents;
 using Microsoft.AspNetCore.Identity;
@@ -95,14 +95,25 @@ namespace FireInsurance.Users.Domain.Entities
             _domainEvents.Add(new UserProfileUpdatedDomainEvent(Id, oldFirstName, oldLastName, firstName, lastName));
         }
 
-        public void ApplyInquiryResult(string firstName, string lastName, string fatherName, string? nationalID, Gender gender)
+        public void ApplyInquiryResult(string firstName, string lastName, string fatherName, string nationalID, string dateOfBirth, Gender gender)
         {
+            if (string.IsNullOrWhiteSpace(firstName) ||
+                string.IsNullOrWhiteSpace(lastName) ||
+                string.IsNullOrWhiteSpace(fatherName) ||
+                string.IsNullOrWhiteSpace(nationalID))
+                //||
+                //string.IsNullOrWhiteSpace(dateOfBirth))
+            {
+                throw new ArgumentException("Inquiry result fields cannot be null or empty");
+            }
+
             FirstName = firstName;
             LastName = lastName;
-            NationalID = nationalID ?? NationalID;
             Gender = gender;
             FatherName = fatherName;
             IdentityConfirmed = true;
+            NationalID = nationalID ?? NationalID;
+            //DateOfBirth = dateOfBirth ?? DateOfBirth;
 
             _domainEvents.Add(new InquiryResultAppliedDomainEvent(Id, firstName, lastName, fatherName, nationalID, gender));
         }

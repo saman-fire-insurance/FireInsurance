@@ -71,6 +71,7 @@ namespace FireInsurance.Users.Application.Dtos.SamanService
         public LocationInfo State { get; set; } = new();
 
         public string? NationalCode { get; set; }
+        public string? DateOfBirth { get; set; }
     }
     /// <summary>
     /// Location information (State/City) with Code, Id, and Name

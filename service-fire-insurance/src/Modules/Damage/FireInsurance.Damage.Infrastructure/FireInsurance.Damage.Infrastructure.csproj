@@ -7,9 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Data\" />
     <Folder Include="Migrations\" />
     <Folder Include="Mocks\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Routing.Abstractions" Version="2.3.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FireInsurance.Damage.Domain\FireInsurance.Damage.Domain.csproj" />
+    <ProjectReference Include="..\FireInsurance.Damage.Application\FireInsurance.Damage.Application.csproj" />
   </ItemGroup>
 
 </Project>

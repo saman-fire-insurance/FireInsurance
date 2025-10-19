@@ -20,17 +20,6 @@ namespace FireInsurance.Users.Domain.Events.UserEvents
         public string LastName { get; } = lastName;
     }
 
-    public class UserProfileUpdatedDomainEvent(string userId, string? oldFirstName, string? oldLastName, string newFirstName, string newLastName) : IDomainEvent
-    {
-        public Guid Id { get; } = Guid.NewGuid();
-        public DateTime OccurredAt { get; } = DateTime.UtcNow;
-        public string UserId { get; } = userId;
-        public string? OldFirstName { get; } = oldFirstName;
-        public string? OldLastName { get; } = oldLastName;
-        public string NewFirstName { get; } = newFirstName;
-        public string NewLastName { get; } = newLastName;
-    }
-
     public class UserLoggedInDomainEvent(string userId, DateTime loginTime) : IDomainEvent
     {
         public Guid Id { get; } = Guid.NewGuid();

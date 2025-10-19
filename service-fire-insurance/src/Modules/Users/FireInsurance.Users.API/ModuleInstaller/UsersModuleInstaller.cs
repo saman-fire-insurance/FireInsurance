@@ -3,14 +3,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Common.Behaviors;
-using FireInsurance.Users.Infrastructure.Data;
-using Microsoft.AspNetCore.Identity;
-using FireInsurance.Users.Domain.Entities;
 using FireInsurance.Users.Infrastructure.Services.Identity;
-using FireInsurance.Users.Infrastructure.Services.Saman.Sms;
 using FireInsurance.Users.Infrastructure.Services.Cache;
 using FireInsurance.Users.Infrastructure.Services.Saman;
 using FireInsurance.Users.Infrastructure.Services.ProxyServer;
+using FireInsurance.Users.Infrastructure.Data;
+using FireInsurance.Users.Application.Services.ServiceInstallers;
 
 namespace FireInsurance.Users.API.ModuleInstaller
 {
@@ -32,6 +30,8 @@ namespace FireInsurance.Users.API.ModuleInstaller
 
             services.AddSamanServices(environment);
 
+            // ModuleServices for inter-module communication
+            services.AddUsersModuleService(configuration, environment);
         }
     }
 }
