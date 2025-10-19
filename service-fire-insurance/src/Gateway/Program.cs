@@ -41,7 +41,8 @@ const string corsName = "SAMAN_CORS_POLICY";
 
 string[] localUrls =
 [
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "https://localhost:3000"
 ];
 
 string[] stageUrls =
