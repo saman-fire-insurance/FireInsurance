@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Services\ServiceInstallers\" />
     <Folder Include="UseCases\Queries\" />
   </ItemGroup>
 
@@ -22,7 +23,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
-    <PackageReference Include="Microsoft.AspNetCore.Routing.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="9.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.9" />
@@ -34,6 +34,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Common\Common.csproj" />
     <ProjectReference Include="..\FireInsurance.Users.Domain\FireInsurance.Users.Domain.csproj" />
+    <ProjectReference Include="..\FireInsurance.Users.Contracts\FireInsurance.Users.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

@@ -157,9 +157,9 @@ public sealed class SmsAuthHandler(
 
     private async Task<TokenResponse?> ManualGetToken(string Username, string Password)
     {
-        var proxyAddress = "http://188.121.118.53:3128";
-        var proxyUser = "parabank";
-        var proxyPassword = "mVzPam27wcoxJdw";
+        var proxyAddress = "";
+        var proxyUser = "";
+        var proxyPassword = "";
         var handler = new HttpClientHandler
         {
             Proxy = new WebProxy(proxyAddress)

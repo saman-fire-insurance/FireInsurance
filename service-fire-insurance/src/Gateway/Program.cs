@@ -8,6 +8,7 @@ using Common.Installers;
 //using FireInsurance.SharedKernel.HealthChecks;
 //using FireInsurance.SharedKernel.Monitoring;
 using FireInsurance.Users.API.ModuleInstaller;
+using FireInsurance.Damage.API.ModuleInstaller;
 using Common.Behaviors;
 using Gridify;
 using Common.Abstraction.MinimalApi;
@@ -22,13 +23,15 @@ builder.Services.AddAuthorization();
 builder.Services.InstallModules(
     builder.Configuration,
     builder.Environment,
-    UsersModule.Assembly);
+    UsersModule.Assembly,
+    DamageModule.Assembly);
 
 
 builder.Services.AddMediatR(config => config.RegisterServicesFromAssemblies(
     [
         //.. InsuranceModule.Assemblies,
-        .. UsersModule.Assemblies
+        .. UsersModule.Assemblies,
+        .. DamageModule.Assemblies
     ]));
 
 
@@ -71,7 +74,8 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddEndpoints<IEndpoint>(
     //InsuranceModule.Assembly,
-    UsersModule.Assembly
+    UsersModule.Assembly,
+    DamageModule.Assembly
     );
 
 var forwardedHeaderOptions = new ForwardedHeadersOptions

@@ -405,3 +405,4 @@ app-saman-home-insurance/.vercel
 app-saman-home-insurance/*.tsbuildinfo
 app-saman-home-insurance/next-env.d.ts
 
+/.claude
