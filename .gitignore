@@ -367,41 +367,41 @@ FodyWeavers.xsd
 ##########################################################################
 
 # dependencies
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+app-saman-home-insurance/.pnp
+app-saman-home-insurance/.pnp.*
+app-saman-home-insurance/.yarn/*
+!app-saman-home-insurance/.yarn/patches
+!app-saman-home-insurance/.yarn/plugins
+!app-saman-home-insurance/.yarn/releases
+!app-saman-home-insurance/.yarn/versions
 
 # testing
-/coverage
+app-saman-home-insurance/coverage
 
 # next.js
-/.next/
-/out/
+app-saman-home-insurance/.next/
+app-saman-home-insurance/out/
 
 # production
-/build
+app-saman-home-insurance/build
 
 # misc
-.DS_Store
-*.pem
+app-saman-home-insurance/.DS_Store
+app-saman-home-insurance/*.pem
 
 # debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+app-saman-home-insurance/npm-debug.log*
+app-saman-home-insurance/yarn-debug.log*
+app-saman-home-insurance/yarn-error.log*
+app-saman-home-insurance/.pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
+app-saman-home-insurance/.env*
 
 # vercel
-.vercel
+app-saman-home-insurance/.vercel
 
 # typescript
-*.tsbuildinfo
-next-env.d.ts
+app-saman-home-insurance/*.tsbuildinfo
+app-saman-home-insurance/next-env.d.ts
 
