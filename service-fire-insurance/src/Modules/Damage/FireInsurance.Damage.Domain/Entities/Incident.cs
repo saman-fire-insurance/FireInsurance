@@ -10,10 +10,11 @@ namespace FireInsurance.Damage.Domain.Entities
 {
     public class Incident : BaseEntity
     {
-        public Guid Id { get; set; }
         public DateTime OccuranceDate { get; set; }
         public string Location { get; set; } = string.Empty;
-        public IncidentType IncidentCause { get; set; }
+        public Guid IncidentTypeId { get; set; }
+        public IncidentType? IncidentType { get; set; }
+        public required string IncidentCause { get; set; }
         public string RestraintDescription { get; set; } = string.Empty;
     }
 }

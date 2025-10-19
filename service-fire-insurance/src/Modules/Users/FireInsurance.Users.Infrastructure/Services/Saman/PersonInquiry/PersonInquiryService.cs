@@ -1,8 +1,8 @@
 ﻿using Ardalis.Result;
+using FireInsurance.Users.Contracts.Enums;
 using Common.Interfaces;
 using FireInsurance.Users.Application.Dtos.SamanService;
 using FireInsurance.Users.Application.Services;
-using FireInsurance.Users.Domain.Common.Enums;
 using FireInsurance.Users.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -59,6 +59,7 @@ public sealed class PersonInquiryService (IPersonInquiryApi inquiryApi, UserMana
         }
 
         inquiryResponse.NationalCode = nationalCode;
+        inquiryResponse.DateOfBirth = dateOfBirth;
 
         await ApplyInquiryResultToUser(inquiryResponse);
         return Result.Success(inquiryResponse);
@@ -74,7 +75,7 @@ public sealed class PersonInquiryService (IPersonInquiryApi inquiryApi, UserMana
     {
         var userId = claimsProvider.UserId ?? throw new("UserId was null");
         var user = await userManager.FindByIdAsync(userId) ?? throw new("User was null");
-        user.ApplyInquiryResult(response.FirstName, response.LastName, response.FatherName, response.NationalCode, response.Gender ? Gender.Male : Gender.Female);
+        user.ApplyInquiryResult(response.FirstName, response.LastName, response.FatherName, response.NationalCode!, response.DateOfBirth!, response.Gender ? Gender.Male : Gender.Female);
         await userManager.UpdateAsync(user);
 
         //await ownerService.ApplyInquiryResult(..);

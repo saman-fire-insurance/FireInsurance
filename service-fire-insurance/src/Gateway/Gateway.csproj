@@ -20,7 +20,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
-    <PackageReference Include="Microsoft.AspNetCore.Routing.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="9.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
@@ -42,6 +41,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Modules\Insurance\FireInsurance.Insurance.API\FireInsurance.Insurance.API.csproj" />
 		<ProjectReference Include="..\Modules\Users\FireInsurance.Users.API\FireInsurance.Users.API.csproj" />
+		<ProjectReference Include="..\Modules\Damage\FireInsurance.Damage.API\FireInsurance.Damage.API.csproj" />
 		<ProjectReference Include="..\Common\Common.csproj" />
 	</ItemGroup>
 

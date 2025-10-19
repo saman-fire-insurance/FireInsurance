@@ -1,32 +1,48 @@
-﻿using FireInsurance.Damage.Domain.Common;
+﻿using Ardalis.Result;
+using Mapster;
+using FireInsurance.Damage.Domain.Common;
 using FireInsurance.Damage.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FireInsurance.Damage.Domain.Entities
 {
+    [AdaptTo("[name]Dto"), GenerateMapper]
     public class DamageClaim : BaseEntity
     {
-        public Guid Guid { get; set; }
-        public string SerialNumber { get; set; }
-        public string Code { get; set; }
-        public Guid UserId { get; set; }
+        public string UserId { get; set; }
+        public Insurer Insurer { get; set; }
+        public string? SerialNumber { get; set; }
+        public string? Code { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
-        public List<Guid> FileIds { get; set; }
+        public List<Guid>? FileIds { get; set; }
         //public List<FileEntity> Files { get; set; }
-        public Guid IncidentId { get; set; }
-        public Incident Incident { get; set; }
-        public List<DamagedObject> DamagedObjects { get; set; }
-        public IncidentType IncidentType { get; set; }
-        public string IncidentCause { get; set; } = string.Empty;
-        public string SuppressionAction { get; set; } = string.Empty;
-        public Guid OwnershipTypeId { get; set; }
-        public OwnershipType OwnershipType { get; set; }
+        public Guid? IncidentId { get; set; }
+        //public Incident? Incident { get; set; }
+        //public List<DamagedObject>? DamagedObjects { get; set; }
+        public Guid? OwnershipTypeId { get; set; }
+        //public OwnershipType? OwnershipType { get; set; }
         public Guid? StakeHolderId { get; set; }
-        public StakeHolder? StakeHolder { get; set; }
-        //public ThirdPartyInsuranceItem ThirdPartyInsuranceItem { get; set; }
+        //public StakeHolder? StakeHolder { get; set; }
+        public DamageClaimStatus Status { get; set; }
+        //public ThirdPartyInsurableObject ThirdPartyInsurableObject { get; set; }
+
+        public static Result<DamageClaim> Create(string userId, string phoneNumber, string firstName, string lastName)
+        {
+            var insurer = new Insurer
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                PhoneNumber = phoneNumber
+            };
+
+            var createdClaim = new DamageClaim
+            {
+                UserId = userId,
+                PhoneNumber = phoneNumber,
+                Status = DamageClaimStatus.IncidentInfo,
+                Insurer = insurer
+            };
+
+            return createdClaim;
+        }
     }
 }
