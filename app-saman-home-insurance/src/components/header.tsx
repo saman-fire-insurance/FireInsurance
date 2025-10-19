@@ -43,6 +43,8 @@ export function Header() {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
+  console.log("status", status);
+
   // Official NextAuth v4 solution for tab switching
   useEffect(() => {
     const visibilityHandler = () => {
@@ -115,7 +117,10 @@ export function Header() {
             <Skeleton className="w-28 h-9 md:w-36 md:h-10 rounded-lg bg-BlueGray" />
           </>
         ) : status === "authenticated" ? (
-          <>{/* <UserDropdown /> */}</>
+          // <>{/* <UserDropdown /> */}</>
+          <div className="border border-border px-4 py-2 rounded-xl text-sm bg-transparent">
+            خوش آمدید!
+          </div>
         ) : (
           <Link href="/login">
             <Button
