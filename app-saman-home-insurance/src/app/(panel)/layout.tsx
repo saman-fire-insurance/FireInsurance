@@ -12,7 +12,7 @@ const Main = ({
   return (
     <>
       <Header />
-      <main className="min-h-[65dvh] sm:px-4 sm:pt-4 lg:px-0 lg:pt-0 mx-auto">
+      <main className="min-h-[65dvh] sm:px-4 sm:py-4 lg:px-0 lg:py-6 mx-auto bg-background">
         {children}
       </main>
     </>

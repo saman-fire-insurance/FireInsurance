@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/matta/Desktop/Projects/saman-home-insurance/src/app/%28panel%29/test/components/content.tsx"],"sourcesContent":["\"use client\";\r\n\r\nimport { motion } from \"motion/react\";\r\n\r\nconst Test = () => {\r\n  return (\r\n    <div className=\"bg-background min-h-screen relative overflow-hidden\">\r\n      <div>\r\n        kfjdoifgj\r\n      </div>\r\n    </div>\r\n  )\r\n}\r\n\r\nexport default Test;\r\n"],"names":[],"mappings":";;;;;AAAA;;AAIA,MAAM,OAAO;IACX,qBACE,4TAAC;QAAI,WAAU;kBACb,cAAA,4TAAC;sBAAI;;;;;;;;;;;AAKX;KARM;uCAUS","debugId":null}}]
-}

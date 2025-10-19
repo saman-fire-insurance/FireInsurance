@@ -147,7 +147,7 @@ export default function InsuranceInfoForm({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-y-5 w-full"
+          className="flex flex-col gap-y-6 w-full"
         >
           {/* Mobile Number */}
           <FormField

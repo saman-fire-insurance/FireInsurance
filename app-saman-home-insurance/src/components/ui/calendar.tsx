@@ -37,7 +37,11 @@ function Calendar({
       captionLayout={captionLayout}
       formatters={{
         formatMonthDropdown: (date) =>
-          date.toLocaleString("default", { month: "short" }),
+          date.toLocaleString("fa-IR", { month: "long" }),
+        formatWeekdayName: (date) => {
+          const persianWeekdays = ["ش", "ی", "د", "س", "چ", "پ", "ج"];
+          return persianWeekdays[date.getDay()];
+        },
         ...formatters,
       }}
       classNames={{
@@ -74,7 +78,7 @@ function Calendar({
           defaultClassNames.dropdown_root
         ),
         dropdown: cn(
-          "absolute bg-popover inset-0 opacity-0",
+          "absolute bg-popover inset-0 opacity-0 w-full h-full",
           defaultClassNames.dropdown
         ),
         caption_label: cn(

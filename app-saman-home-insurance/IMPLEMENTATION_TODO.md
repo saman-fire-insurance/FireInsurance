@@ -163,7 +163,7 @@ export default function YourForm({
       </h2>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-y-5 w-full">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-y-6 w-full">
           {/* Add your form fields here */}
 
           {/* Navigation Buttons */}

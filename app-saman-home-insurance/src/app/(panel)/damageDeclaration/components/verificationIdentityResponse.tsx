@@ -22,7 +22,7 @@ const VerificationIdentityResponse = (props: PropsType) => {
       </h2>
 
       {verificationResult ? (
-          <div className="flex flex-col gap-y-5 w-full">
+          <div className="flex flex-col gap-y-6 w-full">
             <Card className="w-full bg-success/10 border-success/20">
               <CardContent className="p-6">
                 <div className="flex flex-col gap-y-3 items-start">
@@ -101,7 +101,7 @@ const VerificationIdentityResponse = (props: PropsType) => {
             </div>
           </div>
       ) : (
-        <div className="flex flex-col gap-y-5 w-full">
+        <div className="flex flex-col gap-y-6 w-full">
           <Card className="w-full bg-destructive/10 border-destructive/20">
             <CardContent className="p-6">
               <div className="flex flex-col gap-y-3 items-start">

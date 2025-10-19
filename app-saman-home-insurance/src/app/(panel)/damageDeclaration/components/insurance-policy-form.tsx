@@ -24,41 +24,62 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeftIcon, Upload } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
+import { MultiFileUpload } from "@/components/ui/multi-file-upload";
 
 // Form validation schema
 const insurancePolicySchema = z
   .object({
-    policyNumber: z.string().min(1, "شماره بیمه‌نامه الزامی است"),
-    policyFile: z.any().optional(),
-    hasOtherInsurance: z
-      .enum(["yes", "no"], {
-        message: "لطفاً یکی از گزینه‌ها را انتخاب کنید",
-      })
-      .optional()
-      .refine((val) => val !== undefined, {
-        message: "لطفاً یکی از گزینه‌ها را انتخاب کنید",
-      }),
+    policyNumber: z
+      .string()
+      .min(1, "شماره بیمه‌نامه الزامی است")
+      .max(16, "شماره بیمه‌نامه نمی‌تواند بیشتر از 16 کاراکتر باشد"),
+    policyFiles: z.array(z.any()).optional(),
+    hasOtherInsurance: z.enum(["yes", "no"]).optional(),
     otherInsuranceCompany: z.string().optional(),
     otherPolicyNumber: z.string().optional(),
     otherInsuranceCase: z.string().optional(),
   })
-  .refine(
-    (data) => {
-      if (data.hasOtherInsurance === "yes") {
-        return (
-          !!data.otherInsuranceCompany &&
-          !!data.otherPolicyNumber &&
-          !!data.otherInsuranceCase
-        );
+  .superRefine((data, ctx) => {
+    if (data.hasOtherInsurance === "yes") {
+      if (
+        !data.otherInsuranceCompany ||
+        data.otherInsuranceCompany.trim() === ""
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "نام شرکت بیمه‌گر الزامی است",
+          path: ["otherInsuranceCompany"],
+        });
       }
-      return true;
-    },
-    {
-      message: "لطفاً تمام فیلدهای مربوط به بیمه دیگر را پر کنید",
-      path: ["otherInsuranceCompany"],
+      if (!data.otherPolicyNumber || data.otherPolicyNumber.trim() === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "شماره بیمه‌نامه الزامی است",
+          path: ["otherPolicyNumber"],
+        });
+      } else if (data.otherPolicyNumber.trim().length < 1) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "شماره بیمه‌نامه نمی‌تواند خالی باشد",
+          path: ["otherPolicyNumber"],
+        });
+      } else if (data.otherPolicyNumber.trim().length > 16) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "شماره بیمه‌نامه نمی‌تواند بیشتر از 16 کاراکتر باشد",
+          path: ["otherPolicyNumber"],
+        });
+      }
+      if (!data.otherInsuranceCase) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "مورد بیمه الزامی است",
+          path: ["otherInsuranceCase"],
+        });
+      }
     }
-  );
+  });
 
 type InsurancePolicyFormData = z.infer<typeof insurancePolicySchema>;
 
@@ -76,15 +97,13 @@ const InsurancePolicyForm = ({
   onPrevious,
 }: InsurancePolicyFormProps) => {
   const isInitialMount = useRef(true);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<InsurancePolicyFormData>({
     resolver: zodResolver(insurancePolicySchema),
     defaultValues: initialData || {
       policyNumber: "",
-      policyFile: undefined,
-      hasOtherInsurance: undefined,
+      policyFiles: [],
+      hasOtherInsurance: "no",
       otherInsuranceCompany: "",
       otherPolicyNumber: "",
       otherInsuranceCase: "",
@@ -108,28 +127,6 @@ const InsurancePolicyForm = ({
     return () => subscription.unsubscribe();
   }, [form, onChange]);
 
-  const handleFileSelect = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Check file size (5MB max)
-      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
-      if (file.size > maxSize) {
-        form.setError("policyFile", {
-          type: "manual",
-          message: "حداکثر حجم فایل: 5 مگابایت",
-        });
-        return;
-      }
-      setSelectedFile(file);
-      form.setValue("policyFile", file);
-      form.clearErrors("policyFile");
-    }
-  };
-
   const onSubmit = (data: InsurancePolicyFormData) => {
     onChange(data);
     onNext();
@@ -144,7 +141,7 @@ const InsurancePolicyForm = ({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-y-5 w-full"
+          className="flex flex-col gap-y-6 w-full"
         >
           {/* Policy Number */}
           <FormField
@@ -160,11 +157,11 @@ const InsurancePolicyForm = ({
                   <Input
                     {...field}
                     placeholder="شماره بیمه‌نامه ۱۶ رقمی"
-                    className={cn("text-center placeholder:text-right")}
+                    className={cn("text-right placeholder:text-right")}
                     maxLength={16}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-right !text-xs text-destructive" />
               </FormItem>
             )}
           />
@@ -172,44 +169,26 @@ const InsurancePolicyForm = ({
           {/* Policy File Upload */}
           <FormField
             control={form.control}
-            name="policyFile"
+            name="policyFiles"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-right">
                   فایل بیمه‌نامه (اختیاری)
                 </FormLabel>
                 <FormControl>
-                  <div className="flex flex-col items-center">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*,.pdf"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                    <div
-                      onClick={handleFileSelect}
-                      className="w-full border-2 border-dashed border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors"
-                    >
-                      <Upload className="w-12 h-12 text-gray-400 mb-3" />
-                      <p className="text-sm text-gray-500 mb-1">
-                        {selectedFile
-                          ? selectedFile.name
-                          : "حداکثر حجم فایل: 5 مگابایت"}
-                      </p>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="mt-3 cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleFileSelect();
-                        }}
-                      >
-                        انتخاب فایل
-                      </Button>
-                    </div>
-                  </div>
+                  <MultiFileUpload
+                    value={field.value}
+                    onChange={field.onChange}
+                    onError={(error) => {
+                      form.setError("policyFiles", {
+                        type: "manual",
+                        message: error,
+                      });
+                    }}
+                    maxFiles={5}
+                    maxSizeMB={5}
+                    accept="image/*,.pdf"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -221,7 +200,7 @@ const InsurancePolicyForm = ({
             control={form.control}
             name="hasOtherInsurance"
             render={({ field }) => (
-              <FormItem className="space-y-3">
+              <FormItem className="space-y-3 border border-border rounded-xl p-4">
                 <FormLabel className="text-right">
                   آیا مورد بیمه در شرکت دیگری هم تحت پوشش است؟
                 </FormLabel>
@@ -260,7 +239,7 @@ const InsurancePolicyForm = ({
 
           {/* Conditional Fields - Show when "Yes" is selected */}
           {hasOtherInsurance === "yes" && (
-            <div className="flex flex-col gap-y-5 p-5">
+            <div className="flex flex-col gap-y-5">
               {/* Insurance Case */}
               <FormField
                 control={form.control}
@@ -271,7 +250,11 @@ const InsurancePolicyForm = ({
                       مورد بیمه
                       <span className="text-destructive">*</span>
                     </FormLabel>
-                    <Select dir="rtl" onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      dir="rtl"
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger className="text-left">
                           <SelectValue placeholder="انتخاب کنید" />
@@ -284,7 +267,7 @@ const InsurancePolicyForm = ({
                         <SelectItem value="liability">مسئولیت</SelectItem>
                       </SelectContent>
                     </Select>
-                <FormMessage className="text-right !text-xs text-destructive" />
+                    <FormMessage className="text-right !text-xs text-destructive" />
                   </FormItem>
                 )}
               />
@@ -304,10 +287,10 @@ const InsurancePolicyForm = ({
                         <Input
                           {...field}
                           placeholder="مثلا سامان"
-                          className={cn("text-center placeholder:text-right")}
+                          className={cn("text-right placeholder:text-right")}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-right !text-xs text-destructive" />
                     </FormItem>
                   )}
                 />
@@ -326,11 +309,11 @@ const InsurancePolicyForm = ({
                         <Input
                           {...field}
                           placeholder="بیمه نامه ۱۶ رقمی"
-                          className={cn("text-center placeholder:text-right")}
+                          className={cn("text-right placeholder:text-right")}
                           maxLength={16}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-right !text-xs text-destructive" />
                     </FormItem>
                   )}
                 />
@@ -339,21 +322,21 @@ const InsurancePolicyForm = ({
           )}
 
           {/* Action Buttons */}
-          <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-3 pt-4 w-full text-sm font-medium">
+          <div className="flex flex-row items-center justify-between gap-2 pt-4 w-full text-sm font-medium">
+            <Button
+              type="submit"
+              className="bg-primary hover:bg-primary w-3/5 cursor-pointer"
+            >
+              تایید و ادامه
+              <ArrowLeftIcon className="size-4 mr-2" />
+            </Button>
             <Button
               type="button"
               variant="outline"
               onClick={onPrevious}
-              className="w-full md:w-auto cursor-pointer"
+              className="w-2/5 cursor-pointer"
             >
               مرحله قبلی
-            </Button>
-            <Button
-              type="submit"
-              className="bg-primary hover:bg-primary w-full md:w-auto cursor-pointer"
-            >
-              تایید و ادامه
-              <ArrowLeftIcon className="size-4 mr-2" />
             </Button>
           </div>
         </form>
