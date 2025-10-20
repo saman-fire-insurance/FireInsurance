@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -25,7 +25,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeftIcon } from "lucide-react";
-import { MultiFileUpload } from "@/components/ui/multi-file-upload";
+import { FileUploader } from "@/components/ui/multi-file-upload";
+import { toast } from "sonner";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
 // Form validation schema
 const insurancePolicySchema = z
@@ -34,6 +36,7 @@ const insurancePolicySchema = z
       .string()
       .length(16, "شماره بیمه‌نامه باید 16 کاراکتر باشد"),
     policyFiles: z.array(z.any()).optional(),
+    policyFileUrls: z.array(z.string()).optional(),
     hasOtherInsurance: z.enum(["yes", "no"]).optional(),
     otherInsuranceCompany: z.string().optional(),
     otherPolicyNumber: z.string().optional(),
@@ -90,18 +93,43 @@ const InsurancePolicyForm = ({
   onPrevious,
 }: InsurancePolicyFormProps) => {
   const isInitialMount = useRef(true);
+  const { uploadFile, uploadMultipleFiles, uploading } = useFileUpload();
 
   const form = useForm<InsurancePolicyFormData>({
     resolver: zodResolver(insurancePolicySchema),
     defaultValues: initialData || {
       policyNumber: "",
       policyFiles: [],
+      policyFileUrls: [],
       hasOtherInsurance: "no",
       otherInsuranceCompany: "",
       otherPolicyNumber: "",
       otherInsuranceCase: "",
     },
   });
+
+    // Handle immediate multiple file upload
+  const handleImmediateMultipleFileUpload = useCallback(
+    async (
+      files: File[]
+    ): Promise<Array<{ id: string; url: string; name?: string }>> => {
+      if (!files.length) return [];
+
+      try {
+        const uploadedFiles = await uploadMultipleFiles(files);
+        return uploadedFiles.map((file) => ({
+          id: file.id!,
+          url: file.url!,
+          name: file.name,
+        }));
+      } catch (error) {
+        console.error("Immediate multiple file upload failed:", error);
+        toast.error("خطا در آپلود فایل‌ها");
+      }
+      return [];
+    },
+    [uploadMultipleFiles]
+  );
 
   // Watch the hasOtherInsurance field to show/hide additional fields
   const hasOtherInsurance = form.watch("hasOtherInsurance");
@@ -169,18 +197,167 @@ const InsurancePolicyForm = ({
                   فایل بیمه‌نامه (اختیاری)
                 </FormLabel>
                 <FormControl>
-                  <MultiFileUpload
-                    value={field.value}
-                    onChange={field.onChange}
-                    onError={(error) => {
-                      form.setError("policyFiles", {
-                        type: "manual",
-                        message: error,
+                  <FileUploader
+                   maxFiles={20}
+                    uploadText="فایل را انتخاب کنید"
+                    uploadSubText="PDF, Word, SVG, PNG, JPG یا GIF (حداکثر10مگابایت)"
+                    accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    key={"POLICY_DOCUMENT_UPLOAD"}
+                    id={"PolicyDocumentUpload"}
+                    deferLocalPreview
+                    value={
+                    Array.isArray(field.value) && field.value.length > 0
+                      ? field.value
+                        .filter((doc: any) =>
+                        typeof doc === "string"
+                          ? doc.trim() !== ""
+                          : doc instanceof File
+                          ? true
+                          : typeof doc === "object" &&
+                          doc !== null &&
+                          "url" in doc
+                        )
+                        .map((doc: any, index: number) => {
+                        if (typeof doc === "string") {
+                          return {
+                          id: `existing-doc-${index}`,
+                          preview: doc,
+                          progress: 100,
+                          uploaded: true,
+                          name: `Existing Document ${index + 1}`,
+                          type: "image/jpeg",
+                          };
+                        } else if (doc instanceof File) {
+                          return {
+                          id: `new-file-${index}`,
+                          preview: URL.createObjectURL(doc),
+                          progress: 100,
+                          uploaded: false,
+                          name: doc.name,
+                          type:
+                            doc.type || "application/octet-stream",
+                          };
+                        } else {
+                          // Server response object
+                          const imageUrl = typeof doc.url === 'string' ? doc.url : 
+                                  (doc.url?.url || '');
+                          
+                          // Use blob URL if available, otherwise try server URL
+                          const previewUrl = doc.previewBlob || imageUrl;
+                          
+                          console.log("Mapping server doc to UploadFile:", {
+                          hasPreviewBlob: !!doc.previewBlob,
+                          imageUrl,
+                          usingPreview: previewUrl,
+                          docId: doc.id
+                          });
+                          
+                          return {
+                          id: doc.id ?? `existing-doc-${index}`,
+                          preview: previewUrl || `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect fill='%23ddd' width='400' height='400'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%23999'>${encodeURIComponent(doc.name || 'No Preview')}</text></svg>`,
+                          progress: 100,
+                          uploaded: true,
+                          name:
+                            doc.name ??
+                            `Existing Document ${index + 1}`,
+                          type: "image/jpeg",
+                          };
+                        }
+                        })
+                      : []
+                    }
+                    onChange={async (files: any) => {
+                    console.log("FileUploader onChange received files:", files.map((f: any) => ({
+                      id: f.id,
+                      name: f.name,
+                      preview: f.preview?.substring(0, 30),
+                      uploaded: f.uploaded,
+                      hasFile: !!f.file
+                    })));
+                    
+                    // Clean up previous blob URLs
+                    const existingFiles = Array.isArray(field.value)
+                      ? field.value.filter(
+                        (doc: any) =>
+                        typeof doc === "string" ||
+                        (typeof doc === "object" &&
+                          doc !== null &&
+                          "url" in doc)
+                      )
+                      : [];
+
+                    const newFilesToUpload = files
+                      .map((f: any) => f.file)
+                      .filter((file: any): file is File => file instanceof File);
+
+                    console.log("Files to upload:", newFilesToUpload.length, "Existing files:", existingFiles.length);
+
+                    if (newFilesToUpload.length > 0) {
+                      const toastId = toast.loading("در حال آپلود فایل");
+                      
+                      // Find the corresponding UploadFile objects with blob URLs
+                      const filesWithBlobs = files.filter((f: any) => f.file instanceof File);
+                      
+                      const uploadedFiles =
+                      await handleImmediateMultipleFileUpload(
+                        newFilesToUpload
+                      );
+
+                      if (uploadedFiles.length > 0) {
+                      console.log("📤 Upload SUCCESS! Server returned:", uploadedFiles);
+                      
+                      // Merge server response with blob URLs for preview
+                      const mergedFiles = uploadedFiles.map((serverFile, index) => {
+                        const blobFile = filesWithBlobs[index];
+                        return {
+                        id: serverFile.id,
+                        url: serverFile.url,
+                        name: serverFile.name,
+                        // Keep the blob URL for preview if server URL is empty
+                        previewBlob: blobFile?.preview || null,
+                        };
                       });
+                      
+                      const newValue = [
+                        ...existingFiles,
+                        ...mergedFiles,
+                      ];
+                      console.log("📝 Setting form field.value to:", newValue);
+                      field.onChange(newValue);
+                      toast.success("فایل‌ها با موفقیت آپلود شدند", {
+                        id: toastId,
+                      });
+                      } else {
+                      toast.error("خطا در آپلود فایل‌ها", {
+                        id: toastId,
+                      });
+                      }
+                    } else {
+                      // Handle deletion or no new files
+                      const remainingFiles = files
+                      .map((f: any) => {
+                        if (f.uploaded && f.id) {
+                        return existingFiles.find(
+                          (doc: any) =>
+                          (typeof doc === "object" &&
+                            doc.id === f.id) ||
+                          (typeof doc === "string" &&
+                            doc === f.preview)
+                        );
+                        }
+                        return null;
+                      })
+                      .filter(Boolean);
+
+                      field.onChange(
+                      remainingFiles.length > 0 ? remainingFiles : []
+                      ); // Set to empty array if no files remain
+                    }
+                    form.trigger("policyFiles"); // Trigger validation
                     }}
-                    maxFiles={5}
-                    maxSizeMB={5}
-                    accept="image/*,.pdf"
+                    isInvalid={!!form.formState.errors.policyFiles}
+                    capture={"environment"}
+                    prevGridColumns={4}
                   />
                 </FormControl>
                 <FormMessage />

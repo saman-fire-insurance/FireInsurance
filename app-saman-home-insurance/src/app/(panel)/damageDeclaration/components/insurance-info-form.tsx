@@ -174,8 +174,8 @@ export default function InsuranceInfoForm({
       // router.push(res);
       if (res) {
         setIsSubmitting(false);
-        const declarationId = res; // Expected format: "fbafef72-7a80-4b38-a97a-cdd53d61b1ab"
-
+        toast.success("احراز هویت با موفقیت انجام شد.")
+        const declarationId = res;
         // Pass the ID to the parent component
         onNext(declarationId);
       }

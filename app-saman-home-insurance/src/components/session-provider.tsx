@@ -53,7 +53,7 @@ export function Providers({
               position="top-center"
               className="font-IranSans"
               richColors
-              duration={5000}
+              duration={4000}
             />
             <DialogComponent />
           </ThemeProvider>
