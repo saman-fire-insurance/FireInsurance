@@ -133,6 +133,7 @@ export default function DamageDeclarationPage() {
                 alt="damage declaration logo"
                 width={64}
                 height={64}
+                style={{ width: 'auto', height: 'auto' }}
               />
             </div>
             <h1 className="text-2xl font-bold text-gray-800">

@@ -10,6 +10,7 @@ import { SWRConfig } from "swr";
 import { useDialog } from "@/hooks/useDialog";
 // Ensure OpenAPI is configured early
 import "@/lib/openapi-config";
+import { OpenAPI } from "@/swagger/core/OpenAPI";
 
 export function Providers({
   children,
@@ -20,7 +21,7 @@ export function Providers({
 }) {
   const { DialogComponent } = useDialog();
   // Only set the token, base URL is already configured
-//   OpenAPI.TOKEN = session?.accessToken;
+  OpenAPI.TOKEN = session?.accessToken;
   
   return (
     <ProgressProvider

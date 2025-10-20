@@ -18,13 +18,13 @@ export const authOptions: AuthOptions = {
         // recaptchaToken: { label: "ReCAPTCHA Token", type: "text" },
       },
       async authorize(credentials) {
-        console.log("🔐 [AUTHORIZE] Starting authorization with credentials:", {
-          phoneNumber: credentials?.phoneNumber,
-          hasOtp: !!credentials?.otp,
-        });
+        // console.log("🔐 [AUTHORIZE] Starting authorization with credentials:", {
+        //   phoneNumber: credentials?.phoneNumber,
+        //   hasOtp: !!credentials?.otp,
+        // });
 
         if (!credentials?.phoneNumber || !credentials?.otp) {
-          console.error("🔐 [AUTHORIZE] Missing credentials");
+          // console.error("🔐 [AUTHORIZE] Missing credentials");
           throw new Error("شماره تلفن و کد تایید الزامی است");
         }
 
@@ -39,16 +39,16 @@ export const authOptions: AuthOptions = {
           //   requestBody.captchaToken = credentials.recaptchaToken;
           // }
           
-          console.log("🔐 [AUTHORIZE] Calling verify OTP API...");
+          // console.log("🔐 [AUTHORIZE] Calling verify OTP API...");
           const response =
             await UserAuthenticationOtpService.postApiV1UsersVerifyOtp({
               requestBody,
             });
 
-          console.log("🔐 [AUTHORIZE] OTP login response:", {
-            hasAccessToken: !!response?.accessToken,
-            hasRefreshToken: !!response?.refreshToken,
-          });
+          // console.log("🔐 [AUTHORIZE] OTP login response:", {
+          //   hasAccessToken: !!response?.accessToken,
+          //   hasRefreshToken: !!response?.refreshToken,
+          // });
 
           if (response?.accessToken && response?.refreshToken) {
             const user = {
@@ -57,12 +57,12 @@ export const authOptions: AuthOptions = {
               accessToken: response.accessToken,
               refreshToken: response.refreshToken,
             };
-            console.log("🔐 [AUTHORIZE] Returning user object:", {
-              id: user.id,
-              phoneNumber: user.phoneNumber,
-              hasAccessToken: !!user.accessToken,
-              hasRefreshToken: !!user.refreshToken,
-            });
+            // console.log("🔐 [AUTHORIZE] Returning user object:", {
+            //   id: user.id,
+            //   phoneNumber: user.phoneNumber,
+            //   hasAccessToken: !!user.accessToken,
+            //   hasRefreshToken: !!user.refreshToken,
+            // });
             return user;
           }
 
@@ -97,20 +97,20 @@ export const authOptions: AuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
-      console.log("🔐 [JWT CALLBACK] Called with:", {
-        hasUser: !!user,
-        hasToken: !!token,
-        tokenSub: token?.sub,
-      });
+      // console.log("🔐 [JWT CALLBACK] Called with:", {
+      //   hasUser: !!user,
+      //   hasToken: !!token,
+      //   tokenSub: token?.sub,
+      // });
 
       // The user object passed here contains the data returned by the authorize function
       if (user) {
-        console.log("🔐 [JWT CALLBACK] User data received:", {
-          id: user.id,
-          phoneNumber: user.phoneNumber,
-          hasAccessToken: !!user.accessToken,
-          hasRefreshToken: !!user.refreshToken,
-        });
+        // console.log("🔐 [JWT CALLBACK] User data received:", {
+        //   id: user.id,
+        //   phoneNumber: user.phoneNumber,
+        //   hasAccessToken: !!user.accessToken,
+        //   hasRefreshToken: !!user.refreshToken,
+        // });
         
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
@@ -118,19 +118,19 @@ export const authOptions: AuthOptions = {
         token.id = user.id;
         token.phoneNumber = user.phoneNumber;
         
-        console.log("🔐 [JWT CALLBACK] Token updated with user data");
+        // console.log("🔐 [JWT CALLBACK] Token updated with user data");
       }
       
       return token;
     },
     async session({ session, token }) {
-      console.log("🔐 [SESSION CALLBACK] Called with:", {
-        hasSession: !!session,
-        hasToken: !!token,
-        hasSessionUser: !!session?.user,
-        tokenSub: token?.sub,
-        tokenPhoneNumber: token?.phoneNumber,
-      });
+      // console.log("🔐 [SESSION CALLBACK] Called with:", {
+      //   hasSession: !!session,
+      //   hasToken: !!token,
+      //   hasSessionUser: !!session?.user,
+      //   tokenSub: token?.sub,
+      //   tokenPhoneNumber: token?.phoneNumber,
+      // });
 
       // The token object contains the data from the jwt callback
       if (token) {
@@ -142,18 +142,18 @@ export const authOptions: AuthOptions = {
           session.user.id = token.sub as string;
           session.user.phoneNumber = token.phoneNumber as string;
           
-          console.log("🔐 [SESSION CALLBACK] Session user populated:", {
-            id: session.user.id,
-            phoneNumber: session.user.phoneNumber,
-          });
+          // console.log("🔐 [SESSION CALLBACK] Session user populated:", {
+          //   id: session.user.id,
+          //   phoneNumber: session.user.phoneNumber,
+          // });
         }
       }
       
-      console.log("🔐 [SESSION CALLBACK] Returning session with user:", {
-        hasAccessToken: !!session.accessToken,
-        userId: session.user?.id,
-        userPhoneNumber: session.user?.phoneNumber,
-      });
+      // console.log("🔐 [SESSION CALLBACK] Returning session with user:", {
+      //   hasAccessToken: !!session.accessToken,
+      //   userId: session.user?.id,
+      //   userPhoneNumber: session.user?.phoneNumber,
+      // });
       
       return session;
     },

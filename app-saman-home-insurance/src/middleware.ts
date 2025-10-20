@@ -10,7 +10,7 @@ const AUTH_ROUTES = [
   // "/forgot-password",
   // "/reset-password",
 ]; // Routes for authentication
-const PROTECTED_ROUTES = ["/profile", "/damageDeclaration"]; // Routes requiring authentication
+const PROTECTED_ROUTES = ["/damageDeclaration"]; // Routes requiring authentication
 const API_ROUTES = ["/api"]; // API routes
 const STATIC_ROUTES = ["/_next", "/favicon.ico", "/images", "/fonts", "/_next/image", "/public", "/img", "/manifest.json"]; // Static assets
 
@@ -40,6 +40,8 @@ export async function middleware(request: NextRequest) {
   const hasSessionCookie = request.cookies.has(SESSION_COOKIE_NAME);
   const isAuthenticated = !!token || hasSessionCookie;
 
+  console.log(isAuthenticated,token,hasSessionCookie,"isAuthenticated")
+
   // Handle authentication routes (login, register, etc.)
   if (AUTH_ROUTES.some((route) => pathname.startsWith(route))) {
     // If already authenticated, redirect to dashboard
@@ -56,7 +58,7 @@ export async function middleware(request: NextRequest) {
 
   // Handle protected routes
   if (
-    PROTECTED_ROUTES.some((route) => pathname.startsWith(route)) ||
+    PROTECTED_ROUTES.some((route) => pathname.toLowerCase().startsWith(route.toLowerCase())) ||
     (!PUBLIC_ROUTES.some((route) => pathname === route) &&
       !pathname.startsWith("/api"))
   ) {
@@ -92,9 +94,11 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
+     * - api/auth (NextAuth routes)
      * - _next/static (static files)
+     * - _next/image (image optimization files)
      * - favicon.ico, sitemap.xml, robots.txt (static files)
      */
-    '/((?!_next/static|favicon.ico|sitemap.xml|robots.txt).*)',
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:jpg|jpeg|png|gif|svg|webp|ico)).*)',
   ],
 };

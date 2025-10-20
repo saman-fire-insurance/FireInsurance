@@ -83,7 +83,7 @@ const VerificationIdentityResponse = (props: PropsType) => {
             </Card>
 
             {/* Action Buttons */}
-            <div className="flex flex-row w-full gap-x-1">
+            <div className="flex flex-row w-full gap-x-2">
               <Button
                 onClick={handleContinue}
                 className="w-3/5 bg-primary hover:bg-primary/90"

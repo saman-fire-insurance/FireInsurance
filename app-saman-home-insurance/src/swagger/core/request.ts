@@ -309,7 +309,7 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
                     status: response.status,
                     statusText: response.statusText,
                     body: responseHeader ?? responseBody,
-                };  
+                };
 
                 catchErrorCodes(options, result);
 
