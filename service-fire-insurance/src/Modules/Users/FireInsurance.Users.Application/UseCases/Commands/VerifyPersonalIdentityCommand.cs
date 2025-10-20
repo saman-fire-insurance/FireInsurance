@@ -25,17 +25,25 @@ namespace FireInsurance.Users.Application.UseCases.Commands
             {
                 RuleFor(req => req.NationalCode)
                     .NotEmpty()
-                    .WithMessage(UserErrors.NationalCode.Empty)
+                    .WithMessage(UserErrors.NationalCode.Empty);
+
+                RuleFor(req => req.NationalCode)
                     .Length(10)
-                    .WithMessage(UserErrors.NationalCode.Invalid)
+                    .WithMessage(UserErrors.NationalCode.Invalid);
+
+                RuleFor(req => req.NationalCode)
                     .Matches("^[0-9]+$")
                     .WithMessage(UserErrors.NationalCode.Invalid);
 
                 RuleFor(req => req.DateOfBirth)
                     .NotEmpty()
-                    .WithMessage(UserErrors.DateOfBirth.Empty)
+                    .WithMessage(UserErrors.DateOfBirth.Empty);
+
+                RuleFor(req => req.DateOfBirth)
                     .Length(10)
-                    .WithMessage(UserErrors.DateOfBirth.Invalid)
+                    .WithMessage(UserErrors.DateOfBirth.Invalid);
+
+                RuleFor(req => req.DateOfBirth)
                     .Matches(@"^\d{4}/\d{2}/\d{2}$")
                     .WithMessage(UserErrors.DateOfBirth.Invalid);
             }

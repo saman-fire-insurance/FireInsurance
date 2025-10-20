@@ -1,5 +1,5 @@
-﻿using FireInsurance.Users.Application.Services;
-using FireInsurance.Users.Infrastructure.Mocks;
+﻿using FireInsurance.Damage.Application.Services.SamanServices.SmsService;
+using FireInsurance.Damage.Infrastructure.Mocks.SmsServiceMocks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -11,9 +11,9 @@ using Refit;
 using System.Net;
 
 
-namespace FireInsurance.Users.Infrastructure.Services.Saman.Sms
+namespace FireInsurance.Damage.Infrastructure.Services.Saman.SmsService
 {
-    public static class NotificationServiceInstaller
+    public static class SmsServiceInstaller
     {
         private static void AddSmsProviderOptions(this IServiceCollection services)
         {
