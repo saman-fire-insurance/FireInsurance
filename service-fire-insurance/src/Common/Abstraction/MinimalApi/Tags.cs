@@ -8,4 +8,6 @@ public class Tags
     public const string User_Authentication_Otp = "User:Authentication:Otp";
 
     public const string DamageClaim = "DamageClaim";
+
+    public const string File = "File";
 }

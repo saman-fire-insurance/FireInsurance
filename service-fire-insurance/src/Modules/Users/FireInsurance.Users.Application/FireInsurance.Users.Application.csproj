@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Services\ServiceInstallers\" />
     <Folder Include="UseCases\Queries\" />
   </ItemGroup>
 
