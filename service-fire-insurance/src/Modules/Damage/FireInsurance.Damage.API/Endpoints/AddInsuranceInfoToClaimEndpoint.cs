@@ -8,11 +8,11 @@ using Microsoft.AspNetCore.Routing;
 
 namespace FireInsurance.Damage.API.Endpoints
 {
-    internal class AddInsuranceInfoToClaimEndpoint
+    internal sealed class AddInsuranceInfoToClaimEndpoint : IEndpoint
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("/DamageClaim/Create", CreateDamageClaimAsync)
+            app.MapPost("/DamageClaim/AddInsurance", CreateDamageClaimAsync)
                 .RequireAuthorization()
                 .WithTags(Tags.DamageClaim);
         }
