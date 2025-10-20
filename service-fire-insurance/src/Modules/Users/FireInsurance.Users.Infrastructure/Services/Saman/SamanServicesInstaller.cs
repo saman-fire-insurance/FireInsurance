@@ -56,17 +56,17 @@ namespace FireInsurance.Users.Infrastructure.Services.Saman
                 services.AddScoped<IPersonInquiryService, MockPersonInquiryService>();
             }
 
-            services
-                .AddRefitClient<IPersonInquiryApi>()
-                .ConfigureHttpClient((sp, httpClient) =>
-                {
-                    httpClient.BaseAddress = new Uri(samanServicesOptions.BaseUrl);
-                    httpClient.Timeout = TimeSpan.FromSeconds(30);
-                })
-                .ConfigurePrimaryHttpMessageHandler(() => CreateHttpMessageHandler(proxyOptions))
-                .AddHttpMessageHandler<SamanServiceHandler>();
+            //services
+            //    .AddRefitClient<IPersonInquiryApi>()
+            //    .ConfigureHttpClient((sp, httpClient) =>
+            //    {
+            //        httpClient.BaseAddress = new Uri(samanServicesOptions.BaseUrl);
+            //        httpClient.Timeout = TimeSpan.FromSeconds(30);
+            //    })
+            //    .ConfigurePrimaryHttpMessageHandler(() => CreateHttpMessageHandler(proxyOptions))
+            //    .AddHttpMessageHandler<SamanServiceHandler>();
 
-            services.TryAddScoped<SamanServiceHandler>();
+            //services.TryAddScoped<SamanServiceHandler>();
         }
 
         private static HttpClientHandler CreateHttpMessageHandler(ProxyOptions options)

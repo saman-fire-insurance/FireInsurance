@@ -5,16 +5,11 @@ using FireInsurance.Users.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace FireInsurance.Users.Application.Services
+namespace FireInsurance.Users.Application.Services.UsersModuleService
 {
-    public class UsersModuleService : IUsersModuleService
+    public class UsersModuleService(UserManager<User> userManager) : IUsersModuleService
     {
-        private readonly UserManager<User> _userManager;
-
-        public UsersModuleService(UserManager<User> userManager)
-        {
-            _userManager = userManager;
-        }
+        private readonly UserManager<User> _userManager = userManager;
 
         public async Task<Result<UserDto>> GetUserById(Guid id)
         {
