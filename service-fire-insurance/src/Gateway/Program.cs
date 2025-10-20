@@ -139,10 +139,6 @@ app.UseDefaultOpenApi();
 
 app.UseRouting();
 
-app.UseAuthentication();
-
-app.UseAuthorization();
-
 //app.UseExceptionHandler();
 
 var routeGroup = app.MapGroup("api/v1");

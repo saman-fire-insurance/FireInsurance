@@ -8,7 +8,7 @@ using FireInsurance.Users.Infrastructure.Services.Cache;
 using FireInsurance.Users.Infrastructure.Services.Saman;
 using FireInsurance.Users.Infrastructure.Services.ProxyServer;
 using FireInsurance.Users.Infrastructure.Data;
-using FireInsurance.Users.Application.Services.ServiceInstallers;
+using FireInsurance.Users.Application.Services.UsersModuleService;
 
 namespace FireInsurance.Users.API.ModuleInstaller
 {

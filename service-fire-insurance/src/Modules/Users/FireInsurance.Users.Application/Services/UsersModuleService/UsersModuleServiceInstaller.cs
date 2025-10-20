@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
-namespace FireInsurance.Users.Application.Services.ServiceInstallers
+namespace FireInsurance.Users.Application.Services.UsersModuleService
 {
     public static class UsersModuleServiceInstaller
     {
