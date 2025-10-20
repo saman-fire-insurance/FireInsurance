@@ -2,23 +2,23 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PersonInquiryRequest } from '../models/PersonInquiryRequest';
+import type { CreateDamageClaimRequest } from '../models/CreateDamageClaimRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
-export class UserProfileVerifyIdentityService {
+export class DamageClaimService {
     /**
      * @returns any OK
      * @throws ApiError
      */
-    public static postApiV1UsersVerifyIdentity({
+    public static postApiV1DamageClaimCreate({
         requestBody,
     }: {
-        requestBody: PersonInquiryRequest,
+        requestBody: CreateDamageClaimRequest,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/v1/Users/VerifyIdentity',
+            url: '/api/v1/DamageClaim/Create',
             body: requestBody,
             mediaType: 'application/json',
             errors: {

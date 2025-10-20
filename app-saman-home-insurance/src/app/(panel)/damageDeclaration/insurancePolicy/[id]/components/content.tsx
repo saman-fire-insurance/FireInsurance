@@ -3,7 +3,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { X, Save, User, BookCheck, Home, List, FileText, CircleCheck } from "lucide-react";
+import {
+  X,
+  Save,
+  User,
+  BookCheck,
+  Home,
+  List,
+  FileText,
+  CircleCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import InsurancePolicyForm from "../../../components/insurance-policy-form";
@@ -26,6 +35,7 @@ interface ContentProps {
 }
 
 export default function Content({ declarationId }: ContentProps) {
+  console.log("Declaration ID:", declarationId);
   const router = useRouter();
   const [formData, setFormData] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -115,7 +125,7 @@ export default function Content({ declarationId }: ContentProps) {
       `/damageDeclaration/documents/${declarationId}`,
       `/damageDeclaration/review/${declarationId}`,
     ];
-    
+
     if (stepRoutes[index]) {
       router.push(stepRoutes[index]);
     }

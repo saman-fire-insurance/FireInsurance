@@ -23,7 +23,8 @@ import VerificationIdentityResponse from "./verificationIdentityResponse";
 import { toast } from "sonner";
 import {
   PersonInquiryRequest,
-  UserProfileVerifyIdentityService,
+  UserProfileService,
+  DamageClaimService,
 } from "@/swagger";
 
 // Form validation schema
@@ -139,10 +140,9 @@ export default function InsuranceInfoForm({
         : undefined,
     } as PersonInquiryRequest;
     try {
-      const res =
-        await UserProfileVerifyIdentityService.postApiV1UsersVerifyIdentity({
-          requestBody,
-        });
+      const res = await UserProfileService.postApiV1UsersVerifyIdentity({
+        requestBody,
+      });
       // router.push(res);
       if (res) {
         setIsSubmitting(false);
@@ -166,12 +166,11 @@ export default function InsuranceInfoForm({
   const handleContinue = async (mobileNumber: string) => {
     setIsSubmitting(true);
     try {
-      const res =
-        await UserProfileVerifyIdentityService.postApiV1UsersVerifyIdentity({
-          requestBody: {
-            nationalCode: mobileNumber,
-          },
-        });
+      const res = await DamageClaimService.postApiV1DamageClaimCreate({
+        requestBody: {
+          phoneNumber: mobileNumber,
+        },
+      });
       // router.push(res);
       if (res) {
         setIsSubmitting(false);

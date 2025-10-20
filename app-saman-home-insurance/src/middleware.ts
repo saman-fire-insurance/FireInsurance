@@ -49,7 +49,7 @@ export async function middleware(request: NextRequest) {
       console.log(
         `Middleware: Authenticated user accessing auth route ${pathname}, redirecting to dashboard`
       );
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/damageDeclaration", request.url));
     }
 
     // Otherwise, let them access auth routes

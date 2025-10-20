@@ -41,7 +41,7 @@ export default function DamageDeclarationPage() {
     try {
       // Generate a temporary ID for saving (will be replaced by backend ID later)
       const tempId = `temp-${Date.now()}`;
-      localStorage.setItem(`${STORAGE_KEY}-${tempId}`, JSON.stringify(formData));
+      // localStorage.setItem(`${STORAGE_KEY}-${tempId}`, JSON.stringify(formData));
 
       toast.success("تغییرات با موفقیت ذخیره شد", {
         description: "اطلاعات شما به صورت موقت ذخیره شد",
@@ -64,10 +64,10 @@ export default function DamageDeclarationPage() {
   const handleNext = async (declarationId: string) => {
     try {
       // Save form data with the ID received from API
-      localStorage.setItem(
-        `${STORAGE_KEY}-${declarationId}`,
-        JSON.stringify(formData)
-      );
+      // localStorage.setItem(
+      //   `${STORAGE_KEY}-${declarationId}`,
+      //   JSON.stringify(formData)
+      // );
 
       // Navigate to next step with the ID
       router.push(`/damageDeclaration/insurancePolicy/${declarationId}`);
