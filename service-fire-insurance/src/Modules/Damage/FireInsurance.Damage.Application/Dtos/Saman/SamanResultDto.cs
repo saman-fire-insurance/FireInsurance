@@ -46,7 +46,7 @@ namespace FireInsurance.Damage.Application.Dtos.Saman
         InvalidToken = -3,
 
         /// <summary>
-        /// در خواست با شکست مواجه شد - Request failed
+        /// در خواست با شکست مواجه شد - Query failed
         /// </summary>
         RequestFailed = -4,
 
