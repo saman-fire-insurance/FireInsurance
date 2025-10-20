@@ -7,8 +7,8 @@ using Common.Installers;
 //using FireInsurance.SharedKernel.Extensions;
 //using FireInsurance.SharedKernel.HealthChecks;
 //using FireInsurance.SharedKernel.Monitoring;
-using FireInsurance.Users.API.ModuleInstaller;
 using FireInsurance.Damage.API.ModuleInstaller;
+using FireInsurance.Users.API.ModuleInstaller;
 using Common.Behaviors;
 using Gridify;
 using Common.Abstraction.MinimalApi;
@@ -101,18 +101,6 @@ app.UseStaticFiles();
 
 app.UseCors(corsName);
 
-app
-    //.UseJwtRevocation<JwtBlackListValidator>()
-    .UseAuthentication()
-    .UseAuthorization();
-
-    //.UseFastEndpoints(config =>
-    //{
-    //    config.Endpoints.RoutePrefix = "api";
-    //    //config.Throttle.HeaderName = "X-Client-ID";
-    //    config.Throttle.Message = "تعداد درخواست های شما بیش از حد مجاز است.";
-    //})
-
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("Current Environment: {env}", builder.Environment.EnvironmentName);
 Console.WriteLine($"ASPNETCORE_ENVIRONMENT = {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}");
@@ -136,8 +124,19 @@ app.UseDefaultOpenApi();
 //    await next();
 //});
 
-
 app.UseRouting();
+
+app
+    //.UseJwtRevocation<JwtBlackListValidator>()
+    .UseAuthentication()
+    .UseAuthorization();
+
+//.UseFastEndpoints(config =>
+//{
+//    config.Endpoints.RoutePrefix = "api";
+//    //config.Throttle.HeaderName = "X-Client-ID";
+//    config.Throttle.Message = "تعداد درخواست های شما بیش از حد مجاز است.";
+//})
 
 //app.UseExceptionHandler();
 

@@ -21,8 +21,10 @@ public static class BehaviorExtensions
         this IServiceCollection services,
         Assembly assembly)
     {
+        // Include both public and non-public types to find internal validators
         var validatorTypes = assembly
             .GetTypes()
+            .Where(t => !t.IsAbstract && !t.IsInterface)
             .Where(t => t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>)))
             .ToList();
 

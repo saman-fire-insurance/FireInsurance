@@ -2,16 +2,11 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using FireInsurance.Users.Application.Services;
-using FireInsurance.Users.Infrastructure.Services.Saman.PersonInquiry;
 using System.Net;
-using FireInsurance.Users.Infrastructure.Services.ProxyServer;
-using Refit;
-using System;
-using FireInsurance.Users.Infrastructure.Mocks;
-using FireInsurance.Users.Infrastructure.Services.Saman.Sms;
+using FireInsurance.Damage.Infrastructure.Services.Saman.ProxyServer;
+using FireInsurance.Damage.Infrastructure.Services.Saman.SmsService;
 
-namespace FireInsurance.Users.Infrastructure.Services.Saman
+namespace FireInsurance.Damage.Infrastructure.Services.Saman
 {
     public static class SamanServicesInstaller
     {
@@ -39,34 +34,7 @@ namespace FireInsurance.Users.Infrastructure.Services.Saman
             var samanServicesOptions = sp.GetRequiredService<SamanServicesOptions>();
             var proxyOptions = sp.GetRequiredService<ProxyOptions>();
 
-            services.AddPersonInquiryService(environment, samanServicesOptions, proxyOptions);
-
             services.AddSmsProvider(environment);
-        }
-
-        public static void AddPersonInquiryService(this IServiceCollection services, IHostEnvironment environment, SamanServicesOptions samanServicesOptions, ProxyOptions proxyOptions)
-        {
-            if (environment.IsDevelopment())
-            {
-                //services.AddScoped<IPersonInquiryService, PersonInquiryService>();
-                services.AddScoped<IPersonInquiryService, MockPersonInquiryService>();
-            }
-            else
-            {
-                services.AddScoped<IPersonInquiryService, MockPersonInquiryService>();
-            }
-
-            //services
-            //    .AddRefitClient<IPersonInquiryApi>()
-            //    .ConfigureHttpClient((sp, httpClient) =>
-            //    {
-            //        httpClient.BaseAddress = new Uri(samanServicesOptions.BaseUrl);
-            //        httpClient.Timeout = TimeSpan.FromSeconds(30);
-            //    })
-            //    .ConfigurePrimaryHttpMessageHandler(() => CreateHttpMessageHandler(proxyOptions))
-            //    .AddHttpMessageHandler<SamanServiceHandler>();
-
-            //services.TryAddScoped<SamanServiceHandler>();
         }
 
         private static HttpClientHandler CreateHttpMessageHandler(ProxyOptions options)
