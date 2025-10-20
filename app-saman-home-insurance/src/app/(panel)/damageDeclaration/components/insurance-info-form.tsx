@@ -82,12 +82,13 @@ interface VerificationResult {
   province: string;
   city: string;
   address: string;
+  mobieleNumber?: string;
 }
 
 interface InsuranceInfoFormProps {
   initialData?: InsuranceInfoFormData;
   onChange: (data: InsuranceInfoFormData) => void;
-  onNext: () => void;
+  onNext: (declarationId: string) => void;
 }
 
 export default function InsuranceInfoForm({
@@ -150,6 +151,7 @@ export default function InsuranceInfoForm({
           province: res.State?.Name,
           city: res.City?.Name,
           address: res.Address,
+          mobieleNumber: data?.mobileNumber,
         });
       }
       console.log(res, "res from verify identity");
@@ -161,8 +163,31 @@ export default function InsuranceInfoForm({
     }
   };
 
-  const handleContinue = () => {
-    onNext();
+  const handleContinue = async (mobileNumber: string) => {
+    setIsSubmitting(true);
+    try {
+      const res =
+        await UserProfileVerifyIdentityService.postApiV1UsersVerifyIdentity({
+          requestBody: {
+            nationalCode: mobileNumber,
+          },
+        });
+      // router.push(res);
+      if (res) {
+        setIsSubmitting(false);
+        const declarationId = res; // Expected format: "fbafef72-7a80-4b38-a97a-cdd53d61b1ab"
+
+        // Pass the ID to the parent component
+        onNext(declarationId);
+      }
+    } catch (error) {
+      console.error("Error creating damage declaration:", error);
+      toast.error("خطا در ایجاد اعلام خسارت", {
+        description: "لطفاً دوباره تلاش کنید",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleBackToEdit = () => {
@@ -176,6 +201,7 @@ export default function InsuranceInfoForm({
         verificationResult={verificationResult}
         handleBackToEdit={handleBackToEdit}
         handleContinue={handleContinue}
+        isSubmitting={isSubmitting}
       />
     );
   }

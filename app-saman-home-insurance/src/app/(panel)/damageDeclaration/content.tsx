@@ -61,21 +61,9 @@ export default function DamageDeclarationPage() {
     router.push("/");
   };
 
-  const handleNext = async () => {
+  const handleNext = async (declarationId: string) => {
     try {
-      // TODO: Replace with actual API call to create damage declaration
-      // const response = await fetch('/api/damage-declaration/create', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData),
-      // });
-      // const { id } = await response.json();
-
-      // For now, generate a temporary ID
-      // This will be replaced by the actual ID from backend response
-      const declarationId = `temp-${Date.now()}`;
-
-      // Save form data with the ID
+      // Save form data with the ID received from API
       localStorage.setItem(
         `${STORAGE_KEY}-${declarationId}`,
         JSON.stringify(formData)

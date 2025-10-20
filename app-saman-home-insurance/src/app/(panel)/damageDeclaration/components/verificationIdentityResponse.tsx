@@ -10,11 +10,12 @@ import {
 interface PropsType {
   verificationResult: any;
   handleBackToEdit: () => void;
-  handleContinue: () => void;
+  handleContinue: (mobileNumber: string) => void;
+  isSubmitting?: boolean;
 }
 
 const VerificationIdentityResponse = (props: PropsType) => {
-  const { verificationResult, handleBackToEdit, handleContinue } = props;
+  const { verificationResult, handleBackToEdit, handleContinue, isSubmitting = false } = props;
   return (
     <div className="flex flex-col gap-y-10 w-full">
       <h2 className="text-xl font-normal text-secondary text-center">
@@ -85,14 +86,16 @@ const VerificationIdentityResponse = (props: PropsType) => {
             {/* Action Buttons */}
             <div className="flex flex-row w-full gap-x-2">
               <Button
-                onClick={handleContinue}
+                onClick={() => handleContinue(verificationResult.mobieleNumber)}
+                disabled={isSubmitting}
                 className="w-3/5 bg-primary hover:bg-primary/90"
               >
-                تایید و ادامه
+                {isSubmitting ? "در حال ایجاد..." : "تایید و ادامه"}
                 <ArrowLeftIcon className="size-5 mr-2" />
               </Button>
               <Button
                 onClick={handleBackToEdit}
+                disabled={isSubmitting}
                 variant="outline"
                 className="border-gray-200 text-secondary cursor-pointer bg-transparent w-2/5"
               >
