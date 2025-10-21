@@ -6,7 +6,7 @@ namespace FireInsurance.Damage.Application.Dtos
         public string Code { get; set; } = string.Empty;
         public Guid UserId { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
-        public List<Guid> FileIds { get; set; } = [];
+        public List<Guid> InsuranceFileIds { get; set; } = [];
         
         public Guid IncidentId { get; set; }
         public IncidentDto Incident { get; set; } = null!;
