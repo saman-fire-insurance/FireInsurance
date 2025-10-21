@@ -13,10 +13,10 @@ namespace FireInsurance.Damage.Domain.Entities
         public string? SerialNumber { get; set; }
         public string? Code { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
-        public List<Guid>? FileIds { get; set; }
-        //public List<FileEntity> Files { get; set; }
+        public List<Guid>? InsuranceFileIds { get; set; }
+        //public List<StoredFile> InsuranceFiles { get; set; }
         public Guid? IncidentId { get; set; } = null;
-        //public Incident? Incident { get; set; }
+        public Incident? Incident { get; set; }
         //public List<DamagedObject>? DamagedObjects { get; set; }
         public Guid? OwnershipTypeId { get; set; } = null;
         //public OwnershipType? OwnershipType { get; set; }
@@ -51,13 +51,26 @@ namespace FireInsurance.Damage.Domain.Entities
             
             if (fileIds?.Count > 0)
             {
-                FileIds = fileIds;
+                InsuranceFileIds = fileIds;
             }
             
             if (thirdPartyCoverage != null)
             {
                 ThirdPartyCoverage = thirdPartyCoverage;
             }
+
+            return Result.Success(this);
+        }
+
+        public Result<DamageClaim> AddIncidentInfo(Incident incident)
+        {
+            //validations if any
+            if (incident == null)
+            {
+                return Result.Error("Incident information cannot be null.");
+            }
+
+            Incident = incident;
 
             return Result.Success(this);
         }
