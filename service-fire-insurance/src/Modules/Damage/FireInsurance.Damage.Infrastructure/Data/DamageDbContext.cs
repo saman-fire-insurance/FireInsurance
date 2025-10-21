@@ -11,7 +11,10 @@ namespace FireInsurance.Damage.Infrastructure.Data
 
         public DbSet<DamageClaim> DamageClaims => Set<DamageClaim>();
         public DbSet<IncidentType> IncidentTypes => Set<IncidentType>();
+        public DbSet<InsurableObject> InsurableObjects => Set<InsurableObject>();
+        public DbSet<DamagedObject> DamagedObjects => Set<DamagedObject>();
         public DbSet<ThirdPartyCoverage> ThirdPartyCoverages => Set<ThirdPartyCoverage>();
+        public DbSet<OwnershipType> OwnershipTypes => Set<OwnershipType>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
