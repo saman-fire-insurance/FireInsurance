@@ -12,5 +12,7 @@ namespace FireInsurance.Damage.Application.Data
         DbSet<DamagedObject> DamagedObjects { get; }
         DbSet<ThirdPartyCoverage> ThirdPartyCoverages { get; }
         DbSet<OwnershipType> OwnershipTypes { get; }
-    }
+        DbSet<Province> Provinces { get; }
+        DbSet<City> Cities { get; }
+}
 }

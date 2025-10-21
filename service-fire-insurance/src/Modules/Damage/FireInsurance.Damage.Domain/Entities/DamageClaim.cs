@@ -2,7 +2,6 @@
 using Mapster;
 using FireInsurance.Damage.Domain.Common;
 using FireInsurance.Damage.Domain.Enums;
-using MediatR;
 
 namespace FireInsurance.Damage.Domain.Entities
 {
