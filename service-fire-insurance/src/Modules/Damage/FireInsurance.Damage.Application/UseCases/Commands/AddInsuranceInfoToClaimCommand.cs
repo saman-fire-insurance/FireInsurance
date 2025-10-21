@@ -10,14 +10,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FireInsurance.Damage.Application.UseCases.Commands
 {
-    public sealed record AddInsuranceInfoToClaimRequest(Guid DamageClaimId, string SerialNumber, List<Guid>? FileIds, ThirdPartyCoverageDto? ThirdPartyCoverage = null);
+    public sealed record AddThirdPartyCoverageRequest (string CompanyName, string PolicyNumber, List<Guid> InsurableObjectIds);
+    public sealed record AddInsuranceInfoToClaimRequest(Guid DamageClaimId, string SerialNumber, List<Guid>? FileIds, AddThirdPartyCoverageRequest? AddThirdPartyCoverageRequest = null);
 
     public class AddInsuranceInfoToClaimCommand(AddInsuranceInfoToClaimRequest request) : ICommand<DamageClaimDto>
     {
         public Guid DamageClaimId { get; set; } = request.DamageClaimId;
         public string SerialNumber { get; set; } = request.SerialNumber;
         public List<Guid>? FileIds { get; set; } = request.FileIds;
-        public ThirdPartyCoverageDto? ThirdPartyCoverage { get; set; } = request.ThirdPartyCoverage;
+        public AddThirdPartyCoverageRequest? AddThirdPartyCoverageRequest { get; set; } = request.AddThirdPartyCoverageRequest;
 
         internal sealed class Validator : AbstractValidator<AddInsuranceInfoToClaimCommand>
         {
@@ -45,19 +46,23 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                     return Result.NotFound(DamageClaimErrors.NotFound(request.DamageClaimId));
                 }
 
-                //damageClaim.SerialNumber = request.SerialNumber;
+                ThirdPartyCoverage? thirdPartyCoverage = null;
+                var coverageRequest = request.AddThirdPartyCoverageRequest;
+                if (coverageRequest != null)
+                {
+                    var insurableObjects = dbContext.InsurableObjects
+                        .Where(io => 
+                            coverageRequest != null &&
+                            coverageRequest.InsurableObjectIds != null && 
+                            coverageRequest.InsurableObjectIds.Contains(io.Id))
+                        .ToList();
 
-                //if (request.FileIds?.Count > 0)
-                //{
-                //    damageClaim.FileIds = request.FileIds;
-                //}
+                    thirdPartyCoverage = ThirdPartyCoverage.Create(coverageRequest.CompanyName, coverageRequest.PolicyNumber, insurableObjects);
 
-                //if (request.ThirdPartyCoverage != null)
-                //{
-                //    damageClaim.ThirdPartyCoverage = request.ThirdPartyCoverage.Adapt<ThirdPartyCoverage>();
-                //}
+                    dbContext.ThirdPartyCoverages.Add(thirdPartyCoverage);
+                }
 
-                damageClaim = damageClaim.AddInsuranceInfo(request.SerialNumber, request.FileIds, request.ThirdPartyCoverage.Adapt<ThirdPartyCoverage>());
+                damageClaim = damageClaim.AddInsuranceInfo(request.SerialNumber, request.FileIds, thirdPartyCoverage);
 
                 await dbContext.SaveChangesAsync(cancellationToken);
 
