@@ -1,4 +1,4 @@
-﻿using Common.Abstraction.MinimalApi;
+using Common.Abstraction.MinimalApi;
 using Common.Extensions;
 using FireInsurance.Damage.Application.UseCases.Queries;
 using Gridify;
@@ -9,18 +9,18 @@ using Microsoft.AspNetCore.Routing;
 
 namespace FireInsurance.Damage.API.Endpoints
 {
-    internal sealed class GetIncidentTypesEndpoint : IEndpoint
+    internal sealed class GetOwnershipTypesEndpoint : IEndpoint
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("/DamageClaim/GetIncidentTypes", CreateDamageClaimAsync)
+            app.MapPost("/DamageClaim/GetOwnershipTypes", GetOwnershipTypesAsync)
                 //.RequireAuthorization()
                 .WithTags(Tags.DamageClaim);
         }
 
-        public static async Task<IResult> CreateDamageClaimAsync(GridifyQuery request, ISender sender, CancellationToken cancellationToken)
+        public static async Task<IResult> GetOwnershipTypesAsync(GridifyQuery request, ISender sender, CancellationToken cancellationToken)
         {
-            var query = new GetIncidentTypesQuery(request);
+            var query = new GetOwnershipTypesQuery(request);
             var result = await sender.Send(query, cancellationToken);
 
             return result.ToActionResult();

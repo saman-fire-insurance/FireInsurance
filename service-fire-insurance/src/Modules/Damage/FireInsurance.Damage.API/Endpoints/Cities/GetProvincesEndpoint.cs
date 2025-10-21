@@ -7,20 +7,20 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace FireInsurance.Damage.API.Endpoints
+namespace FireInsurance.Damage.API.Endpoints.Cities
 {
-    internal sealed class GetIncidentTypesEndpoint : IEndpoint
+    internal class GetProvincesEndpoint : IEndpoint
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("/DamageClaim/GetIncidentTypes", CreateDamageClaimAsync)
+            app.MapPost("/Province/GetProvinces", GetProvincesAsync)
                 //.RequireAuthorization()
-                .WithTags(Tags.DamageClaim);
+                .WithTags(Tags.City);
         }
 
-        public static async Task<IResult> CreateDamageClaimAsync(GridifyQuery request, ISender sender, CancellationToken cancellationToken)
+        public static async Task<IResult> GetProvincesAsync(GridifyQuery request, ISender sender, CancellationToken cancellationToken)
         {
-            var query = new GetIncidentTypesQuery(request);
+            var query = new GetProvincesQuery(request);
             var result = await sender.Send(query, cancellationToken);
 
             return result.ToActionResult();
