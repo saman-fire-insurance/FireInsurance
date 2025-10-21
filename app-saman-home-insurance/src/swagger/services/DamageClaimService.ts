@@ -81,4 +81,20 @@ export class DamageClaimService {
             mediaType: 'application/json',
         });
     }
+    /**
+     * @returns any OK
+     * @throws ApiError
+     */
+    public static postApiV1DamageClaimGetOwnershipTypes({
+        requestBody,
+    }: {
+        requestBody: GridifyQuery,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/DamageClaim/GetOwnershipTypes',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
 }
