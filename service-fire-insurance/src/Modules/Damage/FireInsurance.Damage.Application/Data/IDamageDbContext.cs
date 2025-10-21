@@ -8,6 +8,9 @@ namespace FireInsurance.Damage.Application.Data
     {
         DbSet<DamageClaim> DamageClaims { get; }
         DbSet<IncidentType> IncidentTypes { get; }
+        DbSet<InsurableObject> InsurableObjects { get; }
+        DbSet<DamagedObject> DamagedObjects { get; }
         DbSet<ThirdPartyCoverage> ThirdPartyCoverages { get; }
+        DbSet<OwnershipType> OwnershipTypes { get; }
     }
 }
