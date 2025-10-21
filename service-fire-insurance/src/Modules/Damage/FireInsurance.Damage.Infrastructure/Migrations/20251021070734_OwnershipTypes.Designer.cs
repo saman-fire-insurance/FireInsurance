@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using FireInsurance.Damage.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FireInsurance.Damage.Infrastructure.Migrations
 {
     [DbContext(typeof(DamageDbContext))]
-    partial class DamageDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251021070734_OwnershipTypes")]
+    partial class OwnershipTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,57 +97,6 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                     b.ToTable("damage_claims", "damage");
                 });
 
-            modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.DamagedObject", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("CoverageId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("coverage_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<Guid>("DamageClaimId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("damage_claim_id");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("description");
-
-                    b.Property<decimal>("EstimatedLoss")
-                        .HasColumnType("numeric")
-                        .HasColumnName("estimated_loss");
-
-                    b.Property<Guid>("InsurableObjectId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("insurable_object_id");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_deleted");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id")
-                        .HasName("pk_damaged_objects");
-
-                    b.HasIndex("DamageClaimId")
-                        .HasDatabaseName("ix_damaged_objects_damage_claim_id");
-
-                    b.HasIndex("InsurableObjectId")
-                        .HasDatabaseName("ix_damaged_objects_insurable_object_id");
-
-                    b.ToTable("damaged_objects", "damage");
-                });
-
             modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.IncidentType", b =>
                 {
                     b.Property<Guid>("Id")
@@ -208,9 +160,9 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id")
-                        .HasName("pk_insurable_objects");
+                        .HasName("pk_insurable_object");
 
-                    b.ToTable("insurable_objects", "damage");
+                    b.ToTable("insurable_object", "damage");
                 });
 
             modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.OwnershipType", b =>
@@ -336,27 +288,6 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                     b.Navigation("ThirdPartyCoverage");
                 });
 
-            modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.DamagedObject", b =>
-                {
-                    b.HasOne("FireInsurance.Damage.Domain.Entities.DamageClaim", "DamageClaim")
-                        .WithMany()
-                        .HasForeignKey("DamageClaimId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_damaged_objects_damage_claims_damage_claim_id");
-
-                    b.HasOne("FireInsurance.Damage.Domain.Entities.InsurableObject", "InsurableObject")
-                        .WithMany()
-                        .HasForeignKey("InsurableObjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_damaged_objects_insurable_objects_insurable_object_id");
-
-                    b.Navigation("DamageClaim");
-
-                    b.Navigation("InsurableObject");
-                });
-
             modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.ThirdPartyCoverage", b =>
                 {
                     b.HasOne("FireInsurance.Damage.Domain.Entities.InsurableObject", "InsurableObject")
@@ -364,7 +295,7 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                         .HasForeignKey("InsurableObjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_third_party_coverages_insurable_objects_insurable_object_id");
+                        .HasConstraintName("fk_third_party_coverages_insurable_object_insurable_object_id");
 
                     b.Navigation("InsurableObject");
                 });

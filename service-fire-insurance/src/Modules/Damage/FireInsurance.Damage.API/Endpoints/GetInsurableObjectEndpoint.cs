@@ -1,0 +1,29 @@
+using Common.Abstraction.MinimalApi;
+using Common.Extensions;
+using FireInsurance.Damage.Application.UseCases.Queries;
+using Gridify;
+using MediatR;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+
+namespace FireInsurance.Damage.API.Endpoints
+{
+    internal sealed class GetInsurableObjectEndpoint : IEndpoint
+    {
+        public void MapEndpoint(IEndpointRouteBuilder app)
+        {
+            app.MapPost("/DamageClaim/GetInsurableObjects", GetInsurableObjectsAsync)
+                //.RequireAuthorization()
+                .WithTags(Tags.DamageClaim);
+        }
+
+        public static async Task<IResult> GetInsurableObjectsAsync(GridifyQuery request, ISender sender, CancellationToken cancellationToken)
+        {
+            var query = new GetInsurableObjectsQuery(request);
+            var result = await sender.Send(query, cancellationToken);
+
+            return result.ToActionResult();
+        }
+    }
+}
