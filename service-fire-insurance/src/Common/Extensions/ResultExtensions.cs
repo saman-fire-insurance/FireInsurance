@@ -35,7 +35,7 @@ namespace Common.Extensions
 
                 ResultStatus.Invalid => Results.ValidationProblem(
                     result.ValidationErrors.ToDictionary(
-                        e => e.Identifier ?? "General",
+                        e => $"{ e.Identifier ?? "General"} - { e.ErrorCode }",
                         e => new[] { e.ErrorMessage }
                     ),
                     title: "Validation failed",

@@ -10,6 +10,8 @@ namespace FireInsurance.Damage.Infrastructure.Data
         public const string DB_SCHEMA = "damage";
 
         public DbSet<DamageClaim> DamageClaims => Set<DamageClaim>();
+        public DbSet<IncidentType> IncidentTypes => Set<IncidentType>();
+        public DbSet<ThirdPartyCoverage> ThirdPartyCoverages => Set<ThirdPartyCoverage>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -16,7 +16,8 @@ namespace FireInsurance.Users.API.ModuleInstaller
     {
         public void Install(IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
         {
-            services.AddValidators(AssemblyReference.Assembly);
+            // Register validators from Application assembly where commands are defined
+            services.AddValidators(FireInsurance.Users.Application.AssemblyReference.Assembly);
 
             services.AddDatabase(configuration);
 
