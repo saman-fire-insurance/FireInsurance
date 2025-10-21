@@ -15,6 +15,8 @@ namespace FireInsurance.Damage.Infrastructure.Data
         public DbSet<DamagedObject> DamagedObjects => Set<DamagedObject>();
         public DbSet<ThirdPartyCoverage> ThirdPartyCoverages => Set<ThirdPartyCoverage>();
         public DbSet<OwnershipType> OwnershipTypes => Set<OwnershipType>();
+        public DbSet<Province> Provinces => Set<Province>();
+        public DbSet<City> Cities => Set<City>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

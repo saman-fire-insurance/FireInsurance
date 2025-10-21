@@ -10,4 +10,6 @@ public class Tags
     public const string DamageClaim = "DamageClaim";
 
     public const string File = "File";
+
+    public const string City = "City";
 }
