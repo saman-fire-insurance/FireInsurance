@@ -58,7 +58,7 @@ export default function ReviewForm({
         </Button>
       </div>
 
-      <Accordion type="single" collapsible className="w-full space-y-2">
+      <Accordion type="multiple" className="w-full space-y-2">
         {/* اطلاعات بیمه‌گذار */}
         <AccordionItem
           value="insured"
@@ -66,7 +66,7 @@ export default function ReviewForm({
         >
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
-              <User className="flex size-8 p-2 text-secondaryBlue font-bold bg-primary/10 items-center justify-center rounded-full" />
+              <User className="flex size-8 p-2 text-secondaryBlue font-bold bg-secondaryBlue/10 items-center justify-center rounded-full" />
               <span className="font-normal text-secondaryBlue">اطلاعات بیمه‌گذار</span>
             </div>
           </AccordionTrigger>
@@ -115,7 +115,7 @@ export default function ReviewForm({
         >
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
-              <BookCheck className="flex size-8 p-2 text-secondaryBlue font-bold bg-primary/10 items-center justify-center rounded-full" />
+              <BookCheck className="flex size-8 p-2 text-secondaryBlue font-bold bg-secondaryBlue/10 items-center justify-center rounded-full" />
               <span className="font-normal text-secondaryBlue">اطلاعات بیمه‌نامه</span>
             </div>
           </AccordionTrigger>
@@ -175,7 +175,7 @@ export default function ReviewForm({
         >
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
-              <Home className="flex size-8 p-2 text-secondaryBlue font-bold bg-primary/10 items-center justify-center rounded-full" />
+              <Home className="flex size-8 p-2 text-secondaryBlue font-bold bg-secondaryBlue/10 items-center justify-center rounded-full" />
               <span className="font-normal text-secondaryBlue">اطلاعات حادثه</span>
             </div>
           </AccordionTrigger>
@@ -245,7 +245,7 @@ export default function ReviewForm({
         >
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
-              <List className="flex size-8 p-2 text-secondaryBlue font-bold bg-primary/10 items-center justify-center rounded-full" />
+              <List className="flex size-8 p-2 text-secondaryBlue font-bold bg-secondaryBlue/10 items-center justify-center rounded-full" />
               <span className="font-normal text-secondaryBlue">موارد آسیب دیده</span>
             </div>
           </AccordionTrigger>
@@ -284,7 +284,7 @@ export default function ReviewForm({
         >
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
-              <FileText className="flex size-8 p-2 text-secondaryBlue font-bold bg-primary/10 items-center justify-center rounded-full" />
+              <FileText className="flex size-8 p-2 text-secondaryBlue font-bold bg-secondaryBlue/10 items-center justify-center rounded-full" />
               <span className="font-normal text-secondaryBlue">اطلاعات ذینفعان</span>
             </div>
           </AccordionTrigger>

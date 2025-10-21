@@ -155,7 +155,7 @@ export default function BeneficiariesForm({
                     className="flex flex-row justify-end gap-8 pt-3"
                   >
                     <div className="flex items-center space-x-2 space-x-reverse">
-                      <RadioGroupItem value="no" id="beneficiary-no" />
+                      <RadioGroupItem value="no" id="beneficiary-no" className="cursor-pointer" />
                       <Label
                         htmlFor="beneficiary-no"
                         className="cursor-pointer"
@@ -164,7 +164,7 @@ export default function BeneficiariesForm({
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2 space-x-reverse">
-                      <RadioGroupItem value="yes" id="beneficiary-yes" />
+                      <RadioGroupItem value="yes" id="beneficiary-yes" className="cursor-pointer" />
                       <Label
                         htmlFor="beneficiary-yes"
                         className="cursor-pointer"
@@ -237,13 +237,13 @@ export default function BeneficiariesForm({
                     className="flex flex-row justify-end gap-8 pt-3"
                   >
                     <div className="flex items-center space-x-2 space-x-reverse">
-                      <RadioGroupItem value="no" id="dispute-no" />
+                      <RadioGroupItem value="no" id="dispute-no" className="cursor-pointer" />
                       <Label htmlFor="dispute-no" className="cursor-pointer">
                         خیر
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2 space-x-reverse">
-                      <RadioGroupItem value="yes" id="dispute-yes" />
+                      <RadioGroupItem value="yes" id="dispute-yes" className="cursor-pointer" />
                       <Label htmlFor="dispute-yes" className="cursor-pointer">
                         بله
                       </Label>
