@@ -21,8 +21,9 @@ import Image from "next/image";
 import { DamageClaimService } from "@/swagger/services/DamageClaimService";
 import { AddInsuranceInfoToClaimRequest } from "@/swagger/models/AddInsuranceInfoToClaimRequest";
 import _ from "lodash";
-import { ThirdPartyCoverageDto } from "@/swagger/models/ThirdPartyCoverageDto";
-import { InsurableObject } from "@/swagger/models/InsurableObject";
+import { AddThirdPartyCoverageRequest } from "@/swagger/models/AddThirdPartyCoverageRequest";
+import { GetInsurableObjects } from "@/swr/insurableObjects";
+import { GridifyQuery } from "@/swagger/models/GridifyQuery";
 
 const STORAGE_KEY = "damage-declaration-form-data";
 
@@ -47,6 +48,15 @@ export default function Content({ declarationId }: ContentProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([0]); // Step 1 (index 0) is completed
   const currentStep = 1; // This is step 2 (index 1)
+
+  const requestBody = {
+    page: 1,
+    pageSize: 100,
+    orderBy: "",
+    filter: "",
+  } as GridifyQuery;
+  // Fetch insurable objects from API
+  const { insurableObjects, insurableObjectsIsLoading } = GetInsurableObjects(requestBody);
 
   // Load saved data from localStorage on mount
   useEffect(() => {
@@ -81,15 +91,13 @@ export default function Content({ declarationId }: ContentProps) {
             return p.id;
           }),
       serialNumber: data.policyNumber,
-      thirdPartyCoverage:
+      addThirdPartyCoverageRequest:
         data.hasOtherInsurance === "yes"
           ? ({
               companyName: data.otherInsuranceCompany,
               policyNumber: data.otherPolicyNumber,
-              insurableObject: {
-                title: data.otherInsuranceCase,
-              } as InsurableObject,
-            } as ThirdPartyCoverageDto)
+              insurableObject: data.otherInsuranceCase,
+            } as AddThirdPartyCoverageRequest)
           : undefined,
     } as AddInsuranceInfoToClaimRequest;
     try {
@@ -225,6 +233,8 @@ export default function Content({ declarationId }: ContentProps) {
               onSubmit={handleFormSubmit}
               onNext={handleNext}
               onPrevious={handlePrevious}
+              insurableObjects={insurableObjects?.items}
+              insurableObjectsLoading={insurableObjectsIsLoading}
             />
           </div>
         </div>

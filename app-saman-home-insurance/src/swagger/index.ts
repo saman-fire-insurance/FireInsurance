@@ -8,13 +8,12 @@ export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { AddInsuranceInfoToClaimRequest } from './models/AddInsuranceInfoToClaimRequest';
+export type { AddThirdPartyCoverageRequest } from './models/AddThirdPartyCoverageRequest';
 export type { CreateDamageClaimRequest } from './models/CreateDamageClaimRequest';
 export type { GridifyQuery } from './models/GridifyQuery';
-export type { InsurableObject } from './models/InsurableObject';
 export type { OtpDto } from './models/OtpDto';
 export type { OtpRequestDto } from './models/OtpRequestDto';
 export type { PersonInquiryRequest } from './models/PersonInquiryRequest';
-export type { ThirdPartyCoverageDto } from './models/ThirdPartyCoverageDto';
 
 export { DamageClaimService } from './services/DamageClaimService';
 export { FileService } from './services/FileService';

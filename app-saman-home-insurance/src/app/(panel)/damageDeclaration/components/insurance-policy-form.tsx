@@ -79,15 +79,9 @@ interface InsurancePolicyFormProps {
   onSubmit?: (data: InsurancePolicyFormData) => void;
   onNext: () => void;
   onPrevious: () => void;
+  insurableObjects?: any;
+  insurableObjectsLoading?: boolean;
 }
-
-// Insurance case options
-const insuranceCaseOptions = [
-  { id: "1", value: "ساختمان" },
-  { id: "2", value: "محتویات" },
-  { id: "3", value: "هر دو" },
-  { id: "4", value: "مسئولیت" },
-];
 
 const InsurancePolicyForm = ({
   initialData,
@@ -95,9 +89,17 @@ const InsurancePolicyForm = ({
   onSubmit: onSubmitProp,
   onNext,
   onPrevious,
+  insurableObjects,
+  insurableObjectsLoading = false,
 }: InsurancePolicyFormProps) => {
   const isInitialMount = useRef(true);
   const { uploadFile, uploadMultipleFiles, uploading } = useFileUpload();
+
+  // Transform API data to the format needed for MultiSelect
+  const insuranceCaseOptions = insurableObjects?.map((obj: any) => ({
+    id: obj.id,
+    value: obj.title,
+  })) || [];
 
   const form = useForm<InsurancePolicyFormData>({
     resolver: zodResolver(insurancePolicySchema),
@@ -436,7 +438,12 @@ const InsurancePolicyForm = ({
                         selected={field.value || []}
                         onChange={field.onChange}
                         isInvalid={!!form.formState.errors.otherInsuranceCase}
-                        // placeholder="انتخاب کنید (می‌توانید چند مورد انتخاب کنید)"
+                        disabled={insurableObjectsLoading}
+                        placeholder={
+                          insurableObjectsLoading
+                            ? "در حال بارگذاری..."
+                            : "انتخاب کنید"
+                        }
                       />
                     </FormControl>
                     <FormMessage className="text-right !text-xs text-destructive" />

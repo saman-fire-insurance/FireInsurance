@@ -2,11 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ThirdPartyCoverageDto } from './ThirdPartyCoverageDto';
+import type { AddThirdPartyCoverageRequest } from './AddThirdPartyCoverageRequest';
 export type AddInsuranceInfoToClaimRequest = {
     damageClaimId?: string;
     serialNumber?: string | null;
     fileIds?: Array<string> | null;
-    thirdPartyCoverage?: ThirdPartyCoverageDto;
+    addThirdPartyCoverageRequest?: AddThirdPartyCoverageRequest;
 };
 
