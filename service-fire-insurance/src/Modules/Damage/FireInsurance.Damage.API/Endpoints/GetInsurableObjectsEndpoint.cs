@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Routing;
 
 namespace FireInsurance.Damage.API.Endpoints
 {
-    internal sealed class GetInsurableObjectEndpoint : IEndpoint
+    internal sealed class GetInsurableObjectsEndpoint : IEndpoint
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
