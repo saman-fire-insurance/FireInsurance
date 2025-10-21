@@ -18,6 +18,11 @@ import { Toaster } from "@/components/ui/sonner";
 import InsurancePolicyForm from "../../../components/insurance-policy-form";
 import WizardSteps from "../../../components/wizardSteps";
 import Image from "next/image";
+import { DamageClaimService } from "@/swagger/services/DamageClaimService";
+import { AddInsuranceInfoToClaimRequest } from "@/swagger/models/AddInsuranceInfoToClaimRequest";
+import _ from "lodash";
+import { ThirdPartyCoverageDto } from "@/swagger/models/ThirdPartyCoverageDto";
+import { InsurableObject } from "@/swagger/models/InsurableObject";
 
 const STORAGE_KEY = "damage-declaration-form-data";
 
@@ -35,10 +40,11 @@ interface ContentProps {
 }
 
 export default function Content({ declarationId }: ContentProps) {
-  console.log("Declaration ID:", declarationId);
+  // console.log("Declaration ID:", declarationId);
   const router = useRouter();
   const [formData, setFormData] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([0]); // Step 1 (index 0) is completed
   const currentStep = 1; // This is step 2 (index 1)
 
@@ -56,10 +62,51 @@ export default function Content({ declarationId }: ContentProps) {
   }, [declarationId]);
 
   const handleFormChange = (data: any) => {
+    // Just save to state for temporary storage
     setFormData((prev: any) => ({
       ...prev,
       policy: data,
     }));
+  };
+
+  const handleFormSubmit = async (data: any) => {
+    console.log(data, "data4343");
+    console.log("Selected insurance case IDs:", data.otherInsuranceCase); // Array of IDs
+    setIsSubmitting(true);
+    const requestBody = {
+      damageClaimId: declarationId,
+      fileIds: _.isEmpty(data.policyFiles)
+        ? []
+        : _.map(data.policyFiles, (p) => {
+            return p.id;
+          }),
+      serialNumber: data.policyNumber,
+      thirdPartyCoverage:
+        data.hasOtherInsurance === "yes"
+          ? ({
+              companyName: data.otherInsuranceCompany,
+              policyNumber: data.otherPolicyNumber,
+              insurableObject: {
+                title: data.otherInsuranceCase,
+              } as InsurableObject,
+            } as ThirdPartyCoverageDto)
+          : undefined,
+    } as AddInsuranceInfoToClaimRequest;
+    try {
+      const res = await DamageClaimService.postApiV1DamageClaimAddInsurance({
+        requestBody,
+      });
+      if (res) {
+        setIsSubmitting(false);
+        toast.success("اطلاعات بیمه نامه با موفقیت ثبت شد");
+        router.push(`/damageDeclaration/accident/${declarationId}`);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("خطایی رخ داده است");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleTemporarySave = async () => {
@@ -96,20 +143,10 @@ export default function Content({ declarationId }: ContentProps) {
   };
 
   const handleExit = () => {
-    router.push("/");
+    router.push("/damageDeclaration");
   };
 
-  const handleNext = () => {
-    // Save current data
-    localStorage.setItem(
-      `${STORAGE_KEY}-${declarationId}`,
-      JSON.stringify(formData)
-    );
-
-    // TODO: Navigate to next step when implemented
-    router.push(`/damageDeclaration/accident/${declarationId}`);
-    // toast.info("مرحله بعدی هنوز پیاده‌سازی نشده است");
-  };
+  const handleNext = () => {};
 
   const handlePrevious = () => {
     router.push("/damageDeclaration");
@@ -185,6 +222,7 @@ export default function Content({ declarationId }: ContentProps) {
             <InsurancePolicyForm
               initialData={formData.policy}
               onChange={handleFormChange}
+              onSubmit={handleFormSubmit}
               onNext={handleNext}
               onPrevious={handlePrevious}
             />

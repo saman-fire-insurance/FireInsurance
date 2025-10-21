@@ -311,7 +311,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
       </div>
 
       {files.length > 0 && (
-        <div className={`grid grid-cols-${prevGridColumns} gap-4`}>
+        <div className={`grid grid-cols-2 gap-4`}>
           {files.map((file, index) => (
             <div
               key={file.id}

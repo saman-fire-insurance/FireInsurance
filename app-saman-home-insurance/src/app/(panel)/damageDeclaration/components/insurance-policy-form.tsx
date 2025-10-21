@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -17,17 +17,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ArrowLeftIcon } from "lucide-react";
 import { FileUploader } from "@/components/ui/multi-file-upload";
 import { toast } from "sonner";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { MultiSelect } from "@/components/ui/multi-select";
 
 // Form validation schema
 const insurancePolicySchema = z
@@ -40,7 +34,7 @@ const insurancePolicySchema = z
     hasOtherInsurance: z.enum(["yes", "no"]).optional(),
     otherInsuranceCompany: z.string().optional(),
     otherPolicyNumber: z.string().optional(),
-    otherInsuranceCase: z.string().optional(),
+    otherInsuranceCase: z.array(z.string()).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.hasOtherInsurance === "yes") {
@@ -67,10 +61,10 @@ const insurancePolicySchema = z
           path: ["otherPolicyNumber"],
         });
       }
-      if (!data.otherInsuranceCase) {
+      if (!data.otherInsuranceCase || data.otherInsuranceCase.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "مورد بیمه الزامی است",
+          message: "حداقل یک مورد بیمه الزامی است",
           path: ["otherInsuranceCase"],
         });
       }
@@ -82,13 +76,23 @@ type InsurancePolicyFormData = z.infer<typeof insurancePolicySchema>;
 interface InsurancePolicyFormProps {
   initialData?: InsurancePolicyFormData;
   onChange: (data: InsurancePolicyFormData) => void;
+  onSubmit?: (data: InsurancePolicyFormData) => void;
   onNext: () => void;
   onPrevious: () => void;
 }
 
+// Insurance case options
+const insuranceCaseOptions = [
+  { id: "1", value: "ساختمان" },
+  { id: "2", value: "محتویات" },
+  { id: "3", value: "هر دو" },
+  { id: "4", value: "مسئولیت" },
+];
+
 const InsurancePolicyForm = ({
   initialData,
   onChange,
+  onSubmit: onSubmitProp,
   onNext,
   onPrevious,
 }: InsurancePolicyFormProps) => {
@@ -104,7 +108,7 @@ const InsurancePolicyForm = ({
       hasOtherInsurance: "no",
       otherInsuranceCompany: "",
       otherPolicyNumber: "",
-      otherInsuranceCase: "",
+      otherInsuranceCase: [],
     },
   });
 
@@ -148,9 +152,15 @@ const InsurancePolicyForm = ({
     return () => subscription.unsubscribe();
   }, [form, onChange]);
 
-  const onSubmit = (data: InsurancePolicyFormData) => {
+  const onSubmit = async (data: InsurancePolicyFormData) => {
     onChange(data);
-    onNext();
+    
+    // Call the submit handler if provided (for API call)
+    if (onSubmitProp) {
+      await onSubmitProp(data);
+    }
+    
+    // onNext();
   };
 
   return (
@@ -410,7 +420,7 @@ const InsurancePolicyForm = ({
           {/* Conditional Fields - Show when "Yes" is selected */}
           {hasOtherInsurance === "yes" && (
             <div className="flex flex-col gap-y-5">
-              {/* Insurance Case */}
+              {/* Insurance Case - Multi Select */}
               <FormField
                 control={form.control}
                 name="otherInsuranceCase"
@@ -420,23 +430,15 @@ const InsurancePolicyForm = ({
                       مورد بیمه
                       <span className="text-destructive">*</span>
                     </FormLabel>
-                    <Select
-                      dir="rtl"
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="text-left">
-                          <SelectValue placeholder="انتخاب کنید" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="building">ساختمان</SelectItem>
-                        <SelectItem value="contents">محتویات</SelectItem>
-                        <SelectItem value="both">هر دو</SelectItem>
-                        <SelectItem value="liability">مسئولیت</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <MultiSelect
+                        options={insuranceCaseOptions}
+                        selected={field.value || []}
+                        onChange={field.onChange}
+                        isInvalid={!!form.formState.errors.otherInsuranceCase}
+                        // placeholder="انتخاب کنید (می‌توانید چند مورد انتخاب کنید)"
+                      />
+                    </FormControl>
                     <FormMessage className="text-right !text-xs text-destructive" />
                   </FormItem>
                 )}

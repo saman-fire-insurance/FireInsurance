@@ -31,7 +31,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ArrowLeftIcon, ChevronDownIcon } from "lucide-react";
-import { MultiFileUpload } from "@/components/ui/multi-file-upload";
+import { FileUploader } from "@/components/ui/multi-file-upload";
 import { Calendar } from "@/components/ui/calendar";
 
 // Form validation schema
@@ -411,18 +411,14 @@ const AccidentForm = ({
                   تصاویر محل حادثه (اختیاری)
                 </FormLabel>
                 <FormControl>
-                  <MultiFileUpload
+                  <FileUploader
+                    id="accident-images"
                     value={field.value}
                     onChange={field.onChange}
-                    onError={(error) => {
-                      form.setError("accidentImages", {
-                        type: "manual",
-                        message: error,
-                      });
-                    }}
                     maxFiles={5}
-                    maxSizeMB={5}
+                    maxSize={5}
                     accept="image/*"
+                    multiple
                   />
                 </FormControl>
                 <FormMessage className="text-right !text-xs text-destructive" />
@@ -550,18 +546,14 @@ const AccidentForm = ({
                       بارگزاری گزارش (اختیاری)
                     </FormLabel>
                     <FormControl>
-                      <MultiFileUpload
+                      <FileUploader
+                        id="police-report-file"
                         value={field.value}
                         onChange={field.onChange}
-                        onError={(error) => {
-                          form.setError("policeReportFile", {
-                            type: "manual",
-                            message: error,
-                          });
-                        }}
                         maxFiles={5}
-                        maxSizeMB={5}
+                        maxSize={5}
                         accept="image/*,.pdf"
+                        multiple
                       />
                     </FormControl>
                     <FormMessage className="text-right !text-xs text-destructive" />
@@ -645,18 +637,14 @@ const AccidentForm = ({
                       بارگزاری گزارش (اختیاری)
                     </FormLabel>
                     <FormControl>
-                      <MultiFileUpload
+                      <FileUploader
+                        id="fire-report-file"
                         value={field.value}
                         onChange={field.onChange}
-                        onError={(error) => {
-                          form.setError("fireReportFile", {
-                            type: "manual",
-                            message: error,
-                          });
-                        }}
                         maxFiles={5}
-                        maxSizeMB={5}
+                        maxSize={5}
                         accept="image/*,.pdf"
+                        multiple
                       />
                     </FormControl>
                     <FormMessage className="text-right !text-xs text-destructive" />

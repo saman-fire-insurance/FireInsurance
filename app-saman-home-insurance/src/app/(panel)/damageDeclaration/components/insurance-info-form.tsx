@@ -127,7 +127,7 @@ export default function InsuranceInfoForm({
   }, [form, onChange]);
 
   const onSubmit = async (data: InsuranceInfoFormData) => {
-    console.log(data, "datafirstStep");
+    // console.log(data, "datafirstStep");
     setIsSubmitting(true);
     const requestBody = {
       nationalCode: data.nationalId,
