@@ -167,7 +167,7 @@ const InsurancePolicyForm = ({
 
   return (
     <div className="flex flex-col justify-center gap-y-10 items-center">
-      <h2 className="text-xl font-normal text-secondary text-center">
+      <h2 className="text-xl font-normal text-gray-500 text-center">
         اطلاعات بیمه‌نامه
       </h2>
 
@@ -257,12 +257,12 @@ const InsurancePolicyForm = ({
                           // Use blob URL if available, otherwise try server URL
                           const previewUrl = doc.previewBlob || imageUrl;
                           
-                          console.log("Mapping server doc to UploadFile:", {
-                          hasPreviewBlob: !!doc.previewBlob,
-                          imageUrl,
-                          usingPreview: previewUrl,
-                          docId: doc.id
-                          });
+                          // console.log("Mapping server doc to UploadFile:", {
+                          // hasPreviewBlob: !!doc.previewBlob,
+                          // imageUrl,
+                          // usingPreview: previewUrl,
+                          // docId: doc.id
+                          // });
                           
                           return {
                           id: doc.id ?? `existing-doc-${index}`,
@@ -279,13 +279,13 @@ const InsurancePolicyForm = ({
                       : []
                     }
                     onChange={async (files: any) => {
-                    console.log("FileUploader onChange received files:", files.map((f: any) => ({
-                      id: f.id,
-                      name: f.name,
-                      preview: f.preview?.substring(0, 30),
-                      uploaded: f.uploaded,
-                      hasFile: !!f.file
-                    })));
+                    // console.log("FileUploader onChange received files:", files.map((f: any) => ({
+                    //   id: f.id,
+                    //   name: f.name,
+                    //   preview: f.preview?.substring(0, 30),
+                    //   uploaded: f.uploaded,
+                    //   hasFile: !!f.file
+                    // })));
                     
                     // Clean up previous blob URLs
                     const existingFiles = Array.isArray(field.value)
@@ -504,16 +504,16 @@ const InsurancePolicyForm = ({
           <div className="flex flex-row items-center justify-between gap-2 pt-4 w-full text-sm font-medium">
             <Button
               type="submit"
-              className="bg-primary hover:bg-primary w-3/5 cursor-pointer"
+              className="bg-primary hover:bg-primary flex-2 cursor-pointer"
             >
               تایید و ادامه
               <ArrowLeftIcon className="size-4 mr-2" />
             </Button>
             <Button
               type="button"
-              variant="outline"
+              variant="transparent"
               onClick={onPrevious}
-              className="w-2/5 cursor-pointer"
+              className="flex-1 cursor-pointer"
             >
               مرحله قبلی
             </Button>

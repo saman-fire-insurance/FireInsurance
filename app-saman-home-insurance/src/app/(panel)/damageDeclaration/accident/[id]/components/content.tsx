@@ -150,7 +150,7 @@ export default function Content({ declarationId }: ContentProps) {
                 height={64}
               />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-primary">
               فرم اعلام خسارت
             </h1>
           </div>

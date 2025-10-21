@@ -124,7 +124,7 @@ export default function DamageDeclarationPage() {
                 style={{ width: 'auto', height: 'auto' }}
               />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-primary">
               فرم اعلام خسارت
             </h1>
           </div>

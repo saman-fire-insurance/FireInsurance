@@ -140,7 +140,7 @@ const AccidentForm = ({
 
   return (
     <div className="flex flex-col justify-center gap-y-10 items-center">
-      <h2 className="text-xl font-normal text-secondary text-center">
+      <h2 className="text-xl font-normal text-gray-500 text-center">
         اطلاعات حادثه
       </h2>
 
@@ -771,16 +771,16 @@ const AccidentForm = ({
           <div className="flex flex-row items-center justify-between gap-2 pt-4 w-full text-sm font-medium">
             <Button
               type="submit"
-              className="bg-primary hover:bg-primary w-3/5 cursor-pointer"
+              className="bg-primary hover:bg-primary flex-2 cursor-pointer"
             >
               تایید و ادامه
               <ArrowLeftIcon className="size-4 mr-2" />
             </Button>
             <Button
               type="button"
-              variant="outline"
+              variant="transparent"
               onClick={onPrevious}
-              className="w-2/5 cursor-pointer"
+              className="flex-1 cursor-pointer"
             >
               مرحله قبلی
             </Button>

@@ -87,7 +87,7 @@ export default function BeneficiariesForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col justify-center gap-y-10 items-center">
         <div className="flex flex-col gap-y-6 w-full">
-          <h2 className="text-lg font-semibold text-gray-800 text-center">
+          <h2 className="text-lg font-normal text-gray-500 text-center">
             اطلاعات ذینفعان
           </h2>
 
@@ -302,7 +302,7 @@ export default function BeneficiariesForm({
         <div className="flex flex-row items-center justify-between gap-2 pt-4 w-full text-sm font-medium">
           <Button
             type="submit"
-            className="cursor-pointer bg-primary hover:bg-primary/90 w-3/5"
+            className="cursor-pointer bg-primary hover:bg-primary/90 flex-2"
           >
             تایید و ادامه
             <ArrowLeftIcon className="mr-2 size-4" />
@@ -310,8 +310,8 @@ export default function BeneficiariesForm({
           <Button
             type="button"
             onClick={onPrevious}
-            variant="outline"
-            className="cursor-pointer w-2/5"
+            variant="transparent"
+            className="cursor-pointer flex-1"
           >
             مرحله قبلی
           </Button>

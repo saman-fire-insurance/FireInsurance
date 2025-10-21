@@ -207,7 +207,7 @@ export default function InsuranceInfoForm({
 
   return (
     <div className="flex flex-col justify-center gap-y-10 items-center">
-      <h2 className="text-xl font-normal text-secondary text-center">
+      <h2 className="text-xl font-normal text-gray-500 text-center">
         اطلاعات بیمه گذار
       </h2>
 
