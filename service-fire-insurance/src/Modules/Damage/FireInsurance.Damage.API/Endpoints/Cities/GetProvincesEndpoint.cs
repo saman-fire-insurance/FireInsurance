@@ -9,8 +9,6 @@ using Microsoft.AspNetCore.Routing;
 
 namespace FireInsurance.Damage.API.Endpoints.Cities
 {
-    public sealed record GetProvincesRequest(GridifyQuery Query);
-
     internal class GetProvincesEndpoint : IEndpoint
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
@@ -20,9 +18,9 @@ namespace FireInsurance.Damage.API.Endpoints.Cities
                 .WithTags(Tags.City);
         }
 
-        public static async Task<IResult> GetProvincesAsync(GetProvincesRequest request, ISender sender, CancellationToken cancellationToken)
+        public static async Task<IResult> GetProvincesAsync(GridifyQuery request, ISender sender, CancellationToken cancellationToken)
         {
-            var query = new GetProvincesQuery(request.Query);
+            var query = new GetProvincesQuery(request);
             var result = await sender.Send(query, cancellationToken);
 
             return result.ToActionResult();

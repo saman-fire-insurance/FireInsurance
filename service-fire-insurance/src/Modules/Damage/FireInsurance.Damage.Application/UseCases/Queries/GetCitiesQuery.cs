@@ -12,11 +12,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FireInsurance.Damage.Application.UseCases.Queries;
 
-public sealed class GetCitiesQuery(Guid provinceId, GridifyQuery auery) : IQuery<PagedList<CitySummaryDto>>
+public sealed class GetCitiesQuery(Guid provinceId, GridifyQuery query) : IQuery<PagedList<CitySummaryDto>>
 {
     public Guid ProvinceId { get; set; } = provinceId;
 
-    public GridifyQuery Query { get; set; } = auery;
+    public GridifyQuery Query { get; set; } = query;
 
 
     internal sealed class RequestValidator : AbstractValidator<GetCitiesQuery>
