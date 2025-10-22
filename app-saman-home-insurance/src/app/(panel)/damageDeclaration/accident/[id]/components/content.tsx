@@ -3,12 +3,32 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { X, Save, User, BookCheck, Home, List, FileText, CircleCheck } from "lucide-react";
+import {
+  X,
+  Save,
+  User,
+  BookCheck,
+  Home,
+  List,
+  FileText,
+  CircleCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import AccidentForm from "../../../components/accident-form";
 import WizardSteps from "../../../components/wizardSteps";
 import Image from "next/image";
+import { GridifyQuery } from "@/swagger/models/GridifyQuery";
+import {
+  GetAccidentType,
+  GetCities,
+  GetOwnerships,
+  GetProvinces,
+} from "@/swr/accident";
+import { GetCitiesRequest } from "@/swagger/models/GetCitiesRequest";
+import _ from "lodash";
+import { DamageClaimService } from "@/swagger/services/DamageClaimService";
+import { AddIncidentInfoToClaimRequest } from "@/swagger/models/AddIncidentInfoToClaimRequest";
 
 const STORAGE_KEY = "damage-declaration-form-data";
 
@@ -27,29 +47,108 @@ interface ContentProps {
 
 export default function Content({ declarationId }: ContentProps) {
   const router = useRouter();
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([0, 1]); // Steps 1 & 2 completed
   const currentStep = 2; // This is step 3 (index 2)
+  const [provinceId, setProvinceId] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const requestBody = {
+    page: 1,
+    pageSize: 100,
+  } as GridifyQuery;
+
+  const cityRequestBody = {
+    provinceId: provinceId,
+    query: {
+      page: 1,
+      pageSize: 100,
+    } as GridifyQuery,
+  } as GetCitiesRequest;
+
+  const ProvinceRequestBody = {
+    page: 1,
+    pageSize: 100,
+  } as GridifyQuery;
+
+  const ownershipRequestBody = {
+    page: 1,
+    pageSize: 100,
+  } as GridifyQuery;
+
+  // Fetch insurable objects from API
+  const { accidentType, accidentTypeIsLoading } = GetAccidentType(requestBody);
+  const { cities, citiesIsLoading } = GetCities(cityRequestBody);
+  const { provinces, provincesIsLoading } = GetProvinces(ProvinceRequestBody);
+  const { ownership, ownershipIsLoading } = GetOwnerships(ownershipRequestBody);
 
   // Load saved data from localStorage on mount
-  useEffect(() => {
-    const savedData = localStorage.getItem(`${STORAGE_KEY}-${declarationId}`);
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData);
-        setFormData(parsed);
-      } catch (error) {
-        console.error("Error loading saved data:", error);
-      }
-    }
-  }, [declarationId]);
+  // useEffect(() => {
+  //   const savedData = localStorage.getItem(`${STORAGE_KEY}-${declarationId}`);
+  //   if (savedData) {
+  //     try {
+  //       const parsed = JSON.parse(savedData);
+  //       setFormData(parsed);
+  //     } catch (error) {
+  //       console.error("Error loading saved data:", error);
+  //     }
+  //   }
+  // }, [declarationId]);
 
-  const handleFormChange = (data: any) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      accident: data,
-    }));
+  const handleFormSubmit = async (data: Record<string, unknown>) => {
+    console.log(data, "DATAACCIDENT");
+    setIsSubmitting(true);
+
+    // Extract date from accidentDate and combine with accidentTime
+    let incidentDateTime;
+    if (data.accidentDate && data.accidentTime) {
+      // Convert to string if it's a Date object
+      const dateString =
+        typeof data.accidentDate === "string"
+          ? data.accidentDate
+          : data.accidentDate instanceof Date
+          ? data.accidentDate.toISOString()
+          : String(data.accidentDate);
+
+      const dateStr = dateString.split("T")[0]; // Extract "2025-09-29"
+      incidentDateTime = `${dateStr}T${data.accidentTime}:00.000Z`; // Format: "2025-09-29THH:mm:00.000Z"
+    }
+    console.log(incidentDateTime, "INCIDENT_DATE_TIME");
+
+    const requestBody = {
+      damageClaimId: declarationId,
+      address: data.accidentAddress,
+      cityId: data.accidentCity,
+      provinceId: data.accidentProvince,
+      incidentTypeId: data.accidentType,
+      ownershipTypeId: data.ownershipType,
+      postalCode: data.postalCode,
+      incidentCause: data.damageDescription,
+      restraintDescription: data.extinguish,
+      occuranceDate: incidentDateTime,
+      incidentImageFileIds: _.isEmpty(data.accidentImages)
+        ? null
+        : _.map(data.accidentImages as Array<{ id: string }>, (p) => {
+            return p.id;
+          }),
+    } as AddIncidentInfoToClaimRequest;
+    console.log(requestBody, "requestBody");
+    try {
+      const res = await DamageClaimService.postApiV1DamageClaimAddIncidentInfo({
+        requestBody,
+      });
+      if (res) {
+        setIsSubmitting(false);
+        toast.success("اطلاعات حادثه با موفقیت ثبت شد");
+        router.push(`/damageDeclaration/cases/${declarationId}`);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("خطایی رخ داده است");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleTemporarySave = async () => {
@@ -57,10 +156,10 @@ export default function Content({ declarationId }: ContentProps) {
 
     try {
       // Save to localStorage
-      localStorage.setItem(
-        `${STORAGE_KEY}-${declarationId}`,
-        JSON.stringify(formData)
-      );
+      // localStorage.setItem(
+      //   `${STORAGE_KEY}-${declarationId}`,
+      //   JSON.stringify(formData)
+      // );
 
       // TODO: Replace with actual API call when backend is ready
       // await fetch(`/api/damage-declaration/${declarationId}/save`, {
@@ -91,10 +190,10 @@ export default function Content({ declarationId }: ContentProps) {
 
   const handleNext = () => {
     // Save to localStorage before navigating
-    localStorage.setItem(
-      `${STORAGE_KEY}-${declarationId}`,
-      JSON.stringify(formData)
-    );
+    // localStorage.setItem(
+    //   `${STORAGE_KEY}-${declarationId}`,
+    //   JSON.stringify(formData)
+    // );
     router.push(`/damageDeclaration/cases/${declarationId}`);
   };
 
@@ -111,7 +210,7 @@ export default function Content({ declarationId }: ContentProps) {
       `/damageDeclaration/documents/${declarationId}`,
       `/damageDeclaration/review/${declarationId}`,
     ];
-    
+
     if (stepRoutes[index]) {
       router.push(stepRoutes[index]);
     }
@@ -150,9 +249,7 @@ export default function Content({ declarationId }: ContentProps) {
                 height={64}
               />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">
-              فرم اعلام خسارت
-            </h1>
+            <h1 className="text-2xl font-bold text-primary">فرم اعلام خسارت</h1>
           </div>
 
           {/* Wizard Steps */}
@@ -165,10 +262,16 @@ export default function Content({ declarationId }: ContentProps) {
 
           <div className="flex flex-col w-full md:w-1/2 mx-auto">
             <AccidentForm
-              initialData={formData.accident}
-              onChange={handleFormChange}
-              onNext={handleNext}
+              initialData={formData.accident as never}
+              onSubmit={handleFormSubmit}
+              // onNext={handleNext}
               onPrevious={handlePrevious}
+              accidentType={accidentType?.items}
+              provinces={provinces?.items}
+              cities={cities?.items}
+              ownerships={ownership?.items}
+              setProvinceId={setProvinceId}
+              citiesIsLoading={citiesIsLoading}
             />
           </div>
         </div>

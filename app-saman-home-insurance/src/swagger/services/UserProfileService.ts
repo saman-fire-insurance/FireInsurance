@@ -6,7 +6,7 @@ import type { PersonInquiryRequest } from '../models/PersonInquiryRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
-export class UserProfileVerifyIdentityService {
+export class UserProfileService {
     /**
      * @returns any OK
      * @throws ApiError

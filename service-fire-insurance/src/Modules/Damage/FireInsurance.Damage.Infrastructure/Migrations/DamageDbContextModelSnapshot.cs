@@ -101,9 +101,9 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                         .HasColumnType("character varying(1000)")
                         .HasColumnName("serial_number");
 
-                    b.Property<Guid?>("StakeHolderId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("stake_holder_id");
+                    b.PrimitiveCollection<List<Guid>>("StakeHolderIds")
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("stake_holder_ids");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer")
@@ -128,6 +128,9 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                     b.HasIndex("IncidentId")
                         .HasDatabaseName("ix_damage_claims_incident_id");
 
+                    b.HasIndex("OwnershipTypeId")
+                        .HasDatabaseName("ix_damage_claims_ownership_type_id");
+
                     b.HasIndex("ThirdPartyCoverageId")
                         .HasDatabaseName("ix_damage_claims_third_party_coverage_id");
 
@@ -141,7 +144,7 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<Guid>("CoverageId")
+                    b.Property<Guid?>("CoverageId")
                         .HasColumnType("uuid")
                         .HasColumnName("coverage_id");
 
@@ -205,6 +208,26 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("FireStationName")
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("fire_station_name");
+
+                    b.PrimitiveCollection<List<Guid>>("FireStationReportFileIds")
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("fire_station_report_file_ids");
+
+                    b.Property<bool>("HasFireStationReport")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_fire_station_report");
+
+                    b.Property<bool>("HasPoliceReport")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_police_report");
+
+                    b.Property<bool>("HasWeatherReport")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_weather_report");
+
                     b.Property<string>("IncidentCause")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -231,6 +254,18 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("ownership_type_id");
 
+                    b.Property<DateTime?>("PoliceReportDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("police_report_date");
+
+                    b.PrimitiveCollection<List<Guid>>("PoliceReportFileIds")
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("police_report_file_ids");
+
+                    b.Property<string>("PoliceReportNumber")
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("police_report_number");
+
                     b.Property<string>("PostalCode")
                         .IsRequired()
                         .HasColumnType("character varying(1000)")
@@ -248,6 +283,14 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<int?>("WeatherCondition")
+                        .HasColumnType("integer")
+                        .HasColumnName("weather_condition");
+
+                    b.Property<int?>("WeatherReportProbability")
+                        .HasColumnType("integer")
+                        .HasColumnName("weather_report_probability");
 
                     b.HasKey("Id")
                         .HasName("pk_incidents");
@@ -315,6 +358,10 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
+
+                    b.Property<bool>("Other")
+                        .HasColumnType("boolean")
+                        .HasColumnName("other");
 
                     b.Property<int>("SamanId")
                         .HasColumnType("integer")
@@ -403,6 +450,65 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                     b.ToTable("provinces", "damage");
                 });
 
+            modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.StakeHolder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AccountNumber")
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("account_number");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("DamageClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("damage_claim_id");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("first_name");
+
+                    b.Property<string>("Iban")
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("iban");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<bool>("IsOwner")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_owner");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("last_name");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("phone_number");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_stake_holders");
+
+                    b.HasIndex("DamageClaimId")
+                        .HasDatabaseName("ix_stake_holders_damage_claim_id");
+
+                    b.ToTable("stake_holders", "damage");
+                });
+
             modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.StoredFile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -424,6 +530,10 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<Guid?>("DamageClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("damage_claim_id");
+
                     b.Property<int>("FileCategory")
                         .HasColumnType("integer")
                         .HasColumnName("file_category");
@@ -431,6 +541,14 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                     b.Property<Guid?>("IncidentId")
                         .HasColumnType("uuid")
                         .HasColumnName("incident_id");
+
+                    b.Property<Guid?>("IncidentId1")
+                        .HasColumnType("uuid")
+                        .HasColumnName("incident_id1");
+
+                    b.Property<Guid?>("IncidentId2")
+                        .HasColumnType("uuid")
+                        .HasColumnName("incident_id2");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -461,8 +579,17 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_stored_file");
 
+                    b.HasIndex("DamageClaimId")
+                        .HasDatabaseName("ix_stored_file_damage_claim_id");
+
                     b.HasIndex("IncidentId")
                         .HasDatabaseName("ix_stored_file_incident_id");
+
+                    b.HasIndex("IncidentId1")
+                        .HasDatabaseName("ix_stored_file_incident_id1");
+
+                    b.HasIndex("IncidentId2")
+                        .HasDatabaseName("ix_stored_file_incident_id2");
 
                     b.ToTable("stored_file", "damage");
                 });
@@ -560,6 +687,11 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                         .HasForeignKey("IncidentId")
                         .HasConstraintName("fk_damage_claims_incidents_incident_id");
 
+                    b.HasOne("FireInsurance.Damage.Domain.Entities.OwnershipType", "OwnershipType")
+                        .WithMany()
+                        .HasForeignKey("OwnershipTypeId")
+                        .HasConstraintName("fk_damage_claims_ownership_types_ownership_type_id");
+
                     b.HasOne("FireInsurance.Damage.Domain.Entities.ThirdPartyCoverage", "ThirdPartyCoverage")
                         .WithMany()
                         .HasForeignKey("ThirdPartyCoverageId")
@@ -600,13 +732,15 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                     b.Navigation("Insurer")
                         .IsRequired();
 
+                    b.Navigation("OwnershipType");
+
                     b.Navigation("ThirdPartyCoverage");
                 });
 
             modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.DamagedObject", b =>
                 {
                     b.HasOne("FireInsurance.Damage.Domain.Entities.DamageClaim", "DamageClaim")
-                        .WithMany()
+                        .WithMany("DamagedObjects")
                         .HasForeignKey("DamageClaimId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -663,12 +797,35 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                     b.Navigation("Province");
                 });
 
+            modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.StakeHolder", b =>
+                {
+                    b.HasOne("FireInsurance.Damage.Domain.Entities.DamageClaim", null)
+                        .WithMany("StakeHolders")
+                        .HasForeignKey("DamageClaimId")
+                        .HasConstraintName("fk_stake_holders_damage_claims_damage_claim_id");
+                });
+
             modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.StoredFile", b =>
                 {
+                    b.HasOne("FireInsurance.Damage.Domain.Entities.DamageClaim", null)
+                        .WithMany("InsuranceFiles")
+                        .HasForeignKey("DamageClaimId")
+                        .HasConstraintName("fk_stored_file_damage_claims_damage_claim_id");
+
                     b.HasOne("FireInsurance.Damage.Domain.Entities.Incident", null)
-                        .WithMany("IncidentImageFiles")
+                        .WithMany("FireStationReportFiles")
                         .HasForeignKey("IncidentId")
                         .HasConstraintName("fk_stored_file_incidents_incident_id");
+
+                    b.HasOne("FireInsurance.Damage.Domain.Entities.Incident", null)
+                        .WithMany("IncidentImageFiles")
+                        .HasForeignKey("IncidentId1")
+                        .HasConstraintName("fk_stored_file_incidents_incident_id1");
+
+                    b.HasOne("FireInsurance.Damage.Domain.Entities.Incident", null)
+                        .WithMany("PoliceReportFiles")
+                        .HasForeignKey("IncidentId2")
+                        .HasConstraintName("fk_stored_file_incidents_incident_id2");
                 });
 
             modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.ThirdPartyCoveredObject", b =>
@@ -692,9 +849,22 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                     b.Navigation("ThirdPartyCoverage");
                 });
 
+            modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.DamageClaim", b =>
+                {
+                    b.Navigation("DamagedObjects");
+
+                    b.Navigation("InsuranceFiles");
+
+                    b.Navigation("StakeHolders");
+                });
+
             modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.Incident", b =>
                 {
+                    b.Navigation("FireStationReportFiles");
+
                     b.Navigation("IncidentImageFiles");
+
+                    b.Navigation("PoliceReportFiles");
                 });
 
             modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.Province", b =>

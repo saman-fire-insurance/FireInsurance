@@ -133,7 +133,7 @@ export default function DamagedItemsForm({
   };
 
   const handleAmountChange = (
-    field: any,
+    field: { onChange: (value: string) => void },
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const formatted = formatCurrency(e.target.value);
@@ -182,7 +182,7 @@ export default function DamagedItemsForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800 text-center">
+          <h2 className="text-lg font-normal text-gray-500 text-center">
             موارد آسیب دیده
           </h2>
           <p className="text-sm text-gray-600 text-center">
@@ -196,12 +196,12 @@ export default function DamagedItemsForm({
                 {/* Checkbox */}
                 <FormField
                   control={form.control}
-                  name={item.id as any}
+                  name={item.id as keyof DamagedItemsFormData}
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2 space-y-0">
                       <FormControl>
                         <Checkbox
-                          checked={field.value}
+                          checked={!!field.value}
                           onCheckedChange={field.onChange}
                           className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                         />
@@ -214,16 +214,16 @@ export default function DamagedItemsForm({
                 />
 
                 {/* Amount Input - Only show if checkbox is checked and it's not "other" */}
-                {form.watch(item.id as any) && item.id !== "other" && (
+                {form.watch(item.id as keyof DamagedItemsFormData) && item.id !== "other" && (
                   <FormField
                     control={form.control}
-                    name={item.amountField as any}
+                    name={item.amountField as keyof DamagedItemsFormData}
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
                           <div className="relative">
                             <Input
-                              {...field}
+                              value={field.value as string || ""}
                               onChange={(e) => handleAmountChange(field, e)}
                               placeholder="0"
                               className="text-center pr-16"
@@ -309,7 +309,7 @@ export default function DamagedItemsForm({
         <div className="flex justify-between pt-4 items-center gap-x-2">
           <Button
             type="submit"
-            className="cursor-pointer bg-primary hover:bg-primary/90 w-3/5"
+            className="cursor-pointer bg-primary hover:bg-primary/90 flex-2"
           >
             تایید و ادامه
             <ArrowLeftIcon className="mr-2 size-4" />
@@ -317,8 +317,8 @@ export default function DamagedItemsForm({
           <Button
             type="button"
             onClick={onPrevious}
-            variant="outline"
-            className="cursor-pointer w-2/5"
+            variant="transparent"
+            className="cursor-pointer flex-1"
           >
             مرحله قبلی
           </Button>

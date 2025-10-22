@@ -73,29 +73,29 @@ public static partial class Extensions
 
             options.SwaggerEndpoint(swaggerUrl, endpointSection.GetRequiredValue("Name"));
 
-            var identitySection = configuration.GetSection("Identity");
+            //var identitySection = configuration.GetSection("Identity");
 
-            if (identitySection.Exists() || authSection.Exists())
-            {
-                var scopes = identitySection.GetRequiredSection("Scopes").GetChildren().ToDictionary(p => p.Key, p => p.Value);
+            //if (identitySection.Exists() || authSection.Exists())
+            //{
+            //    var scopes = identitySection.GetRequiredSection("Scopes").GetChildren().ToDictionary(p => p.Key, p => p.Value);
 
-                if (scopes.ContainsKey("gatewayapi"))
-                {
-                    options.OAuthAppName(authSection.GetRequiredValue("AppName"));
-                    options.OAuthClientId(authSection.GetRequiredValue("ClientId"));
-                    options.OAuthClientSecret(authSection.GetRequiredValue("ClientSecret"));
-                    options.OAuthUsePkce();
-                    options.OAuthScopes([.. scopes.Keys]);
-                }
+            //    if (scopes.ContainsKey("gatewayapi"))
+            //    {
+            //        options.OAuthAppName(authSection.GetRequiredValue("AppName"));
+            //        options.OAuthClientId(authSection.GetRequiredValue("ClientId"));
+            //        options.OAuthClientSecret(authSection.GetRequiredValue("ClientSecret"));
+            //        options.OAuthUsePkce();
+            //        options.OAuthScopes([.. scopes.Keys]);
+            //    }
 
-                if (scopes.ContainsKey("automation"))
-                {
-                    options.OAuthAppName(authSection.GetRequiredValue("AppName"));
-                    options.OAuthClientId(authSection.GetRequiredValue("ClientId"));
-                    options.OAuthClientSecret(authSection.GetRequiredValue("ClientSecret"));
-                    options.OAuthScopes([.. scopes.Keys]);
-                }
-            }
+            //    if (scopes.ContainsKey("automation"))
+            //    {
+            //        options.OAuthAppName(authSection.GetRequiredValue("AppName"));
+            //        options.OAuthClientId(authSection.GetRequiredValue("ClientId"));
+            //        options.OAuthClientSecret(authSection.GetRequiredValue("ClientSecret"));
+            //        options.OAuthScopes([.. scopes.Keys]);
+            //    }
+            //}
 
             // Show hierarchy tags [Tag]:[SubTag] in swagger UI
             options.AddHierarchySupport();

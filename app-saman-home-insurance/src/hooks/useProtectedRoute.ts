@@ -25,13 +25,13 @@ export function useProtectedRoute(options: {
     }
 
     // Get the redirect URL from query params
-    const redirectUrl = searchParams?.get("redirectUrl") || "/";
+    const redirectUrl = searchParams?.get("redirectUrl") || "/damageDeclaration";
     
     // Handle authenticated users
     if (session) {
       if (redirectIfFound) {
         // For auth pages (login, register), redirect away if authenticated
-        router.replace(redirectUrl || "/");
+        router.replace(redirectUrl || "/damageDeclaration");
       } else {
         // For protected pages, user is authenticated so we're good
         setIsLoading(false);

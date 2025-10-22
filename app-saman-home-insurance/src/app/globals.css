@@ -24,6 +24,7 @@
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
+  --color-secondaryBlue: var(--secondaryBlue);
   --color-placeholder: var(--placeholder);
   --color-destructive: var(--destructive);
   --color-success: var(--success);
@@ -64,6 +65,7 @@
   --destructive: oklch(0.5791 0.2027 25.26);
   --success: oklch(0.7205 0.1255 151.34);
   --border: oklch(0.8918 0.0055 274.96);
+  --secondaryBlue: oklch(0.4557 0.1239 263.31);
   --placeholder: oklch(0.7177 0.0037 247.88);
   --input: oklch(0.9846 0.0017 247.84);
   --ring: oklch(0.708 0 0);

@@ -30,7 +30,7 @@ export async function checkRegistration(
       success: true,
       isRegistered: result === true,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Registration check error:", error);
     const errorDetails = handleApiErrorWithDetails(
       error,
@@ -54,7 +54,7 @@ export async function confirmPhoneNumber(
   // Maximum retry attempts
   const maxRetries = 1;
   let retryCount = 0;
-  let lastError: any = null;
+  let lastError: unknown = null;
 
   // Retry logic
   while (retryCount <= maxRetries) {
@@ -65,7 +65,7 @@ export async function confirmPhoneNumber(
         }/${maxRetries + 1})`
       );
 
-      const requestBody: any = {
+      const requestBody: { phoneNumber: string; otp: string; captchaToken?: string } = {
         phoneNumber,
         otp: code.toString(), // Convert number to string and use 'otp' instead of 'code'
       };
@@ -81,7 +81,7 @@ export async function confirmPhoneNumber(
 
       console.log(`Successfully confirmed phone ${phoneNumber}`);
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
       console.error(
         `Phone confirmation error (attempt ${retryCount + 1}):`,
@@ -89,7 +89,7 @@ export async function confirmPhoneNumber(
       );
 
       // Check if it's a network error or server error (not invalid code)
-      if (error?.status >= 500) {
+      if ((error as { status?: number })?.status && (error as { status?: number }).status! >= 500) {
         // Server error, try again after delay
         retryCount++;
         if (retryCount <= maxRetries) {
@@ -110,7 +110,7 @@ export async function confirmPhoneNumber(
   // All retries failed or non-retryable error
   const errorDetails = handleApiErrorWithDetails(
     lastError,
-    lastError?.status === 400
+    (lastError as { status?: number })?.status === 400
       ? "کد تایید نامعتبر است. لطفا دوباره تلاش کنید."
       : "خطا در تایید شماره موبایل. لطفا دوباره تلاش کنید."
   );
@@ -145,7 +145,7 @@ export async function loginWithCode(phoneNumber: string, code: number) {
       error: "خطا در ورود. لطفا دوباره تلاش کنید.",
       details: response,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Login with code error:", error);
     const errorDetails = handleApiErrorWithDetails(
       error,
@@ -163,7 +163,7 @@ export async function loginWithCode(phoneNumber: string, code: number) {
 export async function resendCode(phoneNumber: string) {
   const maxRetries = 2;
   let retryCount = 0;
-  let lastError: any = null;
+  let lastError: unknown = null;
 
   while (retryCount <= maxRetries) {
     try {
@@ -183,11 +183,11 @@ export async function resendCode(phoneNumber: string) {
 
       console.log(`Successfully sent OTP code to ${phoneNumber}`);
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
       console.error(`Resend code error (attempt ${retryCount + 1}):`, error);
 
-      if (error?.status === 422) {
+      if ((error as { status?: number })?.status === 422) {
         const errorDetails = handleApiErrorWithDetails(
           error,
           "کد قبلا فرستاده شده"
@@ -206,7 +206,8 @@ export async function resendCode(phoneNumber: string) {
         };
       }
 
-      if (error?.status === 429 || error?.status >= 500) {
+      const errorStatus = (error as { status?: number })?.status;
+      if (errorStatus === 429 || (errorStatus && errorStatus >= 500)) {
         retryCount++;
         if (retryCount <= maxRetries) {
           console.log(`Retrying in ${retryCount * 1000}ms...`);

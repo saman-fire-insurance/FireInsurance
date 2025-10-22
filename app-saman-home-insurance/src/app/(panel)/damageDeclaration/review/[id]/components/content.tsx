@@ -7,6 +7,7 @@ import { X, Save, User, BookCheck, Home, List, FileText, CircleCheck } from "luc
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import WizardSteps from "../../../components/wizardSteps";
+import ReviewForm from "../../../components/review-form";
 import Image from "next/image";
 
 const STORAGE_KEY = "damage-declaration-form-data";
@@ -27,7 +28,7 @@ interface ContentProps {
 
 export default function Content({ declarationId }: ContentProps) {
   const router = useRouter();
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([0, 1, 2, 3, 4]); // Steps 1-5 completed
@@ -147,7 +148,7 @@ export default function Content({ declarationId }: ContentProps) {
                 height={64}
               />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-primary">
               فرم اعلام خسارت
             </h1>
           </div>
@@ -161,27 +162,12 @@ export default function Content({ declarationId }: ContentProps) {
           />
 
           <div className="flex flex-col w-full md:w-1/2 mx-auto">
-            <div className="py-8 text-center text-gray-500">
-              <p>بررسی نهایی اطلاعات</p>
-              <p className="mt-2 text-sm">(در انتظار پیاده‌سازی)</p>
-              <div className="mt-6 flex justify-between gap-4">
-                <Button
-                  onClick={handlePrevious}
-                  variant="outline"
-                  className="flex-1"
-                  disabled={isSubmitting}
-                >
-                  قبلی
-                </Button>
-                <Button
-                  onClick={handleSubmit}
-                  className="flex-1"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "در حال ثبت..." : "ثبت نهایی"}
-                </Button>
-              </div>
-            </div>
+            <ReviewForm
+              formData={formData}
+              onSubmit={handleSubmit}
+              onPrevious={handlePrevious}
+              isSubmitting={isSubmitting}
+            />
           </div>
         </div>
 

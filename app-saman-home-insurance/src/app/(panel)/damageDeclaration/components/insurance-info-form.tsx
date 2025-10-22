@@ -20,6 +20,12 @@ import { ArrowLeftIcon, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import VerificationIdentityResponse from "./verificationIdentityResponse";
+import { toast } from "sonner";
+import {
+  PersonInquiryRequest,
+  UserProfileService,
+  DamageClaimService,
+} from "@/swagger";
 
 // Form validation schema
 const insuranceInfoSchema = z.object({
@@ -28,13 +34,45 @@ const insuranceInfoSchema = z.object({
   insuranceApprovalPhone: z.string().optional(),
   birthDate: z
     .object({
-      day: z.number().nullable(),
-      month: z.number().nullable(),
-      year: z.number().nullable(),
+      year: z.number(),
+      month: z.number(),
+      day: z.number(),
+      gregorian: z
+        .object({
+          year: z.number(),
+          month: z.number(),
+          day: z.number(),
+        })
+        .optional(),
     })
-    .refine((date) => date.day !== null && date.month !== null && date.year !== null, {
-      message: "تاریخ تولد الزامی است",
-    }),
+    .optional()
+    .refine(
+      (val) => {
+        // Check if birthdate is selected
+        return val !== undefined && val !== null;
+      },
+      {
+        message: "تاریخ تولد را انتخاب کنید",
+        path: [],
+      }
+    )
+    .refine(
+      (val) => {
+        if (!val?.gregorian) return true;
+        const selected = new Date(
+          val.gregorian.year,
+          val.gregorian.month - 1,
+          val.gregorian.day
+        );
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return selected <= today;
+      },
+      {
+        message: "تاریخ تولد نمی‌تواند بعد از امروز باشد",
+        path: [], // Attach error to the root of dateOfBirth
+      }
+    ),
 });
 
 type InsuranceInfoFormData = z.infer<typeof insuranceInfoSchema>;
@@ -45,12 +83,13 @@ interface VerificationResult {
   province: string;
   city: string;
   address: string;
+  mobieleNumber?: string;
 }
 
 interface InsuranceInfoFormProps {
   initialData?: InsuranceInfoFormData;
   onChange: (data: InsuranceInfoFormData) => void;
-  onNext: () => void;
+  onNext: (declarationId: string) => void;
 }
 
 export default function InsuranceInfoForm({
@@ -69,11 +108,7 @@ export default function InsuranceInfoForm({
       mobileNumber: "",
       nationalId: "",
       insuranceApprovalPhone: "",
-      birthDate: {
-        day: null,
-        month: null,
-        year: null,
-      },
+      birthDate: undefined,
     },
   });
 
@@ -92,39 +127,66 @@ export default function InsuranceInfoForm({
   }, [form, onChange]);
 
   const onSubmit = async (data: InsuranceInfoFormData) => {
+    // console.log(data, "datafirstStep");
     setIsSubmitting(true);
+    const requestBody = {
+      nationalCode: data.nationalId,
+      dateOfBirth: data.birthDate
+        ? data.birthDate.year +
+          "/" +
+          String(data.birthDate.month).padStart(2, "0") +
+          "/" +
+          String(data.birthDate.day).padStart(2, "0")
+        : undefined,
+    } as PersonInquiryRequest;
     try {
-      // TODO: Replace this with your actual API call
-      // Example:
-      // const response = await fetch('/api/verify-identity', {
-      //   method: 'POST',
-      //   body: JSON.stringify(data),
-      // });
-      // const result = await response.json();
-
-      // Simulated API call for demonstration
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Mock successful response - replace with actual API response
-      const mockResult: VerificationResult = {
-        fullName: "محمد نیازی",
-        province: "تهران",
-        city: "تهران",
-        address: "تهران، تهران، بلوارکشاورز خیابان قریب، پلاک 57",
-      };
-
-      setVerificationResult(mockResult);
-      onChange(data);
+      const res = await UserProfileService.postApiV1UsersVerifyIdentity({
+        requestBody,
+      });
+      // router.push(res);
+      if (res) {
+        setIsSubmitting(false);
+        setVerificationResult({
+          fullName: res.FirstName + " " + res.LastName,
+          province: res.State?.Name,
+          city: res.City?.Name,
+          address: res.Address,
+          mobieleNumber: data?.mobileNumber,
+        });
+      }
+      console.log(res, "res from verify identity");
     } catch (error) {
-      console.error("Verification failed:", error);
-      // Handle error - you can add error state and display error message
+      console.log(error);
+      toast.error("خطایی رخ داده است");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleContinue = () => {
-    onNext();
+  const handleContinue = async (mobileNumber: string) => {
+    setIsSubmitting(true);
+    try {
+      const res = await DamageClaimService.postApiV1DamageClaimCreate({
+        requestBody: {
+          phoneNumber: mobileNumber,
+        },
+      });
+      // router.push(res);
+      if (res) {
+        setIsSubmitting(false);
+        toast.success("احراز هویت با موفقیت انجام شد.")
+        const declarationId = res;
+        // Pass the ID to the parent component
+        onNext(declarationId);
+      }
+    } catch (error) {
+      console.error("Error creating damage declaration:", error);
+      toast.error("خطا در ایجاد اعلام خسارت", {
+        description: "لطفاً دوباره تلاش کنید",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleBackToEdit = () => {
@@ -138,13 +200,14 @@ export default function InsuranceInfoForm({
         verificationResult={verificationResult}
         handleBackToEdit={handleBackToEdit}
         handleContinue={handleContinue}
+        isSubmitting={isSubmitting}
       />
     );
   }
 
   return (
     <div className="flex flex-col justify-center gap-y-10 items-center">
-      <h2 className="text-xl font-normal text-secondary text-center">
+      <h2 className="text-xl font-normal text-gray-500 text-center">
         اطلاعات بیمه گذار
       </h2>
 
@@ -222,7 +285,7 @@ export default function InsuranceInfoForm({
           <FormField
             control={form.control}
             name="birthDate"
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <FormItem>
                 <FormLabel className="text-right">
                   تاریخ تولد
@@ -233,6 +296,7 @@ export default function InsuranceInfoForm({
                     value={field.value}
                     onChange={field.onChange}
                     format="yyyy-MM-dd"
+                    isInvalid={!!fieldState.error}
                   />
                 </FormControl>
                 <FormMessage />

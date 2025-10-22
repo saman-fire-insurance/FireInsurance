@@ -27,7 +27,7 @@ interface ContentProps {
 
 export default function Content({ declarationId }: ContentProps) {
   const router = useRouter();
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([0, 1, 2]); // Steps 1, 2 & 3 completed
   const currentStep = 3; // This is step 4 (index 3)
@@ -44,8 +44,8 @@ export default function Content({ declarationId }: ContentProps) {
     }
   }, [declarationId]);
 
-  const handleFormChange = (data: any) => {
-    setFormData((prev: any) => ({
+  const handleFormChange = (data: Record<string, unknown>) => {
+    setFormData((prev: Record<string, unknown>) => ({
       ...prev,
       cases: data,
     }));
@@ -139,7 +139,7 @@ export default function Content({ declarationId }: ContentProps) {
                 height={64}
               />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-primary">
               فرم اعلام خسارت
             </h1>
           </div>
@@ -154,7 +154,7 @@ export default function Content({ declarationId }: ContentProps) {
 
           <div className="flex flex-col w-full md:w-1/2 mx-auto">
             <DamagedItemsForm
-              initialData={formData.cases}
+              initialData={formData.cases as never}
               onChange={handleFormChange}
               onNext={handleNext}
               onPrevious={handlePrevious}

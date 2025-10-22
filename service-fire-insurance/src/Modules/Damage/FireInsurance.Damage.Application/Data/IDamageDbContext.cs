@@ -14,7 +14,7 @@ namespace FireInsurance.Damage.Application.Data
         DbSet<OwnershipType> OwnershipTypes { get; }
         DbSet<Province> Provinces { get; }
         DbSet<City> Cities { get; }
-        DbSet<Incident> Incidents{ get; }
-
+        DbSet<Incident> Incidents { get; }
+        DbSet<StakeHolder> StakeHolders { get; }
 }
 }
