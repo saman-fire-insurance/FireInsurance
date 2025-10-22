@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,6 +33,7 @@ import {
 import { ArrowLeftIcon, ChevronDownIcon } from "lucide-react";
 import { FileUploader } from "@/components/ui/multi-file-upload";
 import { Calendar } from "@/components/ui/calendar";
+import _ from "lodash";
 
 // Form validation schema
 const accidentFormSchema = z.object({
@@ -63,11 +64,13 @@ const accidentFormSchema = z.object({
   policeReportFile: z.array(z.any()).optional(),
   hasFireReport: z.enum(["yes", "no"]).optional(),
   fireReportNumber: z.string().optional(),
+  extinguish: z.string().optional(),
   fireReportDate: z.date().optional(),
   fireReportFile: z.array(z.any()).optional(),
   hasMeteorologicalReport: z.enum(["yes", "no"]).optional(),
   meteorologicalReportNumber: z.string().optional(),
   meteorologicalReportDate: z.date().optional(),
+  meteorologicalPredictionLevel: z.string().optional(),
   meteorologicalReportFile: z.array(z.any()).optional(),
 });
 
@@ -75,22 +78,33 @@ type AccidentFormData = z.infer<typeof accidentFormSchema>;
 
 interface AccidentFormProps {
   initialData?: AccidentFormData;
-  onChange: (data: AccidentFormData) => void;
-  onNext: () => void;
+  onSubmit: (data: AccidentFormData) => void;
   onPrevious: () => void;
+  accidentType: any;
+  setProvinceId: Dispatch<SetStateAction<string>>;
+  provinces: any;
+  cities: any;
+  ownerships: any;
+  citiesIsLoading: boolean;
 }
 
 const AccidentForm = ({
   initialData,
-  onChange,
-  onNext,
+  onSubmit,
   onPrevious,
+  accidentType,
+  setProvinceId,
+  provinces,
+  cities,
+  ownerships,
+  citiesIsLoading,
 }: AccidentFormProps) => {
-  const isInitialMount = useRef(true);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isPoliceReportDateOpen, setIsPoliceReportDateOpen] = useState(false);
   const [isFireReportDateOpen, setIsFireReportDateOpen] = useState(false);
   const [isMeteoReportDateOpen, setIsMeteoReportDateOpen] = useState(false);
+
+  console.log(accidentType, "accidentType");
 
   const form = useForm<AccidentFormData>({
     resolver: zodResolver(accidentFormSchema),
@@ -116,26 +130,14 @@ const AccidentForm = ({
       hasMeteorologicalReport: "no",
       meteorologicalReportNumber: "",
       meteorologicalReportDate: undefined,
+      meteorologicalPredictionLevel: "",
       meteorologicalReportFile: [],
+      extinguish: "",
     },
   });
 
-  // Subscribe to form changes
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      if (isInitialMount.current) {
-        isInitialMount.current = false;
-        return;
-      }
-      onChange(value as AccidentFormData);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [form, onChange]);
-
-  const onSubmit = (data: AccidentFormData) => {
-    onChange(data);
-    onNext();
+  const onSubmitForm = (data: AccidentFormData) => {
+    onSubmit(data);
   };
 
   return (
@@ -146,7 +148,7 @@ const AccidentForm = ({
 
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(onSubmitForm)}
           className="flex flex-col gap-y-6 w-full"
         >
           {/* Accident Type */}
@@ -170,13 +172,9 @@ const AccidentForm = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="fire">آتش‌سوزی</SelectItem>
-                    <SelectItem value="flood">سیل</SelectItem>
-                    <SelectItem value="earthquake">زلزله</SelectItem>
-                    <SelectItem value="theft">سرقت</SelectItem>
-                    <SelectItem value="explosion">انفجار</SelectItem>
-                    <SelectItem value="storm">طوفان</SelectItem>
-                    <SelectItem value="other">سایر</SelectItem>
+                    {_.map(accidentType, (a) => {
+                      return <SelectItem value={a.id}>{a.title}</SelectItem>;
+                    })}
                   </SelectContent>
                 </Select>
                 <FormMessage className="text-right !text-xs text-destructive" />
@@ -268,11 +266,29 @@ const AccidentForm = ({
                     <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="مثلا تهران"
-                      className={cn("text-right placeholder:text-right")}
-                    />
+                    <Select
+                      dir="rtl"
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setProvinceId(value);
+                      }}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="text-right">
+                          <SelectValue placeholder="انتخاب کنید" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {_.map(provinces, (p) => {
+                          return (
+                            <SelectItem key={p.id} value={p.id}>
+                              {p.name}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage className="text-right !text-xs text-destructive" />
                 </FormItem>
@@ -289,11 +305,23 @@ const AccidentForm = ({
                     <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="مثلا تهران"
-                      className={cn("text-right placeholder:text-right")}
-                    />
+                    <Select
+                      dir="rtl"
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={!cities}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="text-right">
+                          <SelectValue placeholder="انتخاب کنید" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {_.map(cities, (c) => {
+                          return <SelectItem value={c.id}>{c.name}</SelectItem>;
+                        })}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage className="text-right !text-xs text-destructive" />
                 </FormItem>
@@ -367,9 +395,9 @@ const AccidentForm = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="owner">مالک</SelectItem>
-                    <SelectItem value="tenant">مستاجر</SelectItem>
-                    <SelectItem value="other">سایر</SelectItem>
+                    {_.map(ownerships, (o) => {
+                      return <SelectItem value={o.id}>{o.title}</SelectItem>;
+                    })}
                   </SelectContent>
                 </Select>
                 <FormMessage className="text-right !text-xs text-destructive" />
@@ -394,6 +422,25 @@ const AccidentForm = ({
                     className={cn(
                       "text-right placeholder:text-right min-h-[150px] resize-none"
                     )}
+                  />
+                </FormControl>
+                <FormMessage className="text-right !text-xs text-destructive" />
+              </FormItem>
+            )}
+          />
+
+          {/* extinguish */}
+          <FormField
+            control={form.control}
+            name="extinguish"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-right">نحوه اطفاء</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="نحوه دفع حادثه"
+                    className={cn("text-right placeholder:text-right")}
                   />
                 </FormControl>
                 <FormMessage className="text-right !text-xs text-destructive" />
@@ -525,8 +572,7 @@ const AccidentForm = ({
                             startMonth={new Date(2020, 0)}
                             endMonth={new Date()}
                             disabled={(date) =>
-                              date > new Date() ||
-                              date < new Date("2020-01-01")
+                              date > new Date() || date < new Date("2020-01-01")
                             }
                           />
                         </PopoverContent>
@@ -614,7 +660,9 @@ const AccidentForm = ({
                   name="fireReportNumber"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel className="text-right">نام ایستگاه آتش نشانی</FormLabel>
+                      <FormLabel className="text-right">
+                        نام ایستگاه آتش نشانی
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -734,7 +782,7 @@ const AccidentForm = ({
 
               <FormField
                 control={form.control}
-                name="meteorologicalReportDate"
+                name="meteorologicalPredictionLevel"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-right">
@@ -742,11 +790,8 @@ const AccidentForm = ({
                     </FormLabel>
                     <Select
                       dir="rtl"
-                      onValueChange={(value) => {
-                        // Store as string in date field for this special case
-                        field.onChange(value);
-                      }}
-                      value={field.value as any}
+                      onValueChange={field.onChange}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger className="text-right">

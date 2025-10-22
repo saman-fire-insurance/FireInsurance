@@ -80,8 +80,8 @@ export default function Content({ declarationId }: ContentProps) {
   };
 
   const handleFormSubmit = async (data: any) => {
-    console.log(data, "data4343");
-    console.log("Selected insurance case IDs:", data.otherInsuranceCase); // Array of IDs
+    // console.log(data, "data4343");
+    // console.log("Selected insurance case IDs:", data.otherInsuranceCase); // Array of IDs
     setIsSubmitting(true);
     const requestBody = {
       damageClaimId: declarationId,

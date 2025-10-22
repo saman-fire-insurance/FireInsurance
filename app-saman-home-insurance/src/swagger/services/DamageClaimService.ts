@@ -2,13 +2,35 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AddIncidentInfoToClaimRequest } from '../models/AddIncidentInfoToClaimRequest';
 import type { AddInsuranceInfoToClaimRequest } from '../models/AddInsuranceInfoToClaimRequest';
 import type { CreateDamageClaimRequest } from '../models/CreateDamageClaimRequest';
+import type { GetDamageClaimDetailsRequest } from '../models/GetDamageClaimDetailsRequest';
 import type { GridifyQuery } from '../models/GridifyQuery';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class DamageClaimService {
+    /**
+     * @returns any OK
+     * @throws ApiError
+     */
+    public static postApiV1DamageClaimAddIncidentInfo({
+        requestBody,
+    }: {
+        requestBody: AddIncidentInfoToClaimRequest,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/DamageClaim/AddIncidentInfo',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+            },
+        });
+    }
     /**
      * @returns any OK
      * @throws ApiError
@@ -41,6 +63,46 @@ export class DamageClaimService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/DamageClaim/Create',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+            },
+        });
+    }
+    /**
+     * @returns any OK
+     * @throws ApiError
+     */
+    public static postApiV1DamageClaimGetClaim({
+        requestBody,
+    }: {
+        requestBody: GetDamageClaimDetailsRequest,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/DamageClaim/GetClaim',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+            },
+        });
+    }
+    /**
+     * @returns any OK
+     * @throws ApiError
+     */
+    public static postApiV1DamageClaimGetClaims({
+        requestBody,
+    }: {
+        requestBody: GridifyQuery,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/DamageClaim/GetClaims',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
