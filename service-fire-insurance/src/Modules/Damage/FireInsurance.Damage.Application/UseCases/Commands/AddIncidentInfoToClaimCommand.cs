@@ -22,7 +22,20 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
         Guid OwnershipTypeId,
         string IncidentCause,
         string? RestraintDescription = null,
-        List<Guid>? IncidentImageFileIds = null);
+        List<Guid>? IncidentImageFileIds = null,
+        // Police Report
+        bool HasPoliceReport = false,
+        string? PoliceReportNumber = null,
+        DateTime? PoliceReportDate = null,
+        List<Guid>? PoliceReportFileIds = null,
+        // Fire Station Report
+        bool HasFireStationReport = false,
+        string? FireStationName = null,
+        List<Guid>? FireStationReportFileIds = null,
+        // Weather Report
+        bool HasWeatherReport = false,
+        WeatherCondition? WeatherCondition = null,
+        Probability? WeatherReportProbability = null);
 
     public class AddIncidentInfoToClaimCommand(AddIncidentInfoToClaimRequest request) : ICommand<DamageClaimDto>
     {
@@ -37,6 +50,22 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
         public string IncidentCause { get; set; } = request.IncidentCause;
         public string? RestraintDescription { get; set; } = request.RestraintDescription;
         public List<Guid>? IncidentImageFileIds { get; set; } = request.IncidentImageFileIds;
+
+        // Police Report
+        public bool HasPoliceReport { get; set; } = request.HasPoliceReport;
+        public string? PoliceReportNumber { get; set; } = request.PoliceReportNumber;
+        public DateTime? PoliceReportDate { get; set; } = request.PoliceReportDate;
+        public List<Guid>? PoliceReportFileIds { get; set; } = request.PoliceReportFileIds;
+
+        // Fire Station Report
+        public bool HasFireStationReport { get; set; } = request.HasFireStationReport;
+        public string? FireStationName { get; set; } = request.FireStationName;
+        public List<Guid>? FireStationReportFileIds { get; set; } = request.FireStationReportFileIds;
+
+        // Weather Report
+        public bool HasWeatherReport { get; set; } = request.HasWeatherReport;
+        public WeatherCondition? WeatherCondition { get; set; } = request.WeatherCondition;
+        public Probability? WeatherReportProbability { get; set; } = request.WeatherReportProbability;
 
         internal sealed class Validator : AbstractValidator<AddIncidentInfoToClaimCommand>
         {
@@ -88,6 +117,36 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                     .MaximumLength(1000)
                     .WithMessage("Restraint description must not exceed 1000 characters.")
                     .When(req => !string.IsNullOrEmpty(req.RestraintDescription));
+
+                // Police Report Validations
+                RuleFor(req => req.PoliceReportNumber)
+                    .NotEmpty()
+                    .WithMessage("Police report number is required when HasPoliceReport is true.")
+                    .When(req => req.HasPoliceReport);
+
+                RuleFor(req => req.PoliceReportDate)
+                    .NotEmpty()
+                    .WithMessage("Police report date is required when HasPoliceReport is true.")
+                    .LessThanOrEqualTo(DateTime.Now)
+                    .WithMessage("Police report date cannot be in the future.")
+                    .When(req => req.HasPoliceReport);
+
+                // Fire Station Report Validations
+                RuleFor(req => req.FireStationName)
+                    .NotEmpty()
+                    .WithMessage("Fire station name is required when HasFireStationReport is true.")
+                    .When(req => req.HasFireStationReport);
+
+                // Weather Report Validations
+                RuleFor(req => req.WeatherCondition)
+                    .NotNull()
+                    .WithMessage("Weather condition is required when HasWeatherReport is true.")
+                    .When(req => req.HasWeatherReport);
+
+                RuleFor(req => req.WeatherReportProbability)
+                    .NotNull()
+                    .WithMessage("Weather report probability is required when HasWeatherReport is true.")
+                    .When(req => req.HasWeatherReport);
             }
         }
 
@@ -151,7 +210,17 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                     ownershipType,
                     request.IncidentCause,
                     request.RestraintDescription,
-                    request.IncidentImageFileIds);
+                    request.IncidentImageFileIds,
+                    request.HasPoliceReport,
+                    request.PoliceReportNumber,
+                    request.PoliceReportDate,
+                    request.PoliceReportFileIds,
+                    request.HasFireStationReport,
+                    request.FireStationName,
+                    request.FireStationReportFileIds,
+                    request.HasWeatherReport,
+                    request.WeatherCondition,
+                    request.WeatherReportProbability);
                 if (!createIncidentResult.IsSuccess)
                 {
                     if (createIncidentResult.IsInvalid())

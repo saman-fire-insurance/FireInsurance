@@ -5,5 +5,6 @@ namespace FireInsurance.Damage.Application.Dtos
         public int SamanId { get; set; }
         public string Title { get; set; } = string.Empty;
         public bool IsActive { get; set; }
+        public bool Other { get; set; }
     }
 }

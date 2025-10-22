@@ -14,14 +14,14 @@ namespace FireInsurance.Damage.Domain.Entities
         public string? Code { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
         public List<Guid>? InsuranceFileIds { get; set; }
-        //public List<StoredFile> InsuranceFiles { get; set; }
+        public List<StoredFile> InsuranceFiles { get; set; }
         public Guid? IncidentId { get; set; } = null;
         public Incident? Incident { get; set; }
-        //public List<DamagedObject>? DamagedObjects { get; set; }
+        public List<DamagedObject>? DamagedObjects { get; set; }
         public Guid? OwnershipTypeId { get; set; } = null;
-        //public OwnershipType? OwnershipType { get; set; }
-        public Guid? StakeHolderId { get; set; } = null;
-        //public StakeHolder? StakeHolder { get; set; }
+        public OwnershipType? OwnershipType { get; set; }
+        public List<Guid>? StakeHolderIds { get; set; } = null;
+        public List<StakeHolder>? StakeHolders { get; set; }
         public DamageClaimStatus Status { get; set; }
         public ThirdPartyCoverage? ThirdPartyCoverage { get; set; } = null;
 
@@ -39,7 +39,8 @@ namespace FireInsurance.Damage.Domain.Entities
                 UserId = userId,
                 PhoneNumber = phoneNumber,
                 Status = DamageClaimStatus.IncidentInfo,
-                Insurer = insurer
+                Insurer = insurer,
+                // Add first StakeHolder
             };
 
             return createdClaim;
@@ -71,6 +72,31 @@ namespace FireInsurance.Damage.Domain.Entities
             }
 
             Incident = incident;
+
+            return Result.Success(this);
+        }
+
+        public Result<DamageClaim> AddDamagedObjects(List<DamagedObject> damagedObjects)
+        {
+            if (damagedObjects == null || damagedObjects.Count == 0)
+            {
+                return Result.Error("Damaged objects list cannot be null or empty.");
+            }
+
+            DamagedObjects = damagedObjects;
+
+            return Result.Success(this);
+        }
+
+        public Result<DamageClaim> AddStakeHolders(List<StakeHolder> stakeHolders)
+        {
+            if (stakeHolders == null || stakeHolders.Count == 0)
+            {
+                return Result.Error("Stakeholders list cannot be null or empty.");
+            }
+
+            StakeHolders = stakeHolders;
+            StakeHolderIds = stakeHolders.Select(sh => sh.Id).ToList();
 
             return Result.Success(this);
         }
