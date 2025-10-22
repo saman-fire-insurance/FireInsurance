@@ -40,7 +40,11 @@ namespace FireInsurance.Damage.Application.UseCases.Queries
 
                 var damageClaim = await dbContext.DamageClaims
                     .Where(dc => dc.Id == query.DamageClaimId && dc.UserId == userId && !dc.IsDeleted)
-                    .Include(dc => dc.Insurer)
+                    .Include(dc => dc.OwnershipType)
+                    .Include(dc => dc.DamagedObjects)
+                        .ThenInclude(dc => dc.InsurableObject)
+                    //.Include(dc => dc.InsuranceFileIds)
+                    .Include(dc => dc.StakeHolders)
                     .Include(dc => dc.Incident)
                         .ThenInclude(i => i.IncidentType)
                     .Include(dc => dc.Incident)
@@ -49,6 +53,9 @@ namespace FireInsurance.Damage.Application.UseCases.Queries
                         .ThenInclude(i => i.City)
                     .Include(dc => dc.ThirdPartyCoverage)
                         .ThenInclude(tc => tc.ThirdPartyCoveredObjects)
+                            .ThenInclude(tpco => tpco.InsurableObject)
+                    .AsNoTracking()
+                    .AsSplitQuery()
                     .SingleOrDefaultAsync(cancellationToken);
 
                 if (damageClaim == null)

@@ -1,5 +1,6 @@
 using Common.Behaviors;
 using Common.Interfaces;
+using FireInsurance.Damage.Application.Configuration;
 using FireInsurance.Damage.Infrastructure.Data;
 using FireInsurance.Damage.Infrastructure.Services.FileService;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +15,9 @@ namespace FireInsurance.Damage.API.ModuleInstaller
         {
             // Register validators from Application assembly where commands are defined
             services.AddValidators(FireInsurance.Damage.Application.AssemblyReference.Assembly);
+
+            // Configure Mapster to prevent infinite recursion
+            services.AddMapsterConfiguration();
 
             services.AddDatabase(configuration);
 

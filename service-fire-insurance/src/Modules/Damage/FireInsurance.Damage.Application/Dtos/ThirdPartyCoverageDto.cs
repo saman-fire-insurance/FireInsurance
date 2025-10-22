@@ -7,6 +7,6 @@ namespace FireInsurance.Damage.Application.Dtos
     {
         public required string CompanyName { get; set; }
         public required string PolicyNumber { get; set; }
-        public required InsurableObjectDto InsurableObject { get; set; }
+        public List<ThirdPartyCoveredObjectDto> ThirdPartyCoveredObjects { get; set; } = [];
     }
 }
