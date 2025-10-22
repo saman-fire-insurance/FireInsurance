@@ -1,0 +1,36 @@
+name: Vault Integration Test
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+# REQUIRED: Allow GitHub to generate OIDC tokens
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  retrieve-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Retrieve secrets from Vault
+        uses: hashicorp/vault-action@v3
+        with:
+          method: jwt
+          url: https://noyanvault.paratechco.com
+          role: github-actions
+          secrets: |
+            secret/data/myapp/config api_key | API_KEY ;
+            secret/data/myapp/config db_password | DB_PASSWORD
+      
+      - name: Use secrets
+        run: |
+          echo "✅ Successfully retrieved secrets from Vault!"
+          echo "API Key starts with: ${API_KEY:0:5}..."
+          echo "DB Password length: ${#DB_PASSWORD} characters"
+          # Use your secrets here
+          # Example: deploy with these credentials
