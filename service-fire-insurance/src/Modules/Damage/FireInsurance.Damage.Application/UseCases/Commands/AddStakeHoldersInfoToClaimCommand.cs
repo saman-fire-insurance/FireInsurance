@@ -89,6 +89,8 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                 }
 
                 // Create StakeHolder entities using factory method
+                //var insurerStakeHolder = StakeHolder.Create()
+
                 var stakeHolders = new List<StakeHolder>();
                 foreach (var item in request.StakeHolders)
                 {
@@ -112,6 +114,8 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
 
                     stakeHolders.Add(stakeHolderResult.Value);
                 }
+
+                dbContext.StakeHolders.AddRange(stakeHolders);
 
                 // Add stakeholders to the claim using the domain method
                 var result = damageClaim.AddStakeHolders(stakeHolders);
