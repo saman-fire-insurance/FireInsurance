@@ -108,7 +108,7 @@ export default function InsuranceInfoForm({
       mobileNumber: "",
       nationalId: "",
       insuranceApprovalPhone: "",
-      birthDate: undefined as any,
+      birthDate: undefined,
     },
   });
 

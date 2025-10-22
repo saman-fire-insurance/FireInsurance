@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 interface PropsType {
-  verificationResult: any;
+  verificationResult: { fullName?: string; phoneNumber?: string; province?: string; city?: string; address?: string; mobieleNumber?: string } | undefined;
   handleBackToEdit: () => void;
   handleContinue: (mobileNumber: string) => void;
   isSubmitting?: boolean;
@@ -86,7 +86,7 @@ const VerificationIdentityResponse = (props: PropsType) => {
             {/* Action Buttons */}
             <div className="flex flex-row w-full gap-x-2">
               <Button
-                onClick={() => handleContinue(verificationResult.mobieleNumber)}
+                onClick={() => handleContinue(verificationResult.mobieleNumber || "")}
                 disabled={isSubmitting}
                 className="flex-2 bg-primary hover:bg-primary/90"
               >

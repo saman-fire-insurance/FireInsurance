@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/accordion";
 
 interface ReviewFormProps {
-  formData: any;
+  formData: Record<string, unknown>;
   onSubmit: () => void;
   onPrevious: () => void;
   isSubmitting: boolean;
@@ -29,6 +29,10 @@ export default function ReviewForm({
   onPrevious,
   isSubmitting,
 }: ReviewFormProps) {
+  // Cast to allow accessing nested properties without type errors
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = formData as any;
+
   return (
     <div className="w-full">
       <h2 className="text-lg font-normal text-gray-500 mb-4 text-center">
@@ -77,23 +81,23 @@ export default function ReviewForm({
                   نام و نام خانوادگی:
                 </span>
                 <span className="text-sm font-medium">
-                  {formData.insured?.fullName || "مریم نیازی"}
+                  {data.insured?.fullName || "مریم نیازی"}
                 </span>
               </div>
               <div className="flex justify-between items-center border-b pb-2">
                 <span className="text-sm text-gray-600">کد ملی:</span>
                 <span className="text-sm font-medium" dir="ltr">
-                  {formData.insured?.nationalId || "۰۸۵۱۲۵۴۵۴۰"}
+                  {data.insured?.nationalId || "۰۸۵۱۲۵۴۵۴۰"}
                 </span>
               </div>
               <div className="flex justify-between items-center border-b pb-2">
                 <span className="text-sm text-gray-600">تاریخ تولد:</span>
                 <span className="text-sm font-medium">
-                  {formData.insured?.birthDate
-                    ? `${formData.insured.birthDate.year}/${String(
-                        formData.insured.birthDate.month
+                  {data.insured?.birthDate
+                    ? `${data.insured.birthDate.year}/${String(
+                        data.insured.birthDate.month
                       ).padStart(2, "0")}/${String(
-                        formData.insured.birthDate.day
+                        data.insured.birthDate.day
                       ).padStart(2, "0")}`
                     : "۱۳۷۶/۰۱/۳۱"}
                 </span>
@@ -101,7 +105,7 @@ export default function ReviewForm({
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">شماره موبایل:</span>
                 <span className="text-sm font-medium" dir="ltr">
-                  {formData.insured?.mobileNumber || "۰۹۱۵۳۳۴۵۴۸۷"}
+                  {data.insured?.mobileNumber || "۰۹۱۵۳۳۴۵۴۸۷"}
                 </span>
               </div>
             </div>
@@ -124,7 +128,7 @@ export default function ReviewForm({
               <div className="flex justify-between items-center border-b pb-2">
                 <span className="text-sm text-gray-600">شماره بیمه‌نامه:</span>
                 <span className="text-sm font-medium" dir="ltr">
-                  {formData.policy?.policyNumber || "۱۶۴۲۴۲۴۰۰۰۱۵۴"}
+                  {data.policy?.policyNumber || "۱۶۴۲۴۲۴۰۰۰۱۵۴"}
                 </span>
               </div>
               <div className="flex justify-between items-center border-b pb-2">
@@ -132,19 +136,19 @@ export default function ReviewForm({
                   تحت پوشش سایر بیمه‌گاه:
                 </span>
                 <span className="text-sm font-medium">
-                  {formData.policy?.hasOtherInsurance === "yes"
+                  {data.policy?.hasOtherInsurance === "yes"
                     ? "دارد"
                     : "ندارد"}
                 </span>
               </div>
-              {formData.policy?.hasOtherInsurance === "yes" && (
+              {data.policy?.hasOtherInsurance === "yes" && (
                 <>
                   <div className="flex justify-between items-center border-b pb-2">
                     <span className="text-sm text-gray-600">
                       نام شرکت بیمه‌گر:
                     </span>
                     <span className="text-sm font-medium">
-                      {formData.policy?.otherInsuranceCompany ||
+                      {data.policy?.otherInsuranceCompany ||
                         "سامان، بیمه پارسیان فردیس، پلاک ۵۷"}
                     </span>
                   </div>
@@ -153,7 +157,7 @@ export default function ReviewForm({
                       شماره بیمه‌نامه:
                     </span>
                     <span className="text-sm font-medium" dir="ltr">
-                      {formData.policy?.otherPolicyNumber || "۲۷۳۴۰۰۵۴۶۰۶۰"}
+                      {data.policy?.otherPolicyNumber || "۲۷۳۴۰۰۵۴۶۰۶۰"}
                     </span>
                   </div>
                 </>
@@ -184,40 +188,40 @@ export default function ReviewForm({
               <div className="flex justify-between items-start border-b pb-2">
                 <span className="text-sm text-gray-600">نوع و علت:</span>
                 <span className="text-sm font-medium text-right">
-                  {formData.accident?.accidentType ||
+                  {data.accident?.accidentType ||
                     "آتش سوزی، این حادثه به علت نشت گاز آزگرمکن در منزل اتفاق افتاده است."}
                 </span>
               </div>
               <div className="flex justify-between items-center border-b pb-2">
                 <span className="text-sm text-gray-600">تاریخ و ساعت:</span>
                 <span className="text-sm font-medium">
-                  {formData.accident?.accidentDate
+                  {data.accident?.accidentDate
                     ? new Date(
-                        formData.accident.accidentDate
+                        data.accident.accidentDate
                       ).toLocaleDateString("fa-IR")
                     : "۱۴۰۴/۰۲/۱۶"}{" "}
-                  - {formData.accident?.accidentTime || "۱۴:۳۰"}
+                  - {data.accident?.accidentTime || "۱۴:۳۰"}
                 </span>
               </div>
               <div className="flex justify-between items-center border-b pb-2">
                 <span className="text-sm text-gray-600">نوع مالکیت:</span>
                 <span className="text-sm font-medium">
-                  {formData.accident?.ownershipType || "استیجاری"}
+                  {data.accident?.ownershipType || "استیجاری"}
                 </span>
               </div>
               <div className="flex justify-between items-start border-b pb-2">
                 <span className="text-sm text-gray-600">محل:</span>
                 <span className="text-sm font-medium text-right">
-                  {formData.accident?.accidentProvince &&
-                  formData.accident?.accidentCity
-                    ? `${formData.accident.accidentProvince}، ${formData.accident.accidentCity}`
+                  {data.accident?.accidentProvince &&
+                  data.accident?.accidentCity
+                    ? `${data.accident.accidentProvince}، ${data.accident.accidentCity}`
                     : "تهران، تهران، بلوارکاشاورز، خیابان فردیس، پلاک ۵۷"}
                 </span>
               </div>
               <div className="flex justify-between items-center border-b pb-2">
                 <span className="text-sm text-gray-600">کد پستی:</span>
                 <span className="text-sm font-medium" dir="ltr">
-                  {formData.accident?.postalCode || "۱۸۱۲۵۱۴۳۱"}
+                  {data.accident?.postalCode || "۱۸۱۲۵۱۴۳۱"}
                 </span>
               </div>
               <div className="flex justify-between items-start">
@@ -231,7 +235,7 @@ export default function ReviewForm({
                   نام ایستگاه آتش نشانی:
                 </span>
                 <span className="text-sm font-medium">
-                  {formData.accident?.fireStationName || "تهران مرکز"}
+                  {data.accident?.fireStationName || "تهران مرکز"}
                 </span>
               </div>
             </div>
@@ -254,20 +258,20 @@ export default function ReviewForm({
               <div className="flex justify-between items-center border-b pb-2">
                 <span className="text-sm text-gray-600">مورد ۱:</span>
                 <span className="text-sm font-medium">
-                  اثاثیه، {formData.cases?.[0]?.amount || "۱۵,۰۰۰,۰۰۰"} ریال
+                  اثاثیه، {data.cases?.[0]?.amount || "۱۵,۰۰۰,۰۰۰"} ریال
                 </span>
               </div>
               <div className="flex justify-between items-center border-b pb-2">
                 <span className="text-sm text-gray-600">مورد ۱:</span>
                 <span className="text-sm font-medium">
-                  پنجره‌ها، {formData.cases?.[1]?.amount || "۲۵,۰۰۰,۰۰۰"} ریال
+                  پنجره‌ها، {data.cases?.[1]?.amount || "۲۵,۰۰۰,۰۰۰"} ریال
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">جمع تقریبی خسارت:</span>
                 <span className="text-sm font-medium">
-                  {formData.cases?.reduce(
-                    (sum: number, item: any) => sum + (item.amount || 0),
+                  {(data.cases as Array<{ amount?: number }>)?.reduce(
+                    (sum: number, item) => sum + (item.amount || 0),
                     0
                   ) || "۴۰,۰۰۰,۰۰۰"}{" "}
                   ریال
@@ -295,7 +299,7 @@ export default function ReviewForm({
                   شماره حساب بیمه گذار:
                 </span>
                 <span className="text-sm font-medium" dir="ltr">
-                  {formData.beneficiaries?.accountNumber || "۷۴۱۵۶۳۴۱۷۱"}
+                  {data.beneficiaries?.accountNumber || "۷۴۱۵۶۳۴۱۷۱"}
                 </span>
               </div>
               <div className="flex justify-between items-center border-b pb-2">
@@ -303,13 +307,13 @@ export default function ReviewForm({
                   شماره شبا بیمه‌گذار:
                 </span>
                 <span className="text-sm font-medium" dir="ltr">
-                  {formData.beneficiaries?.iban || "IR۷۴۱۰۵۶۴۵۱۰۰۰۰۲۱۲۴"}
+                  {data.beneficiaries?.iban || "IR۷۴۱۰۵۶۴۵۱۰۰۰۰۲۱۲۴"}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">ذینفع دیگر:</span>
                 <span className="text-sm font-medium">
-                  {formData.beneficiaries?.hasOtherBeneficiaries
+                  {data.beneficiaries?.hasOtherBeneficiaries
                     ? "دارد"
                     : "ندارد"}
                 </span>

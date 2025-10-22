@@ -133,7 +133,7 @@ export default function DamagedItemsForm({
   };
 
   const handleAmountChange = (
-    field: any,
+    field: { onChange: (value: string) => void },
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const formatted = formatCurrency(e.target.value);
@@ -196,12 +196,12 @@ export default function DamagedItemsForm({
                 {/* Checkbox */}
                 <FormField
                   control={form.control}
-                  name={item.id as any}
+                  name={item.id as keyof DamagedItemsFormData}
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2 space-y-0">
                       <FormControl>
                         <Checkbox
-                          checked={field.value}
+                          checked={!!field.value}
                           onCheckedChange={field.onChange}
                           className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                         />
@@ -214,16 +214,16 @@ export default function DamagedItemsForm({
                 />
 
                 {/* Amount Input - Only show if checkbox is checked and it's not "other" */}
-                {form.watch(item.id as any) && item.id !== "other" && (
+                {form.watch(item.id as keyof DamagedItemsFormData) && item.id !== "other" && (
                   <FormField
                     control={form.control}
-                    name={item.amountField as any}
+                    name={item.amountField as keyof DamagedItemsFormData}
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
                           <div className="relative">
                             <Input
-                              {...field}
+                              value={field.value as string || ""}
                               onChange={(e) => handleAmountChange(field, e)}
                               placeholder="0"
                               className="text-center pr-16"

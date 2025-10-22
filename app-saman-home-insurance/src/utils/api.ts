@@ -8,7 +8,7 @@ import '@/lib/openapi-config';
  */
 export async function handleApiRequest<T>(
   request: () => Promise<T>,
-  session?: any
+  session?: { accessToken?: string }
 ): Promise<T> {
   try {
     // Set token if available
@@ -17,9 +17,11 @@ export async function handleApiRequest<T>(
     }
 
     return await request();
-  } catch (error: any) {
+  } catch (error: unknown) {
     // If unauthorized, sign out user immediately
-    if (error.status === 401 || error.message?.includes('401')) {
+    const errorStatus = (error as { status?: number })?.status;
+    const errorMessage = (error as { message?: string })?.message;
+    if (errorStatus === 401 || errorMessage?.includes('401')) {
       console.log('🚪 [AUTH] Unauthorized - signing out user');
       await signOut({ callbackUrl: '/login' });
       throw new Error('Session expired');

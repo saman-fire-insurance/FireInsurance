@@ -178,7 +178,7 @@ export function LoginForm({ callbackUrl = "/" }: LoginFormProps) {
 
   // Build a readable error message compatible with FastEndpoints/Ardalis/ProblemDetails
   const buildErrorMessageFromDetails = (
-    details: any,
+    details: unknown,
     fallback: string,
     errLike?: unknown
   ): string => {
@@ -265,7 +265,7 @@ export function LoginForm({ callbackUrl = "/" }: LoginFormProps) {
     const markLoadedOnce = () =>
       setIsRecaptchaLoaded((prev) => (prev ? prev : true));
 
-    const w: any = window as any;
+    const w: Window & { grecaptcha?: { ready?: (callback: () => void) => void } } = window;
 
     // If already ready by any signal, mark loaded now
     if (
@@ -540,7 +540,7 @@ export function LoginForm({ callbackUrl = "/" }: LoginFormProps) {
         }
       } else {
         const msg = buildErrorMessageFromDetails(
-          (result as any)?.details,
+          (result as { details?: unknown })?.details,
           "خطا در بررسی وضعیت کاربر. لطفا دوباره تلاش کنید.",
           result.error
         );
@@ -747,7 +747,7 @@ export function LoginForm({ callbackUrl = "/" }: LoginFormProps) {
 
       const retrieveOtp = async () => {
         try {
-          const otpCredential = await (navigator.credentials as any).get({
+          const otpCredential = await (navigator.credentials as { get: (options: { otp: { transport: string[] }; signal: AbortSignal }) => Promise<{ code?: string }> }).get({
             otp: { transport: ["sms"] },
             signal: abortController.signal,
           });
@@ -792,7 +792,7 @@ export function LoginForm({ callbackUrl = "/" }: LoginFormProps) {
               );
             }
           }
-        } catch (err: any) {
+        } catch (err: unknown) {
           // Silently handle errors
           console.log("WebOTP API error:", err);
         }

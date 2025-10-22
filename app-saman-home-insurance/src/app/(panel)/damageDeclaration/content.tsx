@@ -23,13 +23,13 @@ const steps = [
 
 export default function DamageDeclarationPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]); // No steps completed yet
   const currentStep = 0; // This is step 1 (index 0)
 
-  const handleFormChange = (data: any) => {
-    setFormData((prev: any) => ({
+  const handleFormChange = (data: Record<string, unknown>) => {
+    setFormData((prev: Record<string, unknown>) => ({
       ...prev,
       insured: data,
     }));
@@ -140,7 +140,7 @@ export default function DamageDeclarationPage() {
           {/* Form Content */}
           <div className="flex flex-col w-full md:w-1/2 mx-auto">
             <InsuranceInfoForm
-              initialData={formData.insured}
+              initialData={formData.insured as never}
               onChange={handleFormChange}
               onNext={handleNext}
             />

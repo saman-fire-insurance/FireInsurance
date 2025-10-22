@@ -28,7 +28,7 @@ interface ContentProps {
 
 export default function Content({ declarationId }: ContentProps) {
   const router = useRouter();
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([0, 1, 2, 3, 4]); // Steps 1-5 completed

@@ -47,7 +47,7 @@ interface ContentProps {
 
 export default function Content({ declarationId }: ContentProps) {
   const router = useRouter();
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([0, 1]); // Steps 1 & 2 completed
   const currentStep = 2; // This is step 3 (index 2)
@@ -96,7 +96,7 @@ export default function Content({ declarationId }: ContentProps) {
   //   }
   // }, [declarationId]);
 
-  const handleFormSubmit = async (data: any) => {
+  const handleFormSubmit = async (data: Record<string, unknown>) => {
     console.log(data, "DATAACCIDENT");
     setIsSubmitting(true);
 
@@ -104,7 +104,7 @@ export default function Content({ declarationId }: ContentProps) {
     let incidentDateTime;
     if (data.accidentDate && data.accidentTime) {
       // Convert to string if it's a Date object
-      let dateString =
+      const dateString =
         typeof data.accidentDate === "string"
           ? data.accidentDate
           : data.accidentDate instanceof Date
@@ -129,7 +129,7 @@ export default function Content({ declarationId }: ContentProps) {
       occuranceDate: incidentDateTime,
       incidentImageFileIds: _.isEmpty(data.accidentImages)
         ? null
-        : _.map(data.accidentImages, (p) => {
+        : _.map(data.accidentImages as Array<{ id: string }>, (p) => {
             return p.id;
           }),
     } as AddIncidentInfoToClaimRequest;
@@ -262,7 +262,7 @@ export default function Content({ declarationId }: ContentProps) {
 
           <div className="flex flex-col w-full md:w-1/2 mx-auto">
             <AccidentForm
-              initialData={formData.accident}
+              initialData={formData.accident as never}
               onSubmit={handleFormSubmit}
               // onNext={handleNext}
               onPrevious={handlePrevious}
