@@ -17,6 +17,7 @@ namespace FireInsurance.Damage.Infrastructure.Data
         public DbSet<OwnershipType> OwnershipTypes => Set<OwnershipType>();
         public DbSet<Province> Provinces => Set<Province>();
         public DbSet<City> Cities => Set<City>();
+        public DbSet<Incident> Incidents => Set<Incident>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

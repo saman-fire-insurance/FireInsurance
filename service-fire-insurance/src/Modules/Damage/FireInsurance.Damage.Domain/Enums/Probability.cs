@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace FireInsurance.Damage.Domain.Enums
 {
-    public enum OwnershipType
+    public enum Probability
     {
-        Private,
-        Rented,
-        GovernmentOwned,
-        Custodial
+        None = 0,
+        VeryLow = 1,
+        Low = 2,
+        Medium = 3,
+        High = 4,
+        VeryHigh = 5
     }
 }
