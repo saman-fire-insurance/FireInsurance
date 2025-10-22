@@ -24,8 +24,8 @@ jobs:
           url: https://noyanvault.paratechco.com
           role: github-actions
           secrets: |
-            secret/data/myapp/config api_key | API_KEY ;
-            secret/data/myapp/config db_password | DB_PASSWORD
+            secret/data/fireinsurance/config api_key | API_KEY ;
+            secret/data/fireinsurance/config db_password | DB_PASSWORD
       
       - name: Use secrets
         run: |
