@@ -3,12 +3,27 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { X, Save, User, BookCheck, Home, List, FileText, CircleCheck } from "lucide-react";
+import {
+  X,
+  Save,
+  User,
+  BookCheck,
+  Home,
+  List,
+  FileText,
+  CircleCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import InsurancePolicyForm from "../../../components/insurance-policy-form";
 import WizardSteps from "../../../components/wizardSteps";
 import Image from "next/image";
+import { DamageClaimService } from "@/swagger/services/DamageClaimService";
+import { AddInsuranceInfoToClaimRequest } from "@/swagger/models/AddInsuranceInfoToClaimRequest";
+import _ from "lodash";
+import { AddThirdPartyCoverageRequest } from "@/swagger/models/AddThirdPartyCoverageRequest";
+import { GetInsurableObjects } from "@/swr/insurableObjects";
+import { GridifyQuery } from "@/swagger/models/GridifyQuery";
 
 const STORAGE_KEY = "damage-declaration-form-data";
 
@@ -26,11 +41,22 @@ interface ContentProps {
 }
 
 export default function Content({ declarationId }: ContentProps) {
+  // console.log("Declaration ID:", declarationId);
   const router = useRouter();
   const [formData, setFormData] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([0]); // Step 1 (index 0) is completed
   const currentStep = 1; // This is step 2 (index 1)
+
+  const requestBody = {
+    page: 1,
+    pageSize: 100,
+    orderBy: "",
+    filter: "",
+  } as GridifyQuery;
+  // Fetch insurable objects from API
+  const { insurableObjects, insurableObjectsIsLoading } = GetInsurableObjects(requestBody);
 
   // Load saved data from localStorage on mount
   useEffect(() => {
@@ -46,10 +72,49 @@ export default function Content({ declarationId }: ContentProps) {
   }, [declarationId]);
 
   const handleFormChange = (data: any) => {
+    // Just save to state for temporary storage
     setFormData((prev: any) => ({
       ...prev,
       policy: data,
     }));
+  };
+
+  const handleFormSubmit = async (data: any) => {
+    // console.log(data, "data4343");
+    // console.log("Selected insurance case IDs:", data.otherInsuranceCase); // Array of IDs
+    setIsSubmitting(true);
+    const requestBody = {
+      damageClaimId: declarationId,
+      fileIds: _.isEmpty(data.policyFiles)
+        ? []
+        : _.map(data.policyFiles, (p) => {
+            return p.id;
+          }),
+      serialNumber: data.policyNumber,
+      addThirdPartyCoverageRequest:
+        data.hasOtherInsurance === "yes"
+          ? ({
+              companyName: data.otherInsuranceCompany,
+              policyNumber: data.otherPolicyNumber,
+              insurableObject: data.otherInsuranceCase,
+            } as AddThirdPartyCoverageRequest)
+          : undefined,
+    } as AddInsuranceInfoToClaimRequest;
+    try {
+      const res = await DamageClaimService.postApiV1DamageClaimAddInsurance({
+        requestBody,
+      });
+      if (res) {
+        setIsSubmitting(false);
+        toast.success("اطلاعات بیمه نامه با موفقیت ثبت شد");
+        router.push(`/damageDeclaration/accident/${declarationId}`);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("خطایی رخ داده است");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleTemporarySave = async () => {
@@ -86,20 +151,10 @@ export default function Content({ declarationId }: ContentProps) {
   };
 
   const handleExit = () => {
-    router.push("/");
+    router.push("/damageDeclaration");
   };
 
-  const handleNext = () => {
-    // Save current data
-    localStorage.setItem(
-      `${STORAGE_KEY}-${declarationId}`,
-      JSON.stringify(formData)
-    );
-
-    // TODO: Navigate to next step when implemented
-    router.push(`/damageDeclaration/accident/${declarationId}`);
-    // toast.info("مرحله بعدی هنوز پیاده‌سازی نشده است");
-  };
+  const handleNext = () => {};
 
   const handlePrevious = () => {
     router.push("/damageDeclaration");
@@ -115,7 +170,7 @@ export default function Content({ declarationId }: ContentProps) {
       `/damageDeclaration/documents/${declarationId}`,
       `/damageDeclaration/review/${declarationId}`,
     ];
-    
+
     if (stepRoutes[index]) {
       router.push(stepRoutes[index]);
     }
@@ -157,7 +212,7 @@ export default function Content({ declarationId }: ContentProps) {
                 height={64}
               />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-primary">
               فرم اعلام خسارت
             </h1>
           </div>
@@ -175,8 +230,11 @@ export default function Content({ declarationId }: ContentProps) {
             <InsurancePolicyForm
               initialData={formData.policy}
               onChange={handleFormChange}
+              onSubmit={handleFormSubmit}
               onNext={handleNext}
               onPrevious={handlePrevious}
+              insurableObjects={insurableObjects?.items}
+              insurableObjectsLoading={insurableObjectsIsLoading}
             />
           </div>
         </div>

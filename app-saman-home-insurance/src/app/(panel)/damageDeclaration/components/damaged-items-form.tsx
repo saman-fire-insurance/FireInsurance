@@ -182,7 +182,7 @@ export default function DamagedItemsForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800 text-center">
+          <h2 className="text-lg font-normal text-gray-500 text-center">
             موارد آسیب دیده
           </h2>
           <p className="text-sm text-gray-600 text-center">
@@ -309,7 +309,7 @@ export default function DamagedItemsForm({
         <div className="flex justify-between pt-4 items-center gap-x-2">
           <Button
             type="submit"
-            className="cursor-pointer bg-primary hover:bg-primary/90 w-3/5"
+            className="cursor-pointer bg-primary hover:bg-primary/90 flex-2"
           >
             تایید و ادامه
             <ArrowLeftIcon className="mr-2 size-4" />
@@ -317,8 +317,8 @@ export default function DamagedItemsForm({
           <Button
             type="button"
             onClick={onPrevious}
-            variant="outline"
-            className="cursor-pointer w-2/5"
+            variant="transparent"
+            className="cursor-pointer flex-1"
           >
             مرحله قبلی
           </Button>

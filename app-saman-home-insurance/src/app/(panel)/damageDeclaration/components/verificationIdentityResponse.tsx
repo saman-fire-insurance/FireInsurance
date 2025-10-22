@@ -10,14 +10,15 @@ import {
 interface PropsType {
   verificationResult: any;
   handleBackToEdit: () => void;
-  handleContinue: () => void;
+  handleContinue: (mobileNumber: string) => void;
+  isSubmitting?: boolean;
 }
 
 const VerificationIdentityResponse = (props: PropsType) => {
-  const { verificationResult, handleBackToEdit, handleContinue } = props;
+  const { verificationResult, handleBackToEdit, handleContinue, isSubmitting = false } = props;
   return (
     <div className="flex flex-col gap-y-10 w-full">
-      <h2 className="text-xl font-normal text-secondary text-center">
+      <h2 className="text-xl font-normal text-gray-500 text-center">
         اطلاعات بیمه گذار
       </h2>
 
@@ -83,18 +84,20 @@ const VerificationIdentityResponse = (props: PropsType) => {
             </Card>
 
             {/* Action Buttons */}
-            <div className="flex flex-row w-full gap-x-1">
+            <div className="flex flex-row w-full gap-x-2">
               <Button
-                onClick={handleContinue}
-                className="w-3/5 bg-primary hover:bg-primary/90"
+                onClick={() => handleContinue(verificationResult.mobieleNumber)}
+                disabled={isSubmitting}
+                className="flex-2 bg-primary hover:bg-primary/90"
               >
-                تایید و ادامه
+                {isSubmitting ? "در حال ایجاد..." : "تایید و ادامه"}
                 <ArrowLeftIcon className="size-5 mr-2" />
               </Button>
               <Button
+                variant="transparent"
                 onClick={handleBackToEdit}
-                variant="outline"
-                className="border-gray-200 text-secondary cursor-pointer bg-transparent w-2/5"
+                disabled={isSubmitting}
+                className="border-gray-200 text-secondary cursor-pointer bg-transparent flex-1"
               >
                 مرحله قبلی
               </Button>
@@ -126,7 +129,7 @@ const VerificationIdentityResponse = (props: PropsType) => {
           <div className="flex flex-row w-full">
             <Button
               onClick={handleBackToEdit}
-              variant="outline"
+              variant="transparent"
               className="border-gray-200 text-secondary cursor-pointer bg-transparent w-full"
             >
               مرحله قبلی

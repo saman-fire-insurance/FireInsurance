@@ -259,7 +259,7 @@ export default function DatePicker({
   return (
     <div className="flex flex-row gap-2 justify-center">
       {/* Year Selector */}
-      <div className="w-1/3 rounded-md border border-border bg-gray-50 placeholder:text-placeholder placeholder:text-sm placeholder:font-normal">
+      <div className="w-1/3 rounded-md border border-border bg-input placeholder:text-placeholder placeholder:text-sm placeholder:font-normal">
         <FormControl>
           <Select
             value={safeYear?.toString()}
@@ -268,7 +268,7 @@ export default function DatePicker({
           >
             <SelectTrigger
               className={`text-right text-textBlack placeholder:text-gray-400 ${
-                isInvalid ? "border-red-500 bg-red-50" : ""
+                isInvalid ? "border-destructive" : ""
               }`}
               aria-invalid={isInvalid}
             >
@@ -287,7 +287,7 @@ export default function DatePicker({
 
       {/* Month Selector */}
       {showMonth && (
-        <div className="w-1/3 rounded-md border border-border bg-gray-50 placeholder:text-placeholder placeholder:text-sm placeholder:font-normal">
+        <div className="w-1/3 rounded-md border border-border bg-input placeholder:text-placeholder placeholder:text-sm placeholder:font-normal">
           <FormControl>
             <Select
               value={safeMonth?.toString()}
@@ -297,7 +297,7 @@ export default function DatePicker({
             >
               <SelectTrigger
                 className={`text-right text-textBlack placeholder:text-gray-400 ${
-                  isInvalid ? "border-red-500 bg-red-50" : ""
+                  isInvalid ? "border-destructive" : ""
                 }`}
                 aria-invalid={isInvalid}
               >
@@ -320,7 +320,7 @@ export default function DatePicker({
 
       {/* Day Selector */}
       {showDay && (
-        <div className="w-1/3 rounded-md border border-border bg-gray-50 placeholder:text-placeholder placeholder:text-sm placeholder:font-normal">
+        <div className="w-1/3 rounded-md border border-border bg-input placeholder:text-placeholder placeholder:text-sm placeholder:font-normal">
           <FormControl>
             <Select
               value={safeDay?.toString()}
@@ -330,7 +330,7 @@ export default function DatePicker({
             >
               <SelectTrigger
                 className={`text-right text-textBlack placeholder:text-gray-400 ${
-                  isInvalid ? "border-red-500 bg-red-50" : ""
+                  isInvalid ? "border-destructive" : ""
                 }`}
                 aria-invalid={isInvalid}
               >

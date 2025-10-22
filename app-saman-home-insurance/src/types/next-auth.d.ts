@@ -4,7 +4,7 @@ import "next-auth/jwt";
 declare module "next-auth" {
   interface User {
     id: string;
-    phoneNumber?: string;
+    phoneNumber: string;
     accessToken: string;
     refreshToken: string;
   }
@@ -14,6 +14,7 @@ declare module "next-auth" {
     refreshToken: string;
     user: {
       id: string;
+      phoneNumber: string;
       name?: string | null;
       email?: string | null;
       image?: string | null;
@@ -26,5 +27,6 @@ declare module "next-auth/jwt" {
     accessToken: string;
     refreshToken: string;
     id: string;
+    phoneNumber: string;
   }
 }

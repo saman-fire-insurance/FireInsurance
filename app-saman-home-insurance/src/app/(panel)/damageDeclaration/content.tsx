@@ -41,7 +41,7 @@ export default function DamageDeclarationPage() {
     try {
       // Generate a temporary ID for saving (will be replaced by backend ID later)
       const tempId = `temp-${Date.now()}`;
-      localStorage.setItem(`${STORAGE_KEY}-${tempId}`, JSON.stringify(formData));
+      // localStorage.setItem(`${STORAGE_KEY}-${tempId}`, JSON.stringify(formData));
 
       toast.success("تغییرات با موفقیت ذخیره شد", {
         description: "اطلاعات شما به صورت موقت ذخیره شد",
@@ -61,25 +61,13 @@ export default function DamageDeclarationPage() {
     router.push("/");
   };
 
-  const handleNext = async () => {
+  const handleNext = async (declarationId: string) => {
     try {
-      // TODO: Replace with actual API call to create damage declaration
-      // const response = await fetch('/api/damage-declaration/create', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData),
-      // });
-      // const { id } = await response.json();
-
-      // For now, generate a temporary ID
-      // This will be replaced by the actual ID from backend response
-      const declarationId = `temp-${Date.now()}`;
-
-      // Save form data with the ID
-      localStorage.setItem(
-        `${STORAGE_KEY}-${declarationId}`,
-        JSON.stringify(formData)
-      );
+      // Save form data with the ID received from API
+      // localStorage.setItem(
+      //   `${STORAGE_KEY}-${declarationId}`,
+      //   JSON.stringify(formData)
+      // );
 
       // Navigate to next step with the ID
       router.push(`/damageDeclaration/insurancePolicy/${declarationId}`);
@@ -133,9 +121,10 @@ export default function DamageDeclarationPage() {
                 alt="damage declaration logo"
                 width={64}
                 height={64}
+                style={{ width: 'auto', height: 'auto' }}
               />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-primary">
               فرم اعلام خسارت
             </h1>
           </div>
