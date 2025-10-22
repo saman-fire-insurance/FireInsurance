@@ -33,7 +33,7 @@ const persianMonths = [
 ];
 
 // Helper function to safely parse values
-function safeParseInt(value: any): number | undefined {
+function safeParseInt(value: unknown): number | undefined {
   if (value === null || value === undefined) return undefined;
   const parsed = parseInt(String(value), 10);
   return isNaN(parsed) ? undefined : parsed;

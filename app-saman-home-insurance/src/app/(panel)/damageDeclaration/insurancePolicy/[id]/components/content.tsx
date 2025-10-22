@@ -43,7 +43,7 @@ interface ContentProps {
 export default function Content({ declarationId }: ContentProps) {
   // console.log("Declaration ID:", declarationId);
   const router = useRouter();
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([0]); // Step 1 (index 0) is completed
@@ -71,15 +71,15 @@ export default function Content({ declarationId }: ContentProps) {
     }
   }, [declarationId]);
 
-  const handleFormChange = (data: any) => {
+  const handleFormChange = (data: Record<string, unknown>) => {
     // Just save to state for temporary storage
-    setFormData((prev: any) => ({
+    setFormData((prev: Record<string, unknown>) => ({
       ...prev,
       policy: data,
     }));
   };
 
-  const handleFormSubmit = async (data: any) => {
+  const handleFormSubmit = async (data: Record<string, unknown>) => {
     // console.log(data, "data4343");
     // console.log("Selected insurance case IDs:", data.otherInsuranceCase); // Array of IDs
     setIsSubmitting(true);
@@ -87,7 +87,7 @@ export default function Content({ declarationId }: ContentProps) {
       damageClaimId: declarationId,
       fileIds: _.isEmpty(data.policyFiles)
         ? []
-        : _.map(data.policyFiles, (p) => {
+        : _.map(data.policyFiles as Array<{ id: string }>, (p) => {
             return p.id;
           }),
       serialNumber: data.policyNumber,
@@ -228,7 +228,7 @@ export default function Content({ declarationId }: ContentProps) {
           {/* Form Content */}
           <div className="flex flex-col w-full md:w-1/2 mx-auto">
             <InsurancePolicyForm
-              initialData={formData.policy}
+              initialData={formData.policy as never}
               onChange={handleFormChange}
               onSubmit={handleFormSubmit}
               onNext={handleNext}

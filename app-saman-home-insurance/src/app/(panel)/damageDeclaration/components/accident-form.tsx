@@ -80,11 +80,11 @@ interface AccidentFormProps {
   initialData?: AccidentFormData;
   onSubmit: (data: AccidentFormData) => void;
   onPrevious: () => void;
-  accidentType: any;
+  accidentType: Array<{ id: string; title?: string; name?: string }> | undefined;
   setProvinceId: Dispatch<SetStateAction<string>>;
-  provinces: any;
-  cities: any;
-  ownerships: any;
+  provinces: Array<{ id: string; title?: string; name?: string }> | undefined;
+  cities: Array<{ id: string; title?: string; name?: string }> | undefined;
+  ownerships: Array<{ id: string; title?: string; name?: string }> | undefined;
   citiesIsLoading: boolean;
 }
 
@@ -283,7 +283,7 @@ const AccidentForm = ({
                         {_.map(provinces, (p) => {
                           return (
                             <SelectItem key={p.id} value={p.id}>
-                              {p.name}
+                              {p.name || p.title}
                             </SelectItem>
                           );
                         })}
@@ -318,7 +318,7 @@ const AccidentForm = ({
                       </FormControl>
                       <SelectContent>
                         {_.map(cities, (c) => {
-                          return <SelectItem value={c.id}>{c.name}</SelectItem>;
+                          return <SelectItem key={c.id} value={c.id}>{c.name || c.title}</SelectItem>;
                         })}
                       </SelectContent>
                     </Select>

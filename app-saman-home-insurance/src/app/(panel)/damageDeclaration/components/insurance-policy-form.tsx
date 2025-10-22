@@ -79,7 +79,7 @@ interface InsurancePolicyFormProps {
   onSubmit?: (data: InsurancePolicyFormData) => void;
   onNext: () => void;
   onPrevious: () => void;
-  insurableObjects?: any;
+  insurableObjects?: Array<{ id: string; title: string }>;
   insurableObjectsLoading?: boolean;
 }
 
@@ -96,7 +96,7 @@ const InsurancePolicyForm = ({
   const { uploadFile, uploadMultipleFiles, uploading } = useFileUpload();
 
   // Transform API data to the format needed for MultiSelect
-  const insuranceCaseOptions = insurableObjects?.map((obj: any) => ({
+  const insuranceCaseOptions = insurableObjects?.map((obj) => ({
     id: obj.id,
     value: obj.title,
   })) || [];
@@ -220,7 +220,7 @@ const InsurancePolicyForm = ({
                     value={
                     Array.isArray(field.value) && field.value.length > 0
                       ? field.value
-                        .filter((doc: any) =>
+                        .filter((doc: File | string | { url?: string | { url: string }; previewBlob?: string; id?: string; name?: string }) =>
                         typeof doc === "string"
                           ? doc.trim() !== ""
                           : doc instanceof File
@@ -229,7 +229,7 @@ const InsurancePolicyForm = ({
                           doc !== null &&
                           "url" in doc
                         )
-                        .map((doc: any, index: number) => {
+                        .map((doc: File | string | { url?: string | { url: string }; previewBlob?: string; id?: string; name?: string }, index: number) => {
                         if (typeof doc === "string") {
                           return {
                           id: `existing-doc-${index}`,
@@ -278,7 +278,7 @@ const InsurancePolicyForm = ({
                         })
                       : []
                     }
-                    onChange={async (files: any) => {
+                    onChange={async (files: Array<{ id?: string; name?: string; preview?: string; uploaded?: boolean; file?: File }>) => {
                     // console.log("FileUploader onChange received files:", files.map((f: any) => ({
                     //   id: f.id,
                     //   name: f.name,
@@ -290,7 +290,7 @@ const InsurancePolicyForm = ({
                     // Clean up previous blob URLs
                     const existingFiles = Array.isArray(field.value)
                       ? field.value.filter(
-                        (doc: any) =>
+                        (doc: File | string | { url?: string | { url: string } }) =>
                         typeof doc === "string" ||
                         (typeof doc === "object" &&
                           doc !== null &&
@@ -299,8 +299,8 @@ const InsurancePolicyForm = ({
                       : [];
 
                     const newFilesToUpload = files
-                      .map((f: any) => f.file)
-                      .filter((file: any): file is File => file instanceof File);
+                      .map((f) => f.file)
+                      .filter((file): file is File => file instanceof File);
 
                     console.log("Files to upload:", newFilesToUpload.length, "Existing files:", existingFiles.length);
 
@@ -308,7 +308,7 @@ const InsurancePolicyForm = ({
                       const toastId = toast.loading("در حال آپلود فایل");
                       
                       // Find the corresponding UploadFile objects with blob URLs
-                      const filesWithBlobs = files.filter((f: any) => f.file instanceof File);
+                      const filesWithBlobs = files.filter((f) => f.file instanceof File);
                       
                       const uploadedFiles =
                       await handleImmediateMultipleFileUpload(
@@ -347,11 +347,12 @@ const InsurancePolicyForm = ({
                     } else {
                       // Handle deletion or no new files
                       const remainingFiles = files
-                      .map((f: any) => {
+                      .map((f) => {
                         if (f.uploaded && f.id) {
                         return existingFiles.find(
-                          (doc: any) =>
+                          (doc: File | string | { id?: string }) =>
                           (typeof doc === "object" &&
+                            "id" in doc &&
                             doc.id === f.id) ||
                           (typeof doc === "string" &&
                             doc === f.preview)

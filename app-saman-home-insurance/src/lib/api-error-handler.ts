@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Comprehensive API error handler utility
  * Handles various error structures including arrays, Ardalis Result patterns, and different API response formats
