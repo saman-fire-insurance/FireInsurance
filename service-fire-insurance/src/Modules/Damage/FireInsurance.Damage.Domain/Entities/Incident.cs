@@ -1,5 +1,6 @@
 ﻿using Ardalis.Result;
 using FireInsurance.Damage.Domain.Common;
+using FireInsurance.Damage.Domain.Enums;
 using Mapster;
 using System.ComponentModel.DataAnnotations;
 
@@ -24,6 +25,21 @@ namespace FireInsurance.Damage.Domain.Entities
         public List<Guid>? IncidentImageFileIds { get; set; }
         public List<StoredFile>? IncidentImageFiles { get; set; }
 
+        public bool HasPoliceReport { get; set; }
+        public string? PoliceReportNumber { get; set; }
+        public DateTime? PoliceReportDate { get; set; }
+        public List<Guid>? PoliceReportFileIds { get; set; }
+        public List<StoredFile>? PoliceReportFiles { get; set; }
+
+        public bool HasFireStationReport { get; set; }
+        public string? FireStationName { get; set; }
+        public List<Guid>? FireStationReportFileIds { get; set; }
+        public List<StoredFile>? FireStationReportFiles { get; set; }
+
+        public bool HasWeatherReport { get; set; }
+        public WeatherCondition? WeatherCondition { get; set; }
+        public Probability? WeatherReportProbability { get; set; }
+
         public static Result<Incident> Create(
             DateTime occuranceDate,
             IncidentType incidentType,
@@ -34,7 +50,17 @@ namespace FireInsurance.Damage.Domain.Entities
             OwnershipType ownershipType,
             string incidentCause,
             string? restraintDescription = null,
-            List<Guid>? incidentImageFileIds = null)
+            List<Guid>? incidentImageFileIds = null,
+            bool hasPoliceReport = false,
+            string? policeReportNumber = null,
+            DateTime? policeReportDate = null,
+            List<Guid>? policeReportFileIds = null,
+            bool hasFireStationReport = false,
+            string? fireStationName = null,
+            List<Guid>? fireStationReportFileIds = null,
+            bool hasWeatherReport = false,
+            WeatherCondition? weatherCondition = null,
+            Probability? weatherReportProbability = null)
         {
             var createdIncident = new Incident
             {
@@ -47,7 +73,17 @@ namespace FireInsurance.Damage.Domain.Entities
                 OwnershipType = ownershipType,
                 IncidentCause = incidentCause,
                 RestraintDescription = restraintDescription ?? string.Empty,
-                IncidentImageFileIds = incidentImageFileIds
+                IncidentImageFileIds = incidentImageFileIds,
+                HasPoliceReport = hasPoliceReport,
+                PoliceReportNumber = policeReportNumber,
+                PoliceReportDate = policeReportDate,
+                PoliceReportFileIds = policeReportFileIds,
+                HasFireStationReport = hasFireStationReport,
+                FireStationName = fireStationName,
+                FireStationReportFileIds = fireStationReportFileIds,
+                HasWeatherReport = hasWeatherReport,
+                WeatherCondition = weatherCondition,
+                WeatherReportProbability = weatherReportProbability
             };
 
             return Result.Success(createdIncident);

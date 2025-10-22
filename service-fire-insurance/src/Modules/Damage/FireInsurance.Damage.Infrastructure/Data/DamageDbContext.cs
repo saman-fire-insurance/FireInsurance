@@ -18,6 +18,7 @@ namespace FireInsurance.Damage.Infrastructure.Data
         public DbSet<Province> Provinces => Set<Province>();
         public DbSet<City> Cities => Set<City>();
         public DbSet<Incident> Incidents => Set<Incident>();
+        public DbSet<StakeHolder> StakeHolders => Set<StakeHolder>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

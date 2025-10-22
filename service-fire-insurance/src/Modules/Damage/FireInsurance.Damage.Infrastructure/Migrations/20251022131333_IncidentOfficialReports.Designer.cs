@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using FireInsurance.Damage.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FireInsurance.Damage.Infrastructure.Migrations
 {
     [DbContext(typeof(DamageDbContext))]
-    partial class DamageDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251022131333_IncidentOfficialReports")]
+    partial class IncidentOfficialReports
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -501,12 +504,12 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id")
-                        .HasName("pk_stake_holders");
+                        .HasName("pk_stake_holder");
 
                     b.HasIndex("DamageClaimId")
-                        .HasDatabaseName("ix_stake_holders_damage_claim_id");
+                        .HasDatabaseName("ix_stake_holder_damage_claim_id");
 
-                    b.ToTable("stake_holders", "damage");
+                    b.ToTable("stake_holder", "damage");
                 });
 
             modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.StoredFile", b =>
@@ -802,7 +805,7 @@ namespace FireInsurance.Damage.Infrastructure.Migrations
                     b.HasOne("FireInsurance.Damage.Domain.Entities.DamageClaim", null)
                         .WithMany("StakeHolders")
                         .HasForeignKey("DamageClaimId")
-                        .HasConstraintName("fk_stake_holders_damage_claims_damage_claim_id");
+                        .HasConstraintName("fk_stake_holder_damage_claims_damage_claim_id");
                 });
 
             modelBuilder.Entity("FireInsurance.Damage.Domain.Entities.StoredFile", b =>
