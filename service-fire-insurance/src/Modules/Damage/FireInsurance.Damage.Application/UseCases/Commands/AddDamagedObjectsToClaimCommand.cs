@@ -98,6 +98,8 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                     damagedObjects.Add(damagedObjectResult.Value);
                 }
 
+                dbContext.DamagedObjects.AddRange(damagedObjects);
+
                 // Add damaged objects to the claim using the domain method
                 var result = damageClaim.AddDamagedObjects(damagedObjects);
                 if (!result.IsSuccess)
@@ -113,7 +115,7 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                 // Save changes
                 await dbContext.SaveChangesAsync(cancellationToken);
 
-                return Result.Success(damageClaim.Adapt<DamageClaimDto>());
+                return Result.Success();
             }
         }
     }

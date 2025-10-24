@@ -1,11 +1,6 @@
-﻿using Mapster;
-using Microsoft.EntityFrameworkCore;
-
-namespace FireInsurance.Damage.Domain.Entities
+namespace FireInsurance.Damage.Application.Dtos
 {
-    [Owned]
-    [AdaptTo("[name]Dto"), GenerateMapper]
-    public class Insurer
+    public class InsurerDto
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;

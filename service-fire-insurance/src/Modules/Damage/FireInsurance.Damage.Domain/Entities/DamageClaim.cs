@@ -14,14 +14,14 @@ namespace FireInsurance.Damage.Domain.Entities
         public string? Code { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
         public List<Guid>? InsuranceFileIds { get; set; }
-        public List<StoredFile> InsuranceFiles { get; set; }
+        public List<StoredFile> InsuranceFiles { get; set; } = [];
         public Guid? IncidentId { get; set; } = null;
         public Incident? Incident { get; set; }
-        public List<DamagedObject>? DamagedObjects { get; set; }
+        public List<DamagedObject> DamagedObjects { get; set; } = [];
         public Guid? OwnershipTypeId { get; set; } = null;
         public OwnershipType? OwnershipType { get; set; }
         public List<Guid>? StakeHolderIds { get; set; } = null;
-        public List<StakeHolder>? StakeHolders { get; set; }
+        public List<StakeHolder>? StakeHolders { get; set; } = [];
         public DamageClaimStatus Status { get; set; }
         public ThirdPartyCoverage? ThirdPartyCoverage { get; set; } = null;
 

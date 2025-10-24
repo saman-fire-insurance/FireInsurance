@@ -1,22 +1,30 @@
+using FireInsurance.Damage.Domain.Enums;
+
 namespace FireInsurance.Damage.Application.Dtos
 {
     public class DamageClaimDto : BaseDto
     {
-        public string SerialNumber { get; set; } = string.Empty;
-        public string Code { get; set; } = string.Empty;
-        public Guid UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public InsurerDto? Insurer { get; set; } = null;
+        public string? SerialNumber { get; set; }
+        public string? Code { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
-        public List<Guid> InsuranceFileIds { get; set; } = [];
-        
-        public Guid IncidentId { get; set; }
-        public IncidentDto Incident { get; set; } = null!;
-        
+        public DamageClaimStatus Status { get; set; }
+
+        public List<Guid>? InsuranceFileIds { get; set; }
+        public List<StoredFileDto>? InsuranceFiles { get; set; }
+
+        public Guid? IncidentId { get; set; }
+        public IncidentDto? Incident { get; set; }
+
         public List<DamagedObjectDto> DamagedObjects { get; set; } = [];
-        
-        public Guid OwnershipTypeId { get; set; }
-        public OwnershipTypeDto OwnershipType { get; set; } = null!;
-        
-        public Guid? StakeHolderId { get; set; }
-        public StakeHolderDto? StakeHolder { get; set; }
+
+        public Guid? OwnershipTypeId { get; set; }
+        public OwnershipTypeDto? OwnershipType { get; set; }
+
+        public List<Guid> StakeHolderIds { get; set; } = [];
+        public List<StakeHolderDto> StakeHolders { get; set; } = [];
+
+        public ThirdPartyCoverageDto? ThirdPartyCoverage { get; set; }
     }
 }

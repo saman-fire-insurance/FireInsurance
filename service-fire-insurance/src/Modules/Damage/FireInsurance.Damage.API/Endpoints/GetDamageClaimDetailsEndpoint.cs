@@ -12,13 +12,14 @@ namespace FireInsurance.Damage.API.Endpoints
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("/DamageClaim/GetClaim", GetDamageClaimAsync)
+            app.MapGet("/DamageClaim/{id:guid}", GetDamageClaimAsync)
                 .RequireAuthorization()
                 .WithTags(Tags.DamageClaim);
         }
 
-        public static async Task<IResult> GetDamageClaimAsync(GetDamageClaimDetailsRequest request, ISender sender, CancellationToken cancellationToken)
+        public static async Task<IResult> GetDamageClaimAsync(Guid id, ISender sender, CancellationToken cancellationToken)
         {
+            var request = new GetDamageClaimDetailsRequest(id);
             var query = new GetDamageClaimDetailsQuery(request);
             var result = await sender.Send(query, cancellationToken);
 
