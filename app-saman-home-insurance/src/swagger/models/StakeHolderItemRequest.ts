@@ -6,8 +6,6 @@ export type StakeHolderItemRequest = {
     firstName?: string | null;
     lastName?: string | null;
     phoneNumber?: string | null;
-    accountNumber?: string | null;
-    iban?: string | null;
     isOwner?: boolean;
 };
 

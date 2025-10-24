@@ -5,6 +5,11 @@
 import type { StakeHolderItemRequest } from './StakeHolderItemRequest';
 export type AddStakeHoldersInfoToClaimRequest = {
     damageClaimId?: string;
-    stakeHolders?: Array<StakeHolderItemRequest> | null;
+    accountNumber?: string | null;
+    iban?: string | null;
+    hasOtherStakeHolder?: boolean;
+    otherStakeHolders?: Array<StakeHolderItemRequest> | null;
+    hasNeighborStakeHolder?: boolean;
+    neighborStakeHolders?: Array<StakeHolderItemRequest> | null;
 };
 

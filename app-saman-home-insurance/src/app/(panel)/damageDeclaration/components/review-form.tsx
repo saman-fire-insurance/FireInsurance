@@ -15,6 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import _ from "lodash";
 
 interface ReviewFormProps {
   formData: Record<string, unknown>;
@@ -37,7 +38,7 @@ export default function ReviewForm({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = formData as any;
 
-  console.log(reviewData,"reviewDataaaa")
+  console.log(reviewData, "reviewDataaaa");
 
   return (
     <div className="w-full">
@@ -68,7 +69,11 @@ export default function ReviewForm({
         </Button>
       </div>
 
-      <Accordion type="multiple" className="w-full space-y-2" defaultValue={["insured"]}>
+      <Accordion
+        type="multiple"
+        className="w-full space-y-2"
+        defaultValue={["insured"]}
+      >
         {/* اطلاعات بیمه‌گذار */}
         <AccordionItem
           value="insured"
@@ -77,7 +82,9 @@ export default function ReviewForm({
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <User className="flex size-8 p-2 text-secondaryBlue font-bold bg-secondaryBlue/10 items-center justify-center rounded-full" />
-              <span className="font-normal text-secondaryBlue">اطلاعات بیمه‌گذار</span>
+              <span className="font-normal text-secondaryBlue">
+                اطلاعات بیمه‌گذار
+              </span>
             </div>
           </AccordionTrigger>
           <AccordionContent>
@@ -87,7 +94,9 @@ export default function ReviewForm({
                   نام و نام خانوادگی:
                 </span>
                 <span className="text-sm font-medium">
-                  {reviewData?.insurer?.firstName + " " + reviewData?.insurer?.lastName  || "-"}
+                  {reviewData?.insurer?.firstName ||
+                    "-" + " " + reviewData?.insurer?.lastName ||
+                    "-"}
                 </span>
               </div>
               <div className="flex justify-start gap-x-2 items-center pb-2">
@@ -126,7 +135,9 @@ export default function ReviewForm({
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <BookCheck className="flex size-8 p-2 text-secondaryBlue font-bold bg-secondaryBlue/10 items-center justify-center rounded-full" />
-              <span className="font-normal text-secondaryBlue">اطلاعات بیمه‌نامه</span>
+              <span className="font-normal text-secondaryBlue">
+                اطلاعات بیمه‌نامه
+              </span>
             </div>
           </AccordionTrigger>
           <AccordionContent>
@@ -134,17 +145,15 @@ export default function ReviewForm({
               <div className="flex justify-start gap-x-2 items-center pb-2">
                 <span className="text-sm text-gray-400">شماره بیمه‌نامه:</span>
                 <span className="text-sm font-medium" dir="ltr">
-                  {data.policy?.policyNumber || "۱۶۴۲۴۲۴۰۰۰۱۵۴"}
+                  {reviewData?.serialNumber || "-"}
                 </span>
               </div>
               <div className="flex justify-start gap-x-2 items-center pb-2">
                 <span className="text-sm text-gray-400">
-                  تحت پوشش سایر بیمه‌گاه:
+                  تحت پوشش سایر بیمه‌‌ها:
                 </span>
                 <span className="text-sm font-medium">
-                  {data.policy?.hasOtherInsurance === "yes"
-                    ? "دارد"
-                    : "ندارد"}
+                  {data.policy?.hasOtherInsurance === "yes" ? "دارد" : "ندارد"}
                 </span>
               </div>
               {data.policy?.hasOtherInsurance === "yes" && (
@@ -186,7 +195,9 @@ export default function ReviewForm({
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <Home className="flex size-8 p-2 text-secondaryBlue font-bold bg-secondaryBlue/10 items-center justify-center rounded-full" />
-              <span className="font-normal text-secondaryBlue">اطلاعات حادثه</span>
+              <span className="font-normal text-secondaryBlue">
+                اطلاعات حادثه
+              </span>
             </div>
           </AccordionTrigger>
           <AccordionContent>
@@ -194,40 +205,45 @@ export default function ReviewForm({
               <div className="flex justify-start gap-x-2 items-center pb-2">
                 <span className="text-sm text-gray-400">نوع و علت:</span>
                 <span className="text-sm font-medium text-right">
-                  {data.accident?.accidentType ||
-                    "آتش سوزی، این حادثه به علت نشت گاز آزگرمکن در منزل اتفاق افتاده است."}
+                  {reviewData?.incident?.incidentType?.title ||
+                    "-" + "، " + reviewData?.incident?.incidentCause ||
+                    "-"}
                 </span>
               </div>
               <div className="flex justify-start gap-x-2 items-center">
                 <span className="text-sm text-gray-400">تاریخ و ساعت:</span>
                 <span className="text-sm font-medium">
-                  {data.accident?.accidentDate
-                    ? new Date(
-                        data.accident.accidentDate
-                      ).toLocaleDateString("fa-IR")
-                    : "۱۴۰۴/۰۲/۱۶"}{" "}
-                  - {data.accident?.accidentTime || "۱۴:۳۰"}
+                  {reviewData?.incident?.occuranceDate
+                    ? (() => {
+                        const date = new Date(
+                          reviewData.incident.occuranceDate
+                        );
+                        const persianDate = date.toLocaleDateString("fa-IR");
+                        const time = date.toLocaleTimeString("fa-IR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        });
+                        return `${persianDate} - ${time}`;
+                      })()
+                    : "-"}
                 </span>
               </div>
               <div className="flex justify-start gap-x-2 items-center pb-2">
                 <span className="text-sm text-gray-400">نوع مالکیت:</span>
                 <span className="text-sm font-medium">
-                  {data.accident?.ownershipType || "استیجاری"}
+                  {reviewData?.ownershipType?.title || "-"}
                 </span>
               </div>
               <div className="flex justify-start gap-x-2 items-center pb-2">
                 <span className="text-sm text-gray-400">محل:</span>
                 <span className="text-sm font-medium text-right">
-                  {data.accident?.accidentProvince &&
-                  data.accident?.accidentCity
-                    ? `${data.accident.accidentProvince}، ${data.accident.accidentCity}`
-                    : "تهران، تهران، بلوارکاشاورز، خیابان فردیس، پلاک ۵۷"}
+                  {reviewData?.incident?.location || "-"}
                 </span>
               </div>
               <div className="flex justify-start gap-x-2 items-center pb-2">
                 <span className="text-sm text-gray-400">کد پستی:</span>
                 <span className="text-sm font-medium" dir="ltr">
-                  {data.accident?.postalCode || "۱۸۱۲۵۱۴۳۱"}
+                  {data.accident?.postalCode || "-"}
                 </span>
               </div>
               <div className="flex justify-between items-start">
@@ -241,7 +257,7 @@ export default function ReviewForm({
                   نام ایستگاه آتش نشانی:
                 </span>
                 <span className="text-sm font-medium">
-                  {data.accident?.fireStationName || "تهران مرکز"}
+                  {reviewData?.incident?.fireStationName || "-"}
                 </span>
               </div>
             </div>
@@ -256,11 +272,25 @@ export default function ReviewForm({
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <List className="flex size-8 p-2 text-secondaryBlue font-bold bg-secondaryBlue/10 items-center justify-center rounded-full" />
-              <span className="font-normal text-secondaryBlue">موارد آسیب دیده</span>
+              <span className="font-normal text-secondaryBlue">
+                موارد آسیب دیده
+              </span>
             </div>
           </AccordionTrigger>
           <AccordionContent>
             <div className="space-y-3 pt-2">
+              {_.map(reviewData?.damagedObjects?.insurableObject, (item, i) => {
+                return (
+                  <div className="flex justify-start gap-x-2 items-center pb-2">
+                    <span className="text-sm text-gray-400">مورد {i+1}:</span>
+                    <span className="text-sm font-medium">
+                      {
+                        item.title + "، " + item
+                      }
+                    </span>
+                  </div>
+                );
+              })}
               <div className="flex justify-start gap-x-2 items-center pb-2">
                 <span className="text-sm text-gray-400">مورد ۱:</span>
                 <span className="text-sm font-medium">
@@ -276,10 +306,8 @@ export default function ReviewForm({
               <div className="flex justify-start gap-x-2 items-center">
                 <span className="text-sm text-gray-400">جمع تقریبی خسارت:</span>
                 <span className="text-sm font-medium">
-                  {(data.cases as Array<{ amount?: number }>)?.reduce(
-                    (sum: number, item) => sum + (item.amount || 0),
-                    0
-                  ) || "۴۰,۰۰۰,۰۰۰"}{" "}
+                  {reviewData?.damagedObjects?.estimatedLoss.toLocaleString() ||
+                    "-"}{" "}
                   ریال
                 </span>
               </div>
@@ -295,7 +323,9 @@ export default function ReviewForm({
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <FileText className="flex size-8 p-2 text-secondaryBlue font-bold bg-secondaryBlue/10 items-center justify-center rounded-full" />
-              <span className="font-normal text-secondaryBlue">اطلاعات ذینفعان</span>
+              <span className="font-normal text-secondaryBlue">
+                اطلاعات ذینفعان
+              </span>
             </div>
           </AccordionTrigger>
           <AccordionContent>
@@ -319,9 +349,7 @@ export default function ReviewForm({
               <div className="flex justify-start gap-x-2 items-center">
                 <span className="text-sm text-gray-400">ذینفع دیگر:</span>
                 <span className="text-sm font-medium">
-                  {data.beneficiaries?.hasOtherBeneficiaries
-                    ? "دارد"
-                    : "ندارد"}
+                  {data.beneficiaries?.hasOtherBeneficiaries ? "دارد" : "ندارد"}
                 </span>
               </div>
             </div>
