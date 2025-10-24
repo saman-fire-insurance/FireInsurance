@@ -1,4 +1,5 @@
-﻿using FireInsurance.Damage.Domain.Enums;
+﻿using FireInsurance.Damage.Domain.Entities;
+using FireInsurance.Damage.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,14 @@ namespace FireInsurance.Damage.Application.Dtos
 {
     public class IncidentDto : BaseDto
     {
-        public DateTime OccuranceDate { get; set; }
-        public string Location { get; set; } = string.Empty;
         public Guid IncidentTypeId { get; set; }
         public IncidentTypeDto? IncidentType { get; set; }
+        public DateTime OccuranceDate { get; set; }
+        public ProvinceDto Province { get; set; }
+        public CityDto City { get; set; }
+        public string Address { get; set; } = string.Empty;
+        public string PostalCode { get; set; }
+        public OwnershipTypeDto OwnershipType { get; set; }
         public required string IncidentCause { get; set; }
         public string RestraintDescription { get; set; } = string.Empty;
 
