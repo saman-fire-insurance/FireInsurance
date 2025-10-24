@@ -1,4 +1,4 @@
-using Ardalis.Result;
+﻿using Ardalis.Result;
 using Common.Messaging;
 using FireInsurance.Damage.Application.Data;
 using FireInsurance.Damage.Application.Dtos;
@@ -14,18 +14,26 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
         string FirstName,
         string LastName,
         string PhoneNumber,
-        string? AccountNumber = null,
-        string? Iban = null,
         bool IsOwner = false);
 
     public sealed record AddStakeHoldersInfoToClaimRequest(
         Guid DamageClaimId,
-        List<StakeHolderItemRequest> StakeHolders);
+        string AccountNumber,
+        string Iban,
+        bool HasOtherStakeHolder = false,
+        List<StakeHolderItemRequest>? OtherStakeHolders = null,
+        bool HasNeighborStakeHolder = false,
+        List<StakeHolderItemRequest>? NeighborStakeHolders = null);
 
     public class AddStakeHoldersInfoToClaimCommand(AddStakeHoldersInfoToClaimRequest request) : ICommand<DamageClaimDto>
     {
         public Guid DamageClaimId { get; set; } = request.DamageClaimId;
-        public List<StakeHolderItemRequest> StakeHolders { get; set; } = request.StakeHolders;
+        public string AccountNumber { get; set; } = request.AccountNumber;
+        public string Iban { get; set; } = request.Iban;
+        public bool HasOtherStakeHolder { get; set; } = request.HasOtherStakeHolder;
+        public List<StakeHolderItemRequest>? OtherStakeHolders { get; set; } = request.OtherStakeHolders;
+        public bool HasNeighborStakeHolder { get; set; } = request.HasNeighborStakeHolder;
+        public List<StakeHolderItemRequest>? NeighborStakeHolders { get; set; } = request.NeighborStakeHolders;
 
         internal sealed class Validator : AbstractValidator<AddStakeHoldersInfoToClaimCommand>
         {
@@ -35,42 +43,17 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                     .NotEmpty()
                     .WithMessage(DamageClaimErrors.Empty);
 
-                RuleFor(req => req.StakeHolders)
+                RuleFor(req => req.AccountNumber)
                     .NotEmpty()
-                    .WithMessage("Stakeholders list cannot be empty.");
+                    .WithMessage("شماره حساب نمی تواند خالی باشد");
 
-                RuleForEach(req => req.StakeHolders).ChildRules(item =>
-                {
-                    item.RuleFor(x => x.FirstName)
-                        .NotEmpty()
-                        .WithMessage("First name is required.")
-                        .MaximumLength(100)
-                        .WithMessage("First name must not exceed 100 characters.");
+                RuleFor(req => req.Iban)
+                    .NotEmpty()
+                    .WithMessage("شماره شبا نمی تواند خالی باشد");
 
-                    item.RuleFor(x => x.LastName)
-                        .NotEmpty()
-                        .WithMessage("Last name is required.")
-                        .MaximumLength(100)
-                        .WithMessage("Last name must not exceed 100 characters.");
-
-                    item.RuleFor(x => x.PhoneNumber)
-                        .NotEmpty()
-                        .WithMessage("Phone number is required.")
-                        .Length(11)
-                        .WithMessage("Phone number must be 11 digits.")
-                        .Matches("^[0-9]+$")
-                        .WithMessage("Phone number must contain only digits.");
-
-                    item.RuleFor(x => x.AccountNumber)
-                        .MaximumLength(50)
-                        .WithMessage("Account number must not exceed 50 characters.")
-                        .When(x => !string.IsNullOrWhiteSpace(x.AccountNumber));
-
-                    item.RuleFor(x => x.Iban)
-                        .MaximumLength(34)
-                        .WithMessage("IBAN must not exceed 34 characters.")
-                        .When(x => !string.IsNullOrWhiteSpace(x.Iban));
-                });
+                RuleFor(req => req.Iban)
+                    .Matches(@"^IR[0-9]{24}$")
+                    .WithMessage("فرمت شماره شبا صحیح نیست");
             }
         }
 
@@ -81,6 +64,7 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                 // Find the damage claim
                 var damageClaim = await dbContext.DamageClaims
                     .Include(dc => dc.StakeHolders)
+                    .Include(dc => dc.Insurer)
                     .SingleOrDefaultAsync(c => c.Id == request.DamageClaimId, cancellationToken);
 
                 if (damageClaim == null)
@@ -88,31 +72,66 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                     return Result.NotFound(DamageClaimErrors.NotFound(request.DamageClaimId));
                 }
 
-                // Create StakeHolder entities using factory method
-                //var insurerStakeHolder = StakeHolder.Create()
-
-                var stakeHolders = new List<StakeHolder>();
-                foreach (var item in request.StakeHolders)
+                // Update insurer's bank account info
+                var insurer = damageClaim.Insurer;
+                if (insurer == null)
                 {
-                    var stakeHolderResult = StakeHolder.Create(
-                        firstName: item.FirstName,
-                        lastName: item.LastName,
-                        phoneNumber: item.PhoneNumber,
-                        accountNumber: item.AccountNumber,
-                        iban: item.Iban,
-                        isOwner: item.IsOwner);
+                    return Result.Error(DamageClaimErrors.InsurerError.Empty);
+                }
+                insurer.AddBankAccountInfo(request.AccountNumber, request.Iban);
 
-                    if (!stakeHolderResult.IsSuccess)
+                // Create StakeHolder entities
+                var stakeHolders = new List<StakeHolder>();
+                if (request.OtherStakeHolders?.Count > 0)
+                {
+                    foreach (var item in request.OtherStakeHolders)
                     {
-                        if (stakeHolderResult.IsInvalid())
+                        var stakeHolderResult = StakeHolder.Create(
+                            firstName: item.FirstName,
+                            lastName: item.LastName,
+                            phoneNumber: item.PhoneNumber,
+                            //accountNumber: item.AccountNumber,
+                            //iban: item.Iban,
+                            isOwner: true);
+
+                        if (!stakeHolderResult.IsSuccess)
                         {
-                            return Result.Invalid(stakeHolderResult.ValidationErrors);
+                            if (stakeHolderResult.IsInvalid())
+                            {
+                                return Result.Invalid(stakeHolderResult.ValidationErrors);
+                            }
+
+                            return Result.Error(new ErrorList(stakeHolderResult.Errors));
                         }
 
-                        return Result.Error(new ErrorList(stakeHolderResult.Errors));
+                        stakeHolders.Add(stakeHolderResult.Value);
                     }
+                }
 
-                    stakeHolders.Add(stakeHolderResult.Value);
+                if (request.NeighborStakeHolders?.Count > 0)
+                {
+                    foreach (var item in request.NeighborStakeHolders)
+                    {
+                        var stakeHolderResult = StakeHolder.Create(
+                            firstName: item.FirstName,
+                            lastName: item.LastName,
+                            phoneNumber: item.PhoneNumber,
+                            //accountNumber: item.AccountNumber,
+                            //iban: item.Iban,
+                            isOwner: false);
+
+                        if (!stakeHolderResult.IsSuccess)
+                        {
+                            if (stakeHolderResult.IsInvalid())
+                            {
+                                return Result.Invalid(stakeHolderResult.ValidationErrors);
+                            }
+
+                            return Result.Error(new ErrorList(stakeHolderResult.Errors));
+                        }
+
+                        stakeHolders.Add(stakeHolderResult.Value);
+                    }
                 }
 
                 dbContext.StakeHolders.AddRange(stakeHolders);

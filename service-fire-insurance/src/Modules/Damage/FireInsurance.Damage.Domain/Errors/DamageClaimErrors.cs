@@ -17,5 +17,10 @@ namespace FireInsurance.Damage.Domain.Errors
             public static string Empty => "شماره بیمه نامه نمی تواند خالی باشد";
             public static string Length(int min, int max) => $"شماره بیمه نامه باید بین {min} و {max} کاراکتر باشد";
         }
+
+        public static class InsurerError
+        {
+            public static string Empty => "مشخصات بیمه گذار نمی تواند خالی باشد";
+        }
     }
 }
