@@ -282,11 +282,9 @@ export default function ReviewForm({
               {_.map(reviewData?.damagedObjects?.insurableObject, (item, i) => {
                 return (
                   <div className="flex justify-start gap-x-2 items-center pb-2">
-                    <span className="text-sm text-gray-400">مورد {i+1}:</span>
+                    <span className="text-sm text-gray-400">مورد {i + 1}:</span>
                     <span className="text-sm font-medium">
-                      {
-                        item.title + "، " + item
-                      }
+                      {item.title + "، " + item.title}
                     </span>
                   </div>
                 );
@@ -335,7 +333,7 @@ export default function ReviewForm({
                   شماره حساب بیمه گذار:
                 </span>
                 <span className="text-sm font-medium" dir="ltr">
-                  {data.beneficiaries?.accountNumber || "۷۴۱۵۶۳۴۱۷۱"}
+                  {reviewData?.stakeHolders?.accountNumber || "-"}
                 </span>
               </div>
               <div className="flex justify-start gap-x-2 items-center pb-2">
@@ -343,13 +341,13 @@ export default function ReviewForm({
                   شماره شبا بیمه‌گذار:
                 </span>
                 <span className="text-sm font-medium" dir="ltr">
-                  {data.beneficiaries?.iban || "IR۷۴۱۰۵۶۴۵۱۰۰۰۰۲۱۲۴"}
+                  {`IR${reviewData?.stakeHolders?.iban || "-"}`}
                 </span>
               </div>
               <div className="flex justify-start gap-x-2 items-center">
                 <span className="text-sm text-gray-400">ذینفع دیگر:</span>
                 <span className="text-sm font-medium">
-                  {data.beneficiaries?.hasOtherBeneficiaries ? "دارد" : "ندارد"}
+                  {reviewData?.stakeHolders?.isOwner ? "دارد" : "ندارد"}
                 </span>
               </div>
             </div>
