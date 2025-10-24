@@ -21,6 +21,8 @@ interface ReviewFormProps {
   onSubmit: () => void;
   onPrevious: () => void;
   isSubmitting: boolean;
+  reviewData: any;
+  reviewDataIsLoading: boolean;
 }
 
 export default function ReviewForm({
@@ -28,10 +30,14 @@ export default function ReviewForm({
   onSubmit,
   onPrevious,
   isSubmitting,
+  reviewData,
+  reviewDataIsLoading,
 }: ReviewFormProps) {
   // Cast to allow accessing nested properties without type errors
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = formData as any;
+
+  console.log(reviewData,"reviewDataaaa")
 
   return (
     <div className="w-full">

@@ -2,6 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Probability } from './Probability';
+import type { WeatherCondition } from './WeatherCondition';
 export type AddIncidentInfoToClaimRequest = {
     damageClaimId?: string;
     incidentTypeId?: string;
@@ -14,5 +16,15 @@ export type AddIncidentInfoToClaimRequest = {
     incidentCause?: string | null;
     restraintDescription?: string | null;
     incidentImageFileIds?: Array<string> | null;
+    hasPoliceReport?: boolean;
+    policeReportNumber?: string | null;
+    policeReportDate?: string | null;
+    policeReportFileIds?: Array<string> | null;
+    hasFireStationReport?: boolean;
+    fireStationName?: string | null;
+    fireStationReportFileIds?: Array<string> | null;
+    hasWeatherReport?: boolean;
+    weatherCondition?: WeatherCondition;
+    weatherReportProbability?: Probability;
 };
 

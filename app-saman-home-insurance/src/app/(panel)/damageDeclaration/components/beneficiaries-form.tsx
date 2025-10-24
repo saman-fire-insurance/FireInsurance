@@ -70,17 +70,11 @@ export default function BeneficiariesForm({
   const hasOtherBeneficiary = form.watch("hasOtherBeneficiary");
   const accidentCausedByDispute = form.watch("accidentCausedByDispute");
 
-  // Update parent component whenever form data changes
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      onChange(value as BeneficiariesFormData);
-    });
-    return () => subscription.unsubscribe();
-  }, [form, onChange]);
 
   const onSubmit = (data: BeneficiariesFormData) => {
     console.log("Form submitted:", data);
-    onNext();
+    onChange(data);
+    // onNext();
   };
 
   return (

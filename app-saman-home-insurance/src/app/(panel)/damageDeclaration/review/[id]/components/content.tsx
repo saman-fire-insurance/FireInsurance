@@ -3,12 +3,22 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { X, Save, User, BookCheck, Home, List, FileText, CircleCheck } from "lucide-react";
+import {
+  X,
+  Save,
+  User,
+  BookCheck,
+  Home,
+  List,
+  FileText,
+  CircleCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import WizardSteps from "../../../components/wizardSteps";
 import ReviewForm from "../../../components/review-form";
 import Image from "next/image";
+import { GetDamageClaim } from "@/swr/review";
 
 const STORAGE_KEY = "damage-declaration-form-data";
 
@@ -21,7 +31,6 @@ const steps = [
   { id: "review", label: "بررسی", icon: CircleCheck },
 ];
 
-
 interface ContentProps {
   declarationId: string;
 }
@@ -31,20 +40,24 @@ export default function Content({ declarationId }: ContentProps) {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [completedSteps, setCompletedSteps] = useState<number[]>([0, 1, 2, 3, 4]); // Steps 1-5 completed
+  const [completedSteps, setCompletedSteps] = useState<number[]>([
+    0, 1, 2, 3, 4,
+  ]); // Steps 1-5 completed
   const currentStep = 5; // This is step 6 (index 5)
 
-  useEffect(() => {
-    const savedData = localStorage.getItem(`${STORAGE_KEY}-${declarationId}`);
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData);
-        setFormData(parsed);
-      } catch (error) {
-        console.error("Error loading saved data:", error);
-      }
-    }
-  }, [declarationId]);
+  const { reviewData, reviewDataIsLoading } = GetDamageClaim(declarationId);
+
+  // useEffect(() => {
+  //   const savedData = localStorage.getItem(`${STORAGE_KEY}-${declarationId}`);
+  //   if (savedData) {
+  //     try {
+  //       const parsed = JSON.parse(savedData);
+  //       setFormData(parsed);
+  //     } catch (error) {
+  //       console.error("Error loading saved data:", error);
+  //     }
+  //   }
+  // }, [declarationId]);
 
   const handleTemporarySave = async () => {
     setIsSaving(true);
@@ -80,14 +93,9 @@ export default function Content({ declarationId }: ContentProps) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Clear localStorage after successful submission
-      localStorage.removeItem(`${STORAGE_KEY}-${declarationId}`);
+      // localStorage.removeItem(`${STORAGE_KEY}-${declarationId}`);
 
       toast.success("فرم با موفقیت ثبت شد");
-
-      // Navigate to success page or main page
-      setTimeout(() => {
-        router.push("/");
-      }, 1500);
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("خطا در ثبت فرم");
@@ -109,7 +117,7 @@ export default function Content({ declarationId }: ContentProps) {
       `/damageDeclaration/documents/${declarationId}`,
       `/damageDeclaration/review/${declarationId}`,
     ];
-    
+
     if (stepRoutes[index]) {
       router.push(stepRoutes[index]);
     }
@@ -148,9 +156,7 @@ export default function Content({ declarationId }: ContentProps) {
                 height={64}
               />
             </div>
-            <h1 className="text-2xl font-bold text-primary">
-              فرم اعلام خسارت
-            </h1>
+            <h1 className="text-2xl font-bold text-primary">فرم اعلام خسارت</h1>
           </div>
 
           {/* Wizard Steps */}
@@ -167,6 +173,8 @@ export default function Content({ declarationId }: ContentProps) {
               onSubmit={handleSubmit}
               onPrevious={handlePrevious}
               isSubmitting={isSubmitting}
+              reviewData={reviewData}
+              reviewDataIsLoading={reviewDataIsLoading}
             />
           </div>
         </div>

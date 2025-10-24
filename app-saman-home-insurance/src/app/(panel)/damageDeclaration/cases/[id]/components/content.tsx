@@ -3,12 +3,26 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { X, Save, User, BookCheck, Home, List, FileText, CircleCheck } from "lucide-react";
+import {
+  X,
+  Save,
+  User,
+  BookCheck,
+  Home,
+  List,
+  FileText,
+  CircleCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import WizardSteps from "../../../components/wizardSteps";
 import Image from "next/image";
 import DamagedItemsForm from "@/app/(panel)/damageDeclaration/components/damaged-items-form";
+import { GridifyQuery } from "@/swagger/models/GridifyQuery";
+import { GetInsurableObjects } from "@/swr/insurableObjects";
+import { DamageClaimService } from "@/swagger/services/DamageClaimService";
+import { AddDamagedObjectsToClaimRequest } from "@/swagger/models/AddDamagedObjectsToClaimRequest";
+import { DamagedObjectItemRequest } from "@/swagger/models/DamagedObjectItemRequest";
 
 const STORAGE_KEY = "damage-declaration-form-data";
 
@@ -29,26 +43,55 @@ export default function Content({ declarationId }: ContentProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([0, 1, 2]); // Steps 1, 2 & 3 completed
   const currentStep = 3; // This is step 4 (index 3)
 
-  useEffect(() => {
-    const savedData = localStorage.getItem(`${STORAGE_KEY}-${declarationId}`);
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData);
-        setFormData(parsed);
-      } catch (error) {
-        console.error("Error loading saved data:", error);
-      }
-    }
-  }, [declarationId]);
+  const requestBody = {
+    page: 1,
+    pageSize: 100,
+    orderBy: "",
+    filter: "",
+  } as GridifyQuery;
+  // Fetch insurable objects from API
+  const { insurableObjects, insurableObjectsIsLoading } =
+    GetInsurableObjects(requestBody);
 
-  const handleFormChange = (data: Record<string, unknown>) => {
-    setFormData((prev: Record<string, unknown>) => ({
-      ...prev,
-      cases: data,
-    }));
+  // useEffect(() => {
+  //   const savedData = localStorage.getItem(`${STORAGE_KEY}-${declarationId}`);
+  //   if (savedData) {
+  //     try {
+  //       const parsed = JSON.parse(savedData);
+  //       setFormData(parsed);
+  //     } catch (error) {
+  //       console.error("Error loading saved data:", error);
+  //     }
+  //   }
+  // }, [declarationId]);
+
+  const handleFormChange = async (data: Record<string, unknown>) => {
+    setIsSubmitting(true);
+    const requestBody = {
+      damageClaimId: declarationId,
+      damagedObjects: data.damagedObjects,
+    } as AddDamagedObjectsToClaimRequest;
+    console.log(requestBody, "requestBody");
+    try {
+      const res =
+        await DamageClaimService.postApiV1DamageClaimAddDamagedObjects({
+          requestBody,
+        });
+      if (res) {
+        setIsSubmitting(false);
+        toast.success("اطلاعات موارد آسیب دیده با موفقیت ثبت شد");
+        router.push(`/damageDeclaration/documents/${declarationId}`);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("خطایی رخ داده است");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleTemporarySave = async () => {
@@ -74,17 +117,16 @@ export default function Content({ declarationId }: ContentProps) {
 
   const handleNext = () => {
     // Mark current step as completed
-    const newCompletedSteps = [...completedSteps];
-    if (!newCompletedSteps.includes(currentStep)) {
-      newCompletedSteps.push(currentStep);
-      setCompletedSteps(newCompletedSteps);
-    }
-
-    localStorage.setItem(
-      `${STORAGE_KEY}-${declarationId}`,
-      JSON.stringify(formData)
-    );
-    router.push(`/damageDeclaration/documents/${declarationId}`);
+    // const newCompletedSteps = [...completedSteps];
+    // if (!newCompletedSteps.includes(currentStep)) {
+    //   newCompletedSteps.push(currentStep);
+    //   setCompletedSteps(newCompletedSteps);
+    // }
+    // localStorage.setItem(
+    //   `${STORAGE_KEY}-${declarationId}`,
+    //   JSON.stringify(formData)
+    // );
+    // router.push(`/damageDeclaration/documents/${declarationId}`);
   };
 
   const handlePrevious = () => {
@@ -100,7 +142,7 @@ export default function Content({ declarationId }: ContentProps) {
       `/damageDeclaration/documents/${declarationId}`,
       `/damageDeclaration/review/${declarationId}`,
     ];
-    
+
     if (stepRoutes[index]) {
       router.push(stepRoutes[index]);
     }
@@ -139,9 +181,7 @@ export default function Content({ declarationId }: ContentProps) {
                 height={64}
               />
             </div>
-            <h1 className="text-2xl font-bold text-primary">
-              فرم اعلام خسارت
-            </h1>
+            <h1 className="text-2xl font-bold text-primary">فرم اعلام خسارت</h1>
           </div>
 
           {/* Wizard Steps */}
@@ -158,6 +198,8 @@ export default function Content({ declarationId }: ContentProps) {
               onChange={handleFormChange}
               onNext={handleNext}
               onPrevious={handlePrevious}
+              insurableObjects={insurableObjects?.items}
+              insurableObjectsLoading={insurableObjectsIsLoading}
             />
           </div>
         </div>

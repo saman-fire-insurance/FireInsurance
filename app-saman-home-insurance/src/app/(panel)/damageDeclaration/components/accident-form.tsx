@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,6 +33,8 @@ import {
 import { ArrowLeftIcon, ChevronDownIcon } from "lucide-react";
 import { FileUploader } from "@/components/ui/multi-file-upload";
 import { Calendar } from "@/components/ui/calendar";
+import { toast } from "sonner";
+import { useFileUpload } from "@/hooks/useFileUpload";
 import _ from "lodash";
 
 // Form validation schema
@@ -80,7 +82,9 @@ interface AccidentFormProps {
   initialData?: AccidentFormData;
   onSubmit: (data: AccidentFormData) => void;
   onPrevious: () => void;
-  accidentType: Array<{ id: string; title?: string; name?: string }> | undefined;
+  accidentType:
+    | Array<{ id: string; title?: string; name?: string }>
+    | undefined;
   setProvinceId: Dispatch<SetStateAction<string>>;
   provinces: Array<{ id: string; title?: string; name?: string }> | undefined;
   cities: Array<{ id: string; title?: string; name?: string }> | undefined;
@@ -103,8 +107,33 @@ const AccidentForm = ({
   const [isPoliceReportDateOpen, setIsPoliceReportDateOpen] = useState(false);
   const [isFireReportDateOpen, setIsFireReportDateOpen] = useState(false);
   const [isMeteoReportDateOpen, setIsMeteoReportDateOpen] = useState(false);
+  
+  const { uploadFile, uploadMultipleFiles, uploading } = useFileUpload();
 
   console.log(accidentType, "accidentType");
+
+  // Handle immediate multiple file upload
+  const handleImmediateMultipleFileUpload = useCallback(
+    async (
+      files: File[]
+    ): Promise<Array<{ id: string; url: string; name?: string }>> => {
+      if (!files.length) return [];
+
+      try {
+        const uploadedFiles = await uploadMultipleFiles(files);
+        return uploadedFiles.map((file) => ({
+          id: file.id!,
+          url: file.url!,
+          name: file.name,
+        }));
+      } catch (error) {
+        console.error("Immediate multiple file upload failed:", error);
+        toast.error("خطا در آپلود فایل‌ها");
+      }
+      return [];
+    },
+    [uploadMultipleFiles]
+  );
 
   const form = useForm<AccidentFormData>({
     resolver: zodResolver(accidentFormSchema),
@@ -318,7 +347,11 @@ const AccidentForm = ({
                       </FormControl>
                       <SelectContent>
                         {_.map(cities, (c) => {
-                          return <SelectItem key={c.id} value={c.id}>{c.name || c.title}</SelectItem>;
+                          return (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.name || c.title}
+                            </SelectItem>
+                          );
                         })}
                       </SelectContent>
                     </Select>
@@ -459,13 +492,121 @@ const AccidentForm = ({
                 </FormLabel>
                 <FormControl>
                   <FileUploader
-                    id="accident-images"
-                    value={field.value}
-                    onChange={field.onChange}
-                    maxFiles={5}
-                    maxSize={5}
-                    accept="image/*"
-                    multiple
+                    maxFiles={20}
+                    uploadText="فایل را انتخاب کنید"
+                    uploadSubText="PDF, Word, SVG, PNG, JPG یا GIF (حداکثر10مگابایت)"
+                    accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    key={"ACCIDENT_IMAGES_UPLOAD"}
+                    id={"AccidentImagesUpload"}
+                    deferLocalPreview
+                    value={
+                      Array.isArray(field.value) && field.value.length > 0
+                        ? field.value
+                            .filter((doc: File | string | { url?: string | { url: string }; previewBlob?: string; id?: string; name?: string }) =>
+                              typeof doc === "string"
+                                ? doc.trim() !== ""
+                                : doc instanceof File
+                                ? true
+                                : typeof doc === "object" &&
+                                  doc !== null &&
+                                  "url" in doc
+                            )
+                            .map((doc: File | string | { url?: string | { url: string }; previewBlob?: string; id?: string; name?: string }, index: number) => {
+                              if (typeof doc === "string") {
+                                return {
+                                  id: `existing-doc-${index}`,
+                                  preview: doc,
+                                  progress: 100,
+                                  uploaded: true,
+                                  name: `Existing Document ${index + 1}`,
+                                  type: "image/jpeg",
+                                };
+                              } else if (doc instanceof File) {
+                                return {
+                                  id: `new-file-${index}`,
+                                  preview: URL.createObjectURL(doc),
+                                  progress: 100,
+                                  uploaded: false,
+                                  name: doc.name,
+                                  type: doc.type || "application/octet-stream",
+                                };
+                              } else {
+                                const imageUrl = typeof doc.url === 'string' ? doc.url : 
+                                        (doc.url?.url || '');
+                                const previewUrl = doc.previewBlob || imageUrl;
+                                
+                                return {
+                                  id: doc.id ?? `existing-doc-${index}`,
+                                  preview: previewUrl || `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect fill='%23ddd' width='400' height='400'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%23999'>${encodeURIComponent(doc.name || 'No Preview')}</text></svg>`,
+                                  progress: 100,
+                                  uploaded: true,
+                                  name: doc.name ?? `Existing Document ${index + 1}`,
+                                  type: "image/jpeg",
+                                };
+                              }
+                            })
+                        : []
+                    }
+                    onChange={async (files: Array<{ id?: string; name?: string; preview?: string; uploaded?: boolean; file?: File }>) => {
+                      const existingFiles = Array.isArray(field.value)
+                        ? field.value.filter(
+                            (doc: File | string | { url?: string | { url: string } }) =>
+                              typeof doc === "string" ||
+                              (typeof doc === "object" &&
+                                doc !== null &&
+                                "url" in doc)
+                          )
+                        : [];
+
+                      const newFilesToUpload = files
+                        .map((f) => f.file)
+                        .filter((file): file is File => file instanceof File);
+
+                      if (newFilesToUpload.length > 0) {
+                        const toastId = toast.loading("در حال آپلود فایل");
+                        const filesWithBlobs = files.filter((f) => f.file instanceof File);
+                        
+                        const uploadedFiles = await handleImmediateMultipleFileUpload(newFilesToUpload);
+
+                        if (uploadedFiles.length > 0) {
+                          const mergedFiles = uploadedFiles.map((serverFile, index) => {
+                            const blobFile = filesWithBlobs[index];
+                            return {
+                              id: serverFile.id,
+                              url: serverFile.url,
+                              name: serverFile.name,
+                              previewBlob: blobFile?.preview || null,
+                            };
+                          });
+                          
+                          const newValue = [...existingFiles, ...mergedFiles];
+                          field.onChange(newValue);
+                          toast.success("فایل‌ها با موفقیت آپلود شدند", { id: toastId });
+                        } else {
+                          toast.error("خطا در آپلود فایل‌ها", { id: toastId });
+                        }
+                      } else {
+                        const remainingFiles = files
+                          .map((f) => {
+                            if (f.uploaded && f.id) {
+                              return existingFiles.find(
+                                (doc: File | string | { id?: string }) =>
+                                  (typeof doc === "object" &&
+                                    "id" in doc &&
+                                    doc.id === f.id) ||
+                                  (typeof doc === "string" && doc === f.preview)
+                              );
+                            }
+                            return null;
+                          })
+                          .filter(Boolean);
+
+                        field.onChange(remainingFiles.length > 0 ? remainingFiles : []);
+                      }
+                    }}
+                    isInvalid={!!form.formState.errors.accidentImages}
+                    capture={"environment"}
+                    prevGridColumns={4}
                   />
                 </FormControl>
                 <FormMessage className="text-right !text-xs text-destructive" />
@@ -593,13 +734,121 @@ const AccidentForm = ({
                     </FormLabel>
                     <FormControl>
                       <FileUploader
-                        id="police-report-file"
-                        value={field.value}
-                        onChange={field.onChange}
-                        maxFiles={5}
-                        maxSize={5}
-                        accept="image/*,.pdf"
-                        multiple
+                        maxFiles={20}
+                        uploadText="فایل را انتخاب کنید"
+                        uploadSubText="PDF, Word, SVG, PNG, JPG یا GIF (حداکثر10مگابایت)"
+                        accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        key={"POLICE_REPORT_FILE_UPLOAD"}
+                        id={"PoliceReportFileUpload"}
+                        deferLocalPreview
+                        value={
+                          Array.isArray(field.value) && field.value.length > 0
+                            ? field.value
+                                .filter((doc: File | string | { url?: string | { url: string }; previewBlob?: string; id?: string; name?: string }) =>
+                                  typeof doc === "string"
+                                    ? doc.trim() !== ""
+                                    : doc instanceof File
+                                    ? true
+                                    : typeof doc === "object" &&
+                                      doc !== null &&
+                                      "url" in doc
+                                )
+                                .map((doc: File | string | { url?: string | { url: string }; previewBlob?: string; id?: string; name?: string }, index: number) => {
+                                  if (typeof doc === "string") {
+                                    return {
+                                      id: `existing-doc-${index}`,
+                                      preview: doc,
+                                      progress: 100,
+                                      uploaded: true,
+                                      name: `Existing Document ${index + 1}`,
+                                      type: "image/jpeg",
+                                    };
+                                  } else if (doc instanceof File) {
+                                    return {
+                                      id: `new-file-${index}`,
+                                      preview: URL.createObjectURL(doc),
+                                      progress: 100,
+                                      uploaded: false,
+                                      name: doc.name,
+                                      type: doc.type || "application/octet-stream",
+                                    };
+                                  } else {
+                                    const imageUrl = typeof doc.url === 'string' ? doc.url : 
+                                            (doc.url?.url || '');
+                                    const previewUrl = doc.previewBlob || imageUrl;
+                                    
+                                    return {
+                                      id: doc.id ?? `existing-doc-${index}`,
+                                      preview: previewUrl || `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect fill='%23ddd' width='400' height='400'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%23999'>${encodeURIComponent(doc.name || 'No Preview')}</text></svg>`,
+                                      progress: 100,
+                                      uploaded: true,
+                                      name: doc.name ?? `Existing Document ${index + 1}`,
+                                      type: "image/jpeg",
+                                    };
+                                  }
+                                })
+                            : []
+                        }
+                        onChange={async (files: Array<{ id?: string; name?: string; preview?: string; uploaded?: boolean; file?: File }>) => {
+                          const existingFiles = Array.isArray(field.value)
+                            ? field.value.filter(
+                                (doc: File | string | { url?: string | { url: string } }) =>
+                                  typeof doc === "string" ||
+                                  (typeof doc === "object" &&
+                                    doc !== null &&
+                                    "url" in doc)
+                              )
+                            : [];
+
+                          const newFilesToUpload = files
+                            .map((f) => f.file)
+                            .filter((file): file is File => file instanceof File);
+
+                          if (newFilesToUpload.length > 0) {
+                            const toastId = toast.loading("در حال آپلود فایل");
+                            const filesWithBlobs = files.filter((f) => f.file instanceof File);
+                            
+                            const uploadedFiles = await handleImmediateMultipleFileUpload(newFilesToUpload);
+
+                            if (uploadedFiles.length > 0) {
+                              const mergedFiles = uploadedFiles.map((serverFile, index) => {
+                                const blobFile = filesWithBlobs[index];
+                                return {
+                                  id: serverFile.id,
+                                  url: serverFile.url,
+                                  name: serverFile.name,
+                                  previewBlob: blobFile?.preview || null,
+                                };
+                              });
+                              
+                              const newValue = [...existingFiles, ...mergedFiles];
+                              field.onChange(newValue);
+                              toast.success("فایل‌ها با موفقیت آپلود شدند", { id: toastId });
+                            } else {
+                              toast.error("خطا در آپلود فایل‌ها", { id: toastId });
+                            }
+                          } else {
+                            const remainingFiles = files
+                              .map((f) => {
+                                if (f.uploaded && f.id) {
+                                  return existingFiles.find(
+                                    (doc: File | string | { id?: string }) =>
+                                      (typeof doc === "object" &&
+                                        "id" in doc &&
+                                        doc.id === f.id) ||
+                                      (typeof doc === "string" && doc === f.preview)
+                                  );
+                                }
+                                return null;
+                              })
+                              .filter(Boolean);
+
+                            field.onChange(remainingFiles.length > 0 ? remainingFiles : []);
+                          }
+                        }}
+                        isInvalid={!!form.formState.errors.policeReportFile}
+                        capture={"environment"}
+                        prevGridColumns={4}
                       />
                     </FormControl>
                     <FormMessage className="text-right !text-xs text-destructive" />
@@ -686,13 +935,121 @@ const AccidentForm = ({
                     </FormLabel>
                     <FormControl>
                       <FileUploader
-                        id="fire-report-file"
-                        value={field.value}
-                        onChange={field.onChange}
-                        maxFiles={5}
-                        maxSize={5}
-                        accept="image/*,.pdf"
-                        multiple
+                        maxFiles={20}
+                        uploadText="فایل را انتخاب کنید"
+                        uploadSubText="PDF, Word, SVG, PNG, JPG یا GIF (حداکثر10مگابایت)"
+                        accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        key={"FIRE_REPORT_FILE_UPLOAD"}
+                        id={"FireReportFileUpload"}
+                        deferLocalPreview
+                        value={
+                          Array.isArray(field.value) && field.value.length > 0
+                            ? field.value
+                                .filter((doc: File | string | { url?: string | { url: string }; previewBlob?: string; id?: string; name?: string }) =>
+                                  typeof doc === "string"
+                                    ? doc.trim() !== ""
+                                    : doc instanceof File
+                                    ? true
+                                    : typeof doc === "object" &&
+                                      doc !== null &&
+                                      "url" in doc
+                                )
+                                .map((doc: File | string | { url?: string | { url: string }; previewBlob?: string; id?: string; name?: string }, index: number) => {
+                                  if (typeof doc === "string") {
+                                    return {
+                                      id: `existing-doc-${index}`,
+                                      preview: doc,
+                                      progress: 100,
+                                      uploaded: true,
+                                      name: `Existing Document ${index + 1}`,
+                                      type: "image/jpeg",
+                                    };
+                                  } else if (doc instanceof File) {
+                                    return {
+                                      id: `new-file-${index}`,
+                                      preview: URL.createObjectURL(doc),
+                                      progress: 100,
+                                      uploaded: false,
+                                      name: doc.name,
+                                      type: doc.type || "application/octet-stream",
+                                    };
+                                  } else {
+                                    const imageUrl = typeof doc.url === 'string' ? doc.url : 
+                                            (doc.url?.url || '');
+                                    const previewUrl = doc.previewBlob || imageUrl;
+                                    
+                                    return {
+                                      id: doc.id ?? `existing-doc-${index}`,
+                                      preview: previewUrl || `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect fill='%23ddd' width='400' height='400'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%23999'>${encodeURIComponent(doc.name || 'No Preview')}</text></svg>`,
+                                      progress: 100,
+                                      uploaded: true,
+                                      name: doc.name ?? `Existing Document ${index + 1}`,
+                                      type: "image/jpeg",
+                                    };
+                                  }
+                                })
+                            : []
+                        }
+                        onChange={async (files: Array<{ id?: string; name?: string; preview?: string; uploaded?: boolean; file?: File }>) => {
+                          const existingFiles = Array.isArray(field.value)
+                            ? field.value.filter(
+                                (doc: File | string | { url?: string | { url: string } }) =>
+                                  typeof doc === "string" ||
+                                  (typeof doc === "object" &&
+                                    doc !== null &&
+                                    "url" in doc)
+                              )
+                            : [];
+
+                          const newFilesToUpload = files
+                            .map((f) => f.file)
+                            .filter((file): file is File => file instanceof File);
+
+                          if (newFilesToUpload.length > 0) {
+                            const toastId = toast.loading("در حال آپلود فایل");
+                            const filesWithBlobs = files.filter((f) => f.file instanceof File);
+                            
+                            const uploadedFiles = await handleImmediateMultipleFileUpload(newFilesToUpload);
+
+                            if (uploadedFiles.length > 0) {
+                              const mergedFiles = uploadedFiles.map((serverFile, index) => {
+                                const blobFile = filesWithBlobs[index];
+                                return {
+                                  id: serverFile.id,
+                                  url: serverFile.url,
+                                  name: serverFile.name,
+                                  previewBlob: blobFile?.preview || null,
+                                };
+                              });
+                              
+                              const newValue = [...existingFiles, ...mergedFiles];
+                              field.onChange(newValue);
+                              toast.success("فایل‌ها با موفقیت آپلود شدند", { id: toastId });
+                            } else {
+                              toast.error("خطا در آپلود فایل‌ها", { id: toastId });
+                            }
+                          } else {
+                            const remainingFiles = files
+                              .map((f) => {
+                                if (f.uploaded && f.id) {
+                                  return existingFiles.find(
+                                    (doc: File | string | { id?: string }) =>
+                                      (typeof doc === "object" &&
+                                        "id" in doc &&
+                                        doc.id === f.id) ||
+                                      (typeof doc === "string" && doc === f.preview)
+                                  );
+                                }
+                                return null;
+                              })
+                              .filter(Boolean);
+
+                            field.onChange(remainingFiles.length > 0 ? remainingFiles : []);
+                          }
+                        }}
+                        isInvalid={!!form.formState.errors.fireReportFile}
+                        capture={"environment"}
+                        prevGridColumns={4}
                       />
                     </FormControl>
                     <FormMessage className="text-right !text-xs text-destructive" />
@@ -766,13 +1123,11 @@ const AccidentForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="sunny">آفتابی</SelectItem>
-                        <SelectItem value="cloudy">ابری</SelectItem>
-                        <SelectItem value="rainy">بارانی</SelectItem>
-                        <SelectItem value="stormy">طوفانی</SelectItem>
-                        <SelectItem value="snowy">برفی</SelectItem>
-                        <SelectItem value="foggy">مه آلود</SelectItem>
-                        <SelectItem value="other">سایر</SelectItem>
+                        {/* <SelectItem value="0">هیچ کدام</SelectItem> */}
+                        <SelectItem value="1">آفتابی</SelectItem>
+                        <SelectItem value="2">طوفانی</SelectItem>
+                        <SelectItem value="3">بارانی</SelectItem>
+                        <SelectItem value="4">ابری</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage className="text-right !text-xs text-destructive" />
@@ -799,10 +1154,12 @@ const AccidentForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="high">زیاد</SelectItem>
-                        <SelectItem value="medium">متوسط</SelectItem>
-                        <SelectItem value="low">کم</SelectItem>
-                        <SelectItem value="none">هیچ</SelectItem>
+                        {/* <SelectItem value="0">هیچ کدام</SelectItem> */}
+                        <SelectItem value="1">خیلی کم</SelectItem>
+                        <SelectItem value="2">کم</SelectItem>
+                        <SelectItem value="3">متوسط</SelectItem>
+                        <SelectItem value="4">زیاد</SelectItem>
+                        <SelectItem value="5">خیلی زیاد</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage className="text-right !text-xs text-destructive" />

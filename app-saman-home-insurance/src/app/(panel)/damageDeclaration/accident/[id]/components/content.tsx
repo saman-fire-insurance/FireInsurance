@@ -97,7 +97,6 @@ export default function Content({ declarationId }: ContentProps) {
   // }, [declarationId]);
 
   const handleFormSubmit = async (data: Record<string, unknown>) => {
-    console.log(data, "DATAACCIDENT");
     setIsSubmitting(true);
 
     // Extract date from accidentDate and combine with accidentTime
@@ -114,7 +113,6 @@ export default function Content({ declarationId }: ContentProps) {
       const dateStr = dateString.split("T")[0]; // Extract "2025-09-29"
       incidentDateTime = `${dateStr}T${data.accidentTime}:00.000Z`; // Format: "2025-09-29THH:mm:00.000Z"
     }
-    console.log(incidentDateTime, "INCIDENT_DATE_TIME");
 
     const requestBody = {
       damageClaimId: declarationId,
@@ -132,6 +130,30 @@ export default function Content({ declarationId }: ContentProps) {
         : _.map(data.accidentImages as Array<{ id: string }>, (p) => {
             return p.id;
           }),
+      hasPoliceReport: data.hasPoliceReport === "yes" ? true : false,
+      policeReportNumber: data.policeReportNumber
+        ? data.policeReportNumber
+        : null,
+      policeReportDate: data.policeReportDate ? data.policeReportDate : null,
+      policeReportFileIds: _.isEmpty(data.policeReportFile)
+        ? null
+        : _.map(data.policeReportFile as Array<{ id: string }>, (p) => {
+            return p.id;
+          }),
+      hasFireStationReport: data.hasFireReport === "yes" ? true : false,
+      fireStationName: data.fireReportNumber ? data.fireReportNumber : null,
+      fireStationReportFileIds: _.isEmpty(data.fireReportFile)
+        ? null
+        : _.map(data.fireReportFile as Array<{ id: string }>, (p) => {
+            return p.id;
+          }),
+      hasWeatherReport: data.hasMeteorologicalReport === "yes" ? true : false,
+      weatherCondition: data.meteorologicalReportNumber
+        ? Number(data.meteorologicalReportNumber)
+        : 0,
+      weatherReportProbability: data.meteorologicalPredictionLevel
+        ? Number(data.meteorologicalPredictionLevel)
+        : 0,
     } as AddIncidentInfoToClaimRequest;
     console.log(requestBody, "requestBody");
     try {

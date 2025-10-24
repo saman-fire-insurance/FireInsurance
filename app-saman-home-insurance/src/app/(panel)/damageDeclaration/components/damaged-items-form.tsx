@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeftIcon } from "lucide-react";
 
 // Form validation schema
@@ -57,6 +58,8 @@ interface DamagedItemsFormProps {
   onChange: (data: DamagedItemsFormData) => void;
   onNext: () => void;
   onPrevious: () => void;
+  insurableObjects: any;
+  insurableObjectsLoading: boolean;
 }
 
 export default function DamagedItemsForm({
@@ -64,8 +67,11 @@ export default function DamagedItemsForm({
   onChange,
   onNext,
   onPrevious,
+  insurableObjects,
+  insurableObjectsLoading,
 }: DamagedItemsFormProps) {
   const [totalDamages, setTotalDamages] = useState(0);
+  // console.log(insurableObjects,"insurableObjects")
 
   const form = useForm<DamagedItemsFormData>({
     resolver: zodResolver(damagedItemsSchema),
@@ -118,12 +124,12 @@ export default function DamagedItemsForm({
   ]);
 
   // Update parent component whenever form data changes
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      onChange(value as DamagedItemsFormData);
-    });
-    return () => subscription.unsubscribe();
-  }, [form, onChange]);
+  // useEffect(() => {
+  //   const subscription = form.watch((value) => {
+  //     onChange(value as DamagedItemsFormData);
+  //   });
+  //   return () => subscription.unsubscribe();
+  // }, [form, onChange]);
 
   const formatCurrency = (value: string) => {
     // Remove all non-digit characters
@@ -142,40 +148,71 @@ export default function DamagedItemsForm({
 
   const onSubmit = (data: DamagedItemsFormData) => {
     console.log("Form submitted:", data);
-    onNext();
+    
+    // Generate damagedObjects array for API
+    const damagedObjects = allDamageItems
+      .filter((item: any) => {
+        // Check if this item is selected
+        const isSelected = data[item.id as keyof DamagedItemsFormData];
+        return isSelected === true;
+      })
+      .map((item: any) => {
+        // Get the amount for this item
+        const amountField = item.amountField as keyof DamagedItemsFormData;
+        const amountValue = data[amountField] as string || "";
+        
+        // Parse the amount (remove commas and convert to number)
+        const estimatedLoss = parseFloat(amountValue.replace(/,/g, "") || "0");
+        
+        // For "other" items, use the description field, otherwise empty string
+        const description = item.id === "other" 
+          ? (data.description || "") 
+          : "";
+        
+        return {
+          insurableObjectId: item.apiId || null, // Use null for "other" option
+          estimatedLoss: estimatedLoss,
+          description: description,
+        };
+      });
+    
+    console.log("Damaged Objects for API:", damagedObjects);
+    
+    // Pass both form data and damagedObjects to parent
+    onChange({ ...data, damagedObjects } as any);
+    // onNext();
   };
 
-  const damageItems = [
-    {
-      id: "building",
-      label: "ساختمان",
-      amountField: "buildingAmount",
-    },
-    {
-      id: "facilities",
-      label: "تاسیسات",
-      amountField: "facilitiesAmount",
-    },
-    {
-      id: "furniture",
-      label: "اتاقیه",
-      amountField: "furnitureAmount",
-    },
-    {
-      id: "glass",
-      label: "شیشه",
-      amountField: "glassAmount",
-    },
-    {
-      id: "vehicleOnSite",
-      label: "خودرو در محل بیمه",
-      amountField: "vehicleOnSiteAmount",
-    },
-    {
-      id: "other",
-      label: "سایر موارد",
-      amountField: "otherAmount",
-    },
+  // Map API field names to form field names
+  const fieldNameMap: Record<number, { id: string; amountField: string }> = {
+    1: { id: "building", amountField: "buildingAmount" },
+    2: { id: "facilities", amountField: "facilitiesAmount" },
+    3: { id: "furniture", amountField: "furnitureAmount" },
+    4: { id: "glass", amountField: "glassAmount" },
+    5: { id: "vehicleOnSite", amountField: "vehicleOnSiteAmount" },
+  };
+
+  // Generate damage items from API data
+  const damageItems = insurableObjects?.map((item: any) => ({
+    id: fieldNameMap[item.samanId]?.id || `custom_${item.id}`,
+    label: item.title,
+    amountField: fieldNameMap[item.samanId]?.amountField || `custom_${item.id}_amount`,
+    apiId: item.id,
+    samanId: item.samanId,
+    isOther: item.other,
+  })) || [];
+
+  // Add "سایر موارد" (Other) option at the end
+  const allDamageItems = [
+    ...damageItems,
+    // {
+    //   id: "other",
+    //   label: "سایر موارد",
+    //   amountField: "otherAmount",
+    //   apiId: null,
+    //   samanId: null,
+    //   isOther: true,
+    // },
   ];
 
   return (
@@ -185,13 +222,25 @@ export default function DamagedItemsForm({
           <h2 className="text-lg font-normal text-gray-500 text-center">
             موارد آسیب دیده
           </h2>
-          <p className="text-sm text-gray-600 text-center">
+          <p className="text-sm text-gray-600 text-right">
             موارد آسیب دیده را انتخاب کنید:
           </p>
 
           {/* Damage Items List */}
           <div className="space-y-4">
-            {damageItems.map((item, index) => (
+            {insurableObjectsLoading ? (
+              // Loading skeleton
+              Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="space-y-2">
+                  {/* Checkbox and label skeleton */}
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-4 rounded" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              allDamageItems.map((item: any, index: number) => (
               <div key={item.id} className="space-y-2">
                 {/* Checkbox */}
                 <FormField
@@ -240,11 +289,12 @@ export default function DamagedItemsForm({
                   />
                 )}
               </div>
-            ))}
+            ))
+            )}
           </div>
 
           {/* Description - Only show when "other" is checked */}
-          {form.watch("other") && (
+          {/* {form.watch("other") && (
             <>
               <FormField
                 control={form.control}
@@ -266,7 +316,6 @@ export default function DamagedItemsForm({
                 )}
               />
 
-              {/* Estimated Damages Amount for Description */}
               <FormField
                 control={form.control}
                 name="otherAmount"
@@ -292,7 +341,9 @@ export default function DamagedItemsForm({
                 )}
               />
             </>
-          )}
+          )} */}
+          {/* ///////////////////////// */}
+
 
           {/* Total Summary */}
           <div className="bg-success/10 p-4 rounded-lg flex justify-between items-center">

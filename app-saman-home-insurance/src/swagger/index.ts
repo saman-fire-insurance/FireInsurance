@@ -7,16 +7,21 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { AddDamagedObjectsToClaimRequest } from './models/AddDamagedObjectsToClaimRequest';
 export type { AddIncidentInfoToClaimRequest } from './models/AddIncidentInfoToClaimRequest';
 export type { AddInsuranceInfoToClaimRequest } from './models/AddInsuranceInfoToClaimRequest';
+export type { AddStakeHoldersInfoToClaimRequest } from './models/AddStakeHoldersInfoToClaimRequest';
 export type { AddThirdPartyCoverageRequest } from './models/AddThirdPartyCoverageRequest';
 export type { CreateDamageClaimRequest } from './models/CreateDamageClaimRequest';
+export type { DamagedObjectItemRequest } from './models/DamagedObjectItemRequest';
 export type { GetCitiesRequest } from './models/GetCitiesRequest';
-export type { GetDamageClaimDetailsRequest } from './models/GetDamageClaimDetailsRequest';
 export type { GridifyQuery } from './models/GridifyQuery';
 export type { OtpDto } from './models/OtpDto';
 export type { OtpRequestDto } from './models/OtpRequestDto';
 export type { PersonInquiryRequest } from './models/PersonInquiryRequest';
+export { Probability } from './models/Probability';
+export type { StakeHolderItemRequest } from './models/StakeHolderItemRequest';
+export { WeatherCondition } from './models/WeatherCondition';
 
 export { CityService } from './services/CityService';
 export { DamageClaimService } from './services/DamageClaimService';
