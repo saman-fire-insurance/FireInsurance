@@ -20,11 +20,11 @@ import { ArrowLeftIcon } from "lucide-react";
 
 // Form validation schema
 const beneficiariesSchema = z.object({
-  insurancePolicyNumber: z
+  insurerAccountNumber: z
     .string()
     .min(1, "شماره حساب بیمه گذار الزامی است")
     .regex(/^(\d{8}|\d{12})$/, "شماره حساب باید 8 یا 12 رقم باشد"),
-  insuranceShabaNumber: z
+  insurerIban: z
     .string()
     .min(1, "شماره شبا بیمه گذار الزامی است")
     .regex(/^\d{16}$/, "شماره شبا باید 16 رقم باشد"),
@@ -54,8 +54,8 @@ export default function BeneficiariesForm({
   const form = useForm<BeneficiariesFormData>({
     resolver: zodResolver(beneficiariesSchema),
     defaultValues: initialData || {
-      insurancePolicyNumber: "",
-      insuranceShabaNumber: "",
+      insurerAccountNumber: "",
+      insurerIban: "",
       hasOtherBeneficiary: "no",
       beneficiaryName: "",
       beneficiaryPhone: "",
@@ -88,7 +88,7 @@ export default function BeneficiariesForm({
           {/* Insurance Policy Number */}
           <FormField
             control={form.control}
-            name="insurancePolicyNumber"
+            name="insurerAccountNumber"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
@@ -112,7 +112,7 @@ export default function BeneficiariesForm({
           {/* Insurance Shaba Number */}
           <FormField
             control={form.control}
-            name="insuranceShabaNumber"
+            name="insurerIban"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>

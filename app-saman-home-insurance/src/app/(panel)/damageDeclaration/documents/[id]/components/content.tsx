@@ -49,21 +49,34 @@ export default function Content({ declarationId }: ContentProps) {
     setIsSubmitting(true);
     const requestBody = {
       damageClaimId: declarationId,
-      stakeHolders: [
-        {
-          firstName: "",
-          lastName: "",
-          phoneNumber: "",
-          accountNumber: "",
-          iban: "",
-          isOwner: true,
-        },
-      ] as StakeHolderItemRequest,
+      accountNumber: data.insurerAccountNumber,
+      iban: `IR${data.insurerIban}`,
+      hasOtherStakeHolder: data.hasOtherBeneficiary === "yes" ? true : false,
+      otherStakeHolders:
+        data.hasOtherBeneficiary === "yes"
+          ? ([
+              {
+                firstName: data.beneficiaryName,
+                phoneNumber: data.beneficiaryPhone,
+              },
+            ] as StakeHolderItemRequest[])
+          : null,
+      hasNeighborStakeHolder:
+        data.accidentCausedByDispute === "yes" ? true : false,
+      neighborStakeHolders:
+        data.accidentCausedByDispute === "yes"
+          ? ([
+              {
+                firstName: data.disputeName,
+                phoneNumber: data.disputePhone,
+              },
+            ] as StakeHolderItemRequest[])
+          : null,
     } as AddStakeHoldersInfoToClaimRequest;
     console.log(requestBody, "requestBody");
     try {
       const res = await DamageClaimService.postApiV1DamageClaimAddStakeHolders({
-        requestBody,
+        requestBody: requestBody,
       });
       if (res) {
         setIsSubmitting(false);

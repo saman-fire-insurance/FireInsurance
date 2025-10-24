@@ -50,23 +50,25 @@ export default function ReviewForm({
         کنید.
       </p>
 
-      <div className="flex gap-x-2 items-center mb-8 justify-between">
-        <Button
-          variant="default"
-          onClick={onSubmit}
-          disabled={isSubmitting}
-          className="bg-primary text-white px-8 flex-2"
-        >
-          {isSubmitting ? "در حال ارسال..." : "تایید و ارسال"}
-          <ArrowLeftIcon className="size-4 mr-2" />
-        </Button>
-        <Button
-          variant="transparent"
-          onClick={onPrevious}
-          className="border-gray-300 flex-1"
-        >
-          مرحله قبلی
-        </Button>
+      <div className="sm:block hidden">
+        <div className="flex gap-x-2 items-center mb-8 justify-between">
+          <Button
+            variant="default"
+            onClick={onSubmit}
+            disabled={isSubmitting}
+            className="bg-primary text-white px-8 flex-2"
+          >
+            {isSubmitting ? "در حال ارسال..." : "تایید و ارسال"}
+            <ArrowLeftIcon className="size-4 mr-2" />
+          </Button>
+          <Button
+            variant="transparent"
+            onClick={onPrevious}
+            className="border-gray-300 flex-1"
+          >
+            مرحله قبلی
+          </Button>
+        </div>
       </div>
 
       <Accordion
@@ -347,13 +349,34 @@ export default function ReviewForm({
               <div className="flex justify-start gap-x-2 items-center">
                 <span className="text-sm text-gray-400">ذینفع دیگر:</span>
                 <span className="text-sm font-medium">
-                  {reviewData?.stakeHolders?.isOwner ? "دارد" : "ندارد"}
+                  {!reviewData?.stakeHolders?.isOwner ? "دارد" : "ندارد"}
                 </span>
               </div>
             </div>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+
+      <div className="sm:hidden block">
+        <div className="flex gap-x-2 items-center mt-6 justify-between">
+          <Button
+            variant="default"
+            onClick={onSubmit}
+            disabled={isSubmitting}
+            className="bg-primary text-white px-8 flex-2"
+          >
+            {isSubmitting ? "در حال ارسال..." : "تایید و ارسال"}
+            <ArrowLeftIcon className="size-4 mr-2" />
+          </Button>
+          <Button
+            variant="transparent"
+            onClick={onPrevious}
+            className="border-gray-300 flex-1"
+          >
+            مرحله قبلی
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
