@@ -25,20 +25,13 @@ namespace FireInsurance.Damage.Domain.Entities
         public DamageClaimStatus Status { get; set; }
         public ThirdPartyCoverage? ThirdPartyCoverage { get; set; } = null;
 
-        public static Result<DamageClaim> Create(string userId, string phoneNumber, string firstName, string lastName)
+        public static Result<DamageClaim> Create(string userId, Insurer insurer)
         {
-            var insurer = new Insurer
-            {
-                FirstName = firstName,
-                LastName = lastName,
-                PhoneNumber = phoneNumber
-            };
-
             var createdClaim = new DamageClaim
             {
                 UserId = userId,
-                PhoneNumber = phoneNumber,
-                Status = DamageClaimStatus.IncidentInfo,
+                PhoneNumber = insurer.PhoneNumber,
+                Status = DamageClaimStatus.Insurance,
                 Insurer = insurer,
                 // Add first StakeHolder
             };
@@ -60,6 +53,8 @@ namespace FireInsurance.Damage.Domain.Entities
                 ThirdPartyCoverage = thirdPartyCoverage;
             }
 
+            Status = DamageClaimStatus.Incident;
+
             return Result.Success(this);
         }
 
@@ -72,6 +67,7 @@ namespace FireInsurance.Damage.Domain.Entities
             }
 
             Incident = incident;
+            Status = DamageClaimStatus.DamagedObjects;
 
             return Result.Success(this);
         }
@@ -84,6 +80,7 @@ namespace FireInsurance.Damage.Domain.Entities
             }
 
             DamagedObjects = damagedObjects;
+            Status = DamageClaimStatus.StakeHolder;
 
             return Result.Success(this);
         }
@@ -96,7 +93,8 @@ namespace FireInsurance.Damage.Domain.Entities
             }
 
             StakeHolders = stakeHolders;
-            StakeHolderIds = stakeHolders.Select(sh => sh.Id).ToList();
+            StakeHolderIds = [.. stakeHolders.Select(sh => sh.Id)];
+            Status = DamageClaimStatus.Pending;
 
             return Result.Success(this);
         }

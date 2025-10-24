@@ -8,10 +8,11 @@ namespace FireInsurance.Damage.Domain.Enums
 {
     public enum DamageClaimStatus
     {
-        InsurerInfo,
-        IncidentInfo,
-        DamagedObjectsInfo,
-        StakeHolderInfo,
+        Insurer,
+        Insurance,
+        Incident,
+        DamagedObjects,
+        StakeHolder,
         Pending,
         Accepted,
         Rejected
