@@ -3,6 +3,7 @@ using Common.Interfaces;
 using Common.Messaging;
 using FireInsurance.Damage.Application.Data;
 using FireInsurance.Damage.Domain.Entities;
+using FireInsurance.Damage.Domain.Errors;
 using FireInsurance.Users.Contracts.ModuleServices;
 using FluentValidation;
 
@@ -53,12 +54,27 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                     return Result.Error(new ErrorList(user.Errors));
                 }
 
-                if (string.IsNullOrEmpty(user.Value.FirstName) || string.IsNullOrEmpty(user.Value.LastName))
+                if (string.IsNullOrEmpty(user.Value.FirstName) ||
+                    string.IsNullOrEmpty(user.Value.LastName) ||
+                    string.IsNullOrEmpty(user.Value.NationalID) ||
+                    user.Value.DateOfBirth == null ||
+                    string.IsNullOrEmpty(user.Value.PhoneNumber))
                 {
-                    return Result.Error("Complete your profile first");
+                    return Result.Error(DamageClaimErrors.UserError.NotComplete);
                 }
 
-                var createdClaim = DamageClaim.Create(userId, request.PhoneNumber, user.Value.FirstName, user.Value.LastName);
+                var createdInsurer = Insurer.Create(user.Value.FirstName, user.Value.LastName, request.PhoneNumber, user.Value.NationalID, user.Value.DateOfBirth);
+                if (!createdInsurer.IsSuccess)
+                {
+                    if (createdInsurer.IsInvalid())
+                    {
+                        return Result.Invalid(createdInsurer.ValidationErrors);
+                    }
+
+                    return Result.Error(new ErrorList(createdInsurer.Errors));
+                }
+
+                var createdClaim = DamageClaim.Create(userId, createdInsurer.Value);
                 if (!createdClaim.IsSuccess)
                 {
                     if (createdClaim.IsInvalid())

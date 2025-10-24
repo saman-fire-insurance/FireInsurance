@@ -240,7 +240,7 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                 damageClaim.Incident = incident;
 
                 // Update damage claim status to next stage
-                damageClaim.Status = DamageClaimStatus.DamagedObjectsInfo;
+                damageClaim.Status = DamageClaimStatus.DamagedObjects;
 
                 await dbContext.SaveChangesAsync(cancellationToken);
 
