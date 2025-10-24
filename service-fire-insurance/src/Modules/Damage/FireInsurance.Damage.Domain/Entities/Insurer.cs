@@ -40,12 +40,16 @@ namespace FireInsurance.Damage.Domain.Entities
                 return Result.Invalid(new ValidationError("کد ملی نمی تواند خالی باشد"));
             }
 
-            FirstName = firstName;
-            LastName = lastName;
-            PhoneNumber = phoneNumber;
-            NationalID = nationalID;
-            DateOfBirth = dateOfBirth;
-            return Result.Success(this);
+            var createdInsurer = new Insurer
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                PhoneNumber = phoneNumber,
+                NationalID = nationalID,
+                DateOfBirth = dateOfBirth
+            };
+
+            return Result.Success(createdInsurer);
         }
 
         public Result<Insurer> AddBankAccountInfo(string accountNumber, string iban)
