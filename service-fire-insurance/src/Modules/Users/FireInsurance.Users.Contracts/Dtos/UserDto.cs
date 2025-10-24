@@ -9,6 +9,7 @@ namespace FireInsurance.Users.Contracts.Dtos
         public string? FullName { get; init; }
         public string? FatherName { get; init; }
         public string? NationalID { get; init; }
+        public string? PhoneNumber { get; init; }
         public DateOnly? DateOfBirth { get; init; }
         public Gender? Gender { get; init; }
         public DateTime? CodeSentAt { get; init; }
