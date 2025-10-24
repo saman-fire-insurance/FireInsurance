@@ -68,7 +68,7 @@ export default function ReviewForm({
         </Button>
       </div>
 
-      <Accordion type="multiple" className="w-full space-y-2">
+      <Accordion type="multiple" className="w-full space-y-2" defaultValue={["insured"]}>
         {/* اطلاعات بیمه‌گذار */}
         <AccordionItem
           value="insured"
