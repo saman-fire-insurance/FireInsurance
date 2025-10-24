@@ -75,17 +75,14 @@ export default function Content({ declarationId }: ContentProps) {
       damageClaimId: declarationId,
       damagedObjects: data.damagedObjects,
     } as AddDamagedObjectsToClaimRequest;
-    console.log(requestBody, "requestBody");
+    // console.log(requestBody, "requestBody");
     try {
-      const res =
-        await DamageClaimService.postApiV1DamageClaimAddDamagedObjects({
-          requestBody,
-        });
-      if (res) {
-        setIsSubmitting(false);
-        toast.success("اطلاعات موارد آسیب دیده با موفقیت ثبت شد");
-        router.push(`/damageDeclaration/documents/${declarationId}`);
-      }
+      await DamageClaimService.postApiV1DamageClaimAddDamagedObjects({
+        requestBody,
+      });
+      // If we reach here, the request was successful
+      toast.success("اطلاعات موارد آسیب دیده با موفقیت ثبت شد");
+      router.push(`/damageDeclaration/documents/${declarationId}`);
     } catch (error) {
       console.log(error);
       toast.error("خطایی رخ داده است");
