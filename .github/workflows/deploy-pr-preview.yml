@@ -46,7 +46,7 @@ jobs:
           url: https://noyanvault.paratechco.com
           role: github-actions
           secrets: |
-            secret/data/fireinsurance/k8s kubeconfig | KUBECONFIG_CONTENT ;
+            secret/data/fireinsurance/preview kubeconfig | KUBECONFIG_CONTENT ;
             secret/data/fireinsurance/preview database_connection_string | DATABASE_CONNECTION_STRING ;
             secret/data/fireinsurance/preview jwt_signing_key | JWT_SIGNING_KEY ;
             secret/data/fireinsurance/preview sms_provider_base_url | SMS_PROVIDER_BASE_URL ;

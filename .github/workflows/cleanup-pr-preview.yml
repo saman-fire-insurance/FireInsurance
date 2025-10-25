@@ -36,7 +36,7 @@ jobs:
           url: https://noyanvault.paratechco.com
           role: github-actions
           secrets: |
-            secret/data/fireinsurance/k8s kubeconfig | KUBECONFIG_CONTENT
+            secret/data/fireinsurance/preview kubeconfig | KUBECONFIG_CONTENT
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3

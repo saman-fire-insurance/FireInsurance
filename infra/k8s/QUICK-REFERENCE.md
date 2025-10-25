@@ -20,9 +20,8 @@ newName: ghcr.io/your-org/fireinsurance/backend
 
 ```
 secret/data/fireinsurance/
-├── k8s/
-│   └── kubeconfig                    # Base64-encoded kubeconfig
 ├── stage/
+│   ├── kubeconfig                    # Base64-encoded stage kubeconfig
 │   ├── database_connection_string
 │   ├── jwt_signing_key
 │   ├── sms_provider_base_url
@@ -33,9 +32,11 @@ secret/data/fireinsurance/
 │   ├── nextauth_secret
 │   └── recaptcha_site_key
 ├── prod/
-│   └── (same as stage)
+│   ├── kubeconfig                    # Base64-encoded prod kubeconfig
+│   └── (same application secrets as stage)
 └── preview/
-    └── (same as stage)
+    ├── kubeconfig                    # Base64-encoded preview kubeconfig
+    └── (same application secrets as stage)
 ```
 
 ## Deployment Triggers

@@ -59,15 +59,10 @@ k8s/
 
 2. **Vault Secrets**: Store the following secrets in HashiCorp Vault:
 
-   **Kubernetes Access:**
-   ```
-   secret/data/fireinsurance/k8s
-   └── kubeconfig: <base64-encoded kubeconfig file>
-   ```
-
-   **Stage Environment:**
+   **Stage Environment (includes kubeconfig):**
    ```
    secret/data/fireinsurance/stage
+   ├── kubeconfig                    # Base64-encoded stage kubeconfig
    ├── database_connection_string
    ├── jwt_signing_key
    ├── sms_provider_base_url
@@ -79,17 +74,21 @@ k8s/
    └── recaptcha_site_key
    ```
 
-   **Production Environment:**
+   **Production Environment (includes kubeconfig):**
    ```
    secret/data/fireinsurance/prod
-   └── (same keys as stage)
+   ├── kubeconfig                    # Base64-encoded prod kubeconfig
+   └── (same application secrets as stage)
    ```
 
-   **Preview Environment:**
+   **Preview Environment (includes kubeconfig):**
    ```
    secret/data/fireinsurance/preview
-   └── (same keys as stage)
+   ├── kubeconfig                    # Base64-encoded preview kubeconfig
+   └── (same application secrets as stage)
    ```
+
+   **Note:** Each environment has its own kubeconfig for better security isolation.
 
 3. **GitHub Environments**: Configure the following environments in your GitHub repository:
    - `stage` - For staging deployments

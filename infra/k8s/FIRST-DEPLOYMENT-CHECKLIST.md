@@ -30,26 +30,40 @@ docker.io/<username>/fireinsurance-frontend
 ```
 
 ### 2. ArvanCloud Kubernetes Setup
-- [ ] Create Kubernetes cluster in ArvanCloud
-- [ ] Download kubeconfig file
-- [ ] Test local kubectl connection:
+- [ ] Create Kubernetes cluster(s) in ArvanCloud (or configure namespaces with RBAC)
+- [ ] Download/create separate kubeconfig files for each environment:
+  - [ ] Stage kubeconfig (with access to `fireinsurance-stage` namespace)
+  - [ ] Production kubeconfig (with access to `fireinsurance-prod` namespace)
+  - [ ] Preview kubeconfig (with access to create/delete `fireinsurance-pr-*` namespaces)
+- [ ] Test local kubectl connection for each:
   ```bash
-  export KUBECONFIG=/path/to/kubeconfig
+  export KUBECONFIG=/path/to/stage-kubeconfig.yaml
   kubectl cluster-info
   kubectl get nodes
   ```
-- [ ] Base64 encode kubeconfig:
+- [ ] Base64 encode each kubeconfig:
   ```bash
-  cat /path/to/kubeconfig | base64 -w 0
+  cat stage-kubeconfig.yaml | base64 -w 0
+  cat prod-kubeconfig.yaml | base64 -w 0
+  cat preview-kubeconfig.yaml | base64 -w 0
   ```
-- [ ] Store encoded kubeconfig in Vault
+- [ ] Store encoded kubeconfigs in Vault
 
 ### 3. Vault Configuration
 
-#### Store Kubeconfig
-- [ ] Path: `secret/data/fireinsurance/k8s`
-- [ ] Key: `kubeconfig`
-- [ ] Value: `<base64-encoded-kubeconfig>`
+#### Store Kubeconfigs (Separate for Each Environment)
+- [ ] Stage kubeconfig:
+  - Path: `secret/data/fireinsurance/stage`
+  - Key: `kubeconfig`
+  - Value: `<base64-encoded-stage-kubeconfig>`
+- [ ] Production kubeconfig:
+  - Path: `secret/data/fireinsurance/prod`
+  - Key: `kubeconfig`
+  - Value: `<base64-encoded-prod-kubeconfig>`
+- [ ] Preview kubeconfig:
+  - Path: `secret/data/fireinsurance/preview`
+  - Key: `kubeconfig`
+  - Value: `<base64-encoded-preview-kubeconfig>`
 
 #### Generate Secrets
 ```bash

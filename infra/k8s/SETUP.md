@@ -27,28 +27,41 @@ This guide will help you set up the complete CI/CD pipeline for deploying FireIn
 
 2. If using a private registry, add authentication to Vault or GitHub Secrets
 
-## Step 2: Prepare Kubeconfig
+## Step 2: Prepare Kubeconfigs
 
-1. Get your kubeconfig from ArvanCloud:
+You need separate kubeconfig files for each environment (stage, prod, preview) for better security isolation.
+
+1. Get your kubeconfig files from ArvanCloud:
    ```bash
    # Download from ArvanCloud dashboard or get via CLI
-   # The kubeconfig should contain cluster URL, certificate, and auth token
+   # Create separate kubeconfig for each environment with appropriate permissions
+   # stage-kubeconfig.yaml
+   # prod-kubeconfig.yaml
+   # preview-kubeconfig.yaml
    ```
 
 2. Store in Vault:
    ```bash
-   # Encode the kubeconfig
-   cat ~/.kube/config | base64 -w 0
+   # Encode the kubeconfigs
+   cat stage-kubeconfig.yaml | base64 -w 0
+   cat prod-kubeconfig.yaml | base64 -w 0
+   cat preview-kubeconfig.yaml | base64 -w 0
 
    # Store in Vault (using Vault CLI)
-   vault kv put secret/fireinsurance/k8s \
-     kubeconfig="<base64-encoded-kubeconfig>"
+   vault kv put secret/fireinsurance/stage \
+     kubeconfig="<base64-encoded-stage-kubeconfig>"
+
+   vault kv put secret/fireinsurance/prod \
+     kubeconfig="<base64-encoded-prod-kubeconfig>"
+
+   vault kv put secret/fireinsurance/preview \
+     kubeconfig="<base64-encoded-preview-kubeconfig>"
    ```
 
    Or use Vault UI:
-   - Path: `secret/data/fireinsurance/k8s`
-   - Key: `kubeconfig`
-   - Value: `<base64-encoded-kubeconfig>`
+   - Stage: `secret/data/fireinsurance/stage` → Key: `kubeconfig` → Value: `<base64-encoded-stage-kubeconfig>`
+   - Prod: `secret/data/fireinsurance/prod` → Key: `kubeconfig` → Value: `<base64-encoded-prod-kubeconfig>`
+   - Preview: `secret/data/fireinsurance/preview` → Key: `kubeconfig` → Value: `<base64-encoded-preview-kubeconfig>`
 
 ## Step 3: Store Application Secrets in Vault
 
