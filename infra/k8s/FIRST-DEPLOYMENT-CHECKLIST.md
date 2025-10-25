@@ -108,6 +108,13 @@ echo "NextAuth Secret: $NEXTAUTH_SECRET"
 
 ### 4. GitHub Repository Configuration
 
+#### Verify Workflow Permissions (GitOps)
+- [ ] Go to: Settings → Actions → General
+- [ ] Under "Workflow permissions":
+  - [ ] Ensure "Read and write permissions" is selected
+  - [ ] This allows workflows to commit kustomization changes back to git
+- [ ] **Why**: This project uses GitOps - all deployments are tracked in git history
+
 #### Create Environments
 - [ ] Go to: Settings → Environments → New environment
 - [ ] Create `stage` environment
@@ -187,6 +194,14 @@ echo "NextAuth Secret: $NEXTAUTH_SECRET"
 - [ ] Verify workflow runs: "Build and Push Docker Images"
 - [ ] Verify workflow runs: "Deploy to Stage"
 - [ ] Check workflow logs for errors
+- [ ] **Verify GitOps commit**: Check git history for deployment commit:
+  ```bash
+  git log --oneline --grep="chore(k8s): deploy stage" -1
+  ```
+- [ ] **Verify kustomization updated**: Check that image tags are exact (not "latest"):
+  ```bash
+  cat infra/k8s/overlays/stage/kustomization.yaml | grep newTag
+  ```
 - [ ] Verify namespace exists:
   ```bash
   kubectl get namespace fireinsurance-stage

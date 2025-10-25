@@ -6,7 +6,7 @@ on:
     branches: [main, master]
 
 permissions:
-  contents: read
+  contents: write  # Need write to commit kustomization changes
   id-token: write
   pull-requests: write
 
@@ -112,6 +112,28 @@ jobs:
             --from-literal=api-url="http://backend:80"
 
           cat kustomization.yaml
+
+      - name: Commit kustomization changes to git
+        run: |
+          # Configure git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Commit changes
+          git add infra/k8s/overlays/preview/kustomization.yaml
+          git commit -m "chore(k8s): deploy preview PR #${{ env.PR_NUMBER }} - ${{ env.IMAGE_TAG }}
+
+          Deployed preview environment:
+          - Namespace: ${{ env.NAMESPACE }}
+          - Backend: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          - Frontend: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+          Triggered by: ${{ github.actor }}
+          Workflow: ${{ github.workflow }}
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          # Push to the PR branch
+          git push origin HEAD:${{ github.head_ref }}
 
       - name: Create/Update secrets in Kubernetes
         run: |

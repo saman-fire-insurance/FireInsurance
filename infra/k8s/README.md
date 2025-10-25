@@ -94,6 +94,40 @@ k8s/
    - `stage` - For staging deployments
    - `production` - For production deployments (with protection rules recommended)
 
+## GitOps Approach
+
+This project uses a **GitOps methodology** where all deployment changes are tracked in git:
+
+**How it works:**
+1. Workflows update `kustomization.yaml` files with exact image tags
+2. Changes are committed back to the repository
+3. Git history provides a full audit trail of all deployments
+
+**Benefits:**
+- ✅ **Full audit trail**: Every deployment is tracked in git history
+- ✅ **Easy rollback**: Just revert the commit to rollback a deployment
+- ✅ **Clear visibility**: See what's currently deployed by looking at the kustomization files
+- ✅ **GitOps best practice**: Infrastructure as Code with version control
+
+**Commit messages include:**
+- Image tags deployed
+- Environment (stage/prod/preview)
+- Who triggered the deployment
+- Link to the workflow run
+
+**Example commit:**
+```
+chore(k8s): deploy stage - backend:main-abc1234, frontend:main-abc1234
+
+Deployed images:
+- Backend: registry.example.com/backend:main-abc1234
+- Frontend: registry.example.com/frontend:main-abc1234
+
+Triggered by: username
+Workflow: Deploy to Stage
+Run: https://github.com/owner/repo/actions/runs/12345
+```
+
 ## GitHub Actions Workflows
 
 ### 1. Build and Push (`build-and-push.yml`)
@@ -212,7 +246,44 @@ kubectl logs -f deployment/frontend -n fireinsurance-stage
 kubectl top pods -n fireinsurance-stage
 ```
 
+### View Deployment History (GitOps)
+```bash
+# View deployment history for stage environment
+git log --oneline --grep="chore(k8s): deploy stage" -- infra/k8s/overlays/stage/kustomization.yaml
+
+# View deployment history for production
+git log --oneline --grep="chore(k8s): deploy production" -- infra/k8s/overlays/prod/kustomization.yaml
+
+# View full details of a specific deployment
+git show <commit-hash>
+
+# See what's currently deployed
+cat infra/k8s/overlays/stage/kustomization.yaml
+cat infra/k8s/overlays/prod/kustomization.yaml
+```
+
 ### Rollback Deployment
+
+**Option 1: GitOps Rollback (Recommended)**
+```bash
+# Find the commit you want to rollback to
+git log --oneline --grep="chore(k8s): deploy stage" -- infra/k8s/overlays/stage/kustomization.yaml
+
+# Revert to that specific deployment
+git revert <commit-hash>
+git push
+
+# Or manually edit the kustomization file and commit
+cd infra/k8s/overlays/stage
+# Edit kustomization.yaml to use previous image tags
+git add kustomization.yaml
+git commit -m "chore(k8s): rollback stage to <previous-tag>"
+git push
+
+# Re-run the deployment workflow manually to apply the rollback
+```
+
+**Option 2: Kubernetes Rollback**
 ```bash
 # View rollout history
 kubectl rollout history deployment/backend -n fireinsurance-stage
@@ -222,6 +293,8 @@ kubectl rollout undo deployment/backend -n fireinsurance-stage
 
 # Rollback to specific revision
 kubectl rollout undo deployment/backend --to-revision=2 -n fireinsurance-stage
+
+# Note: This doesn't update git, so consider doing a GitOps rollback instead
 ```
 
 ## Configuration Updates

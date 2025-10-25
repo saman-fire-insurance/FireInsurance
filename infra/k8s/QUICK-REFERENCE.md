@@ -47,6 +47,26 @@ secret/data/fireinsurance/
 | **Production** | Release published OR manual | `deploy-prod.yml` |
 | **Preview** | PR opened/updated | `deploy-pr-preview.yml` |
 
+## GitOps: Viewing Deployment History
+
+```bash
+# View deployment history for stage
+git log --oneline --grep="chore(k8s): deploy stage" -- infra/k8s/overlays/stage/kustomization.yaml
+
+# View deployment history for production
+git log --oneline --grep="chore(k8s): deploy production" -- infra/k8s/overlays/prod/kustomization.yaml
+
+# View deployment history for PR previews
+git log --oneline --grep="chore(k8s): deploy preview" -- infra/k8s/overlays/preview/kustomization.yaml
+
+# See full details of a deployment
+git show <commit-hash>
+
+# See what's currently deployed in each environment
+cat infra/k8s/overlays/stage/kustomization.yaml | grep newTag
+cat infra/k8s/overlays/prod/kustomization.yaml | grep newTag
+```
+
 ## Common kubectl Commands
 
 ```bash

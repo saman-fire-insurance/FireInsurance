@@ -11,7 +11,7 @@ on:
         type: string
 
 permissions:
-  contents: read
+  contents: write  # Need write to commit kustomization changes
   id-token: write
 
 env:
@@ -98,6 +98,29 @@ jobs:
           kustomize edit set image frontend=${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${IMAGE_TAG}
 
           cat kustomization.yaml
+
+      - name: Commit kustomization changes to git
+        run: |
+          # Configure git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          IMAGE_TAG="${{ steps.image-tag.outputs.tag }}"
+
+          # Commit changes
+          git add infra/k8s/overlays/prod/kustomization.yaml
+          git commit -m "chore(k8s): deploy production - ${IMAGE_TAG}
+
+          Deployed images:
+          - Backend: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${IMAGE_TAG}
+          - Frontend: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${IMAGE_TAG}
+
+          Triggered by: ${{ github.actor }}
+          Workflow: ${{ github.workflow }}
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          # Push to repository
+          git push origin HEAD:${{ github.ref_name }}
 
       - name: Create/Update secrets in Kubernetes
         run: |

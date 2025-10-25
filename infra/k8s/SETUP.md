@@ -118,6 +118,30 @@ openssl rand -base64 32
 
 ## Step 4: Configure GitHub Repository
 
+### GitOps Approach
+
+This setup uses **GitOps methodology** - all deployment changes are committed back to git:
+
+**How it works:**
+- Workflows update kustomization files with exact image tags
+- Changes are automatically committed to the repository
+- Git history provides full audit trail of all deployments
+- Easy rollback: just revert a commit and re-run the workflow
+
+**Permissions Required:**
+The workflows need `contents: write` permission to commit changes. This is already configured in the workflow files.
+
+**What gets committed:**
+- `infra/k8s/overlays/stage/kustomization.yaml` (stage deployments)
+- `infra/k8s/overlays/prod/kustomization.yaml` (production deployments)
+- `infra/k8s/overlays/preview/kustomization.yaml` (PR preview deployments)
+
+**Commit messages include:**
+- Image tags deployed
+- Environment details
+- Who triggered the deployment
+- Link to workflow run
+
 ### Create GitHub Environments
 1. Go to your repository **Settings** → **Environments**
 2. Create two environments:
@@ -128,6 +152,12 @@ openssl rand -base64 32
    - ✅ Required reviewers (add team members)
    - ✅ Wait timer (optional, e.g., 5 minutes)
    - ✅ Deployment branches (only `main`/`master`)
+
+### Verify Workflow Permissions
+1. Go to **Settings** → **Actions** → **General**
+2. Under "Workflow permissions", ensure:
+   - ✅ "Read and write permissions" is selected
+   - OR the workflows have explicit `contents: write` permission (already configured)
 
 ### Verify Vault Integration
 The workflows use the existing Vault setup. Verify it works:
