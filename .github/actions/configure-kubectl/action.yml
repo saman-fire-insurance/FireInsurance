@@ -13,7 +13,7 @@ runs:
       shell: bash
       run: |
         mkdir -p $HOME/.kube
-        echo "${{ inputs.kubeconfig-content }}" > $HOME/.kube/config
+        echo "${{ inputs.kubeconfig-content }}" | base64 -d > $HOME/.kube/config
         chmod 600 $HOME/.kube/config
 
     - name: Test kubectl connection
