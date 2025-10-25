@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore;
 namespace FireInsurance.Damage.Application.UseCases.Commands
 {
     public sealed record StakeHolderItemRequest(
-        string FirstName,
-        string LastName,
+        string FullName,
+        //string LastName,
         string PhoneNumber,
         bool IsOwner = false);
 
@@ -87,8 +87,8 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                     foreach (var item in request.OtherStakeHolders)
                     {
                         var stakeHolderResult = StakeHolder.Create(
-                            firstName: item.FirstName,
-                            lastName: item.LastName,
+                            fullName: item.FullName,
+                            //lastName: item.LastName,
                             phoneNumber: item.PhoneNumber,
                             //accountNumber: item.AccountNumber,
                             //iban: item.Iban,
@@ -113,8 +113,8 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                     foreach (var item in request.NeighborStakeHolders)
                     {
                         var stakeHolderResult = StakeHolder.Create(
-                            firstName: item.FirstName,
-                            lastName: item.LastName,
+                            fullName: item.FullName,
+                            //lastName: item.LastName,
                             phoneNumber: item.PhoneNumber,
                             //accountNumber: item.AccountNumber,
                             //iban: item.Iban,

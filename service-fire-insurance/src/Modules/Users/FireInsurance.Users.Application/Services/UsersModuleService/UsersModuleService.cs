@@ -2,6 +2,7 @@ using Ardalis.Result;
 using FireInsurance.Users.Contracts.Dtos;
 using FireInsurance.Users.Contracts.ModuleServices;
 using FireInsurance.Users.Domain.Entities;
+using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,25 +22,7 @@ namespace FireInsurance.Users.Application.Services.UsersModuleService
                 return Result<UserDto>.NotFound($"User with ID {id} not found");
             }
 
-            var userDto = new UserDto
-            {
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                FullName = user.FullName,
-                FatherName = user.FatherName,
-                NationalID = user.NationalID,
-                DateOfBirth = user.DateOfBirth,
-                Gender = user.Gender.HasValue
-                    ? user.Gender.Value
-                    : null,
-                CodeSentAt = user.CodeSentAt,
-                CreatedAt = user.CreatedAt,
-                LoggedInAt = user.LoggedInAt,
-                DeletedAt = user.DeletedAt,
-                IdentityConfirmed = user.IdentityConfirmed,
-                Admin = user.Admin,
-                SuperAdmin = user.SuperAdmin
-            };
+            var userDto = user.Adapt<UserDto>();
 
             return Result<UserDto>.Success(userDto);
         }

@@ -57,7 +57,7 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                 if (string.IsNullOrEmpty(user.Value.FirstName) ||
                     string.IsNullOrEmpty(user.Value.LastName) ||
                     string.IsNullOrEmpty(user.Value.NationalID) ||
-                    user.Value.DateOfBirth == null ||
+                    //user.Value.DateOfBirth == null ||
                     string.IsNullOrEmpty(user.Value.PhoneNumber))
                 {
                     return Result.Error(DamageClaimErrors.UserError.NotComplete);
