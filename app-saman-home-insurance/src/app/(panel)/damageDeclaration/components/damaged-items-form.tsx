@@ -53,12 +53,28 @@ const damagedItemsSchema = z
 
 type DamagedItemsFormData = z.infer<typeof damagedItemsSchema>;
 
+interface InsurableObject {
+  id: number;
+  samanId: number;
+  title: string;
+  other: boolean;
+}
+
+interface DamageItem {
+  id: string;
+  label: string;
+  amountField: string;
+  apiId: number | null;
+  samanId: number | null;
+  isOther: boolean;
+}
+
 interface DamagedItemsFormProps {
   initialData?: DamagedItemsFormData;
   onChange: (data: DamagedItemsFormData) => void;
   onNext: () => void;
   onPrevious: () => void;
-  insurableObjects: any;
+  insurableObjects: InsurableObject[];
   insurableObjectsLoading: boolean;
 }
 
@@ -151,12 +167,12 @@ export default function DamagedItemsForm({
     
     // Generate damagedObjects array for API
     const damagedObjects = allDamageItems
-      .filter((item: any) => {
+      .filter((item: DamageItem) => {
         // Check if this item is selected
         const isSelected = data[item.id as keyof DamagedItemsFormData];
         return isSelected === true;
       })
-      .map((item: any) => {
+      .map((item: DamageItem) => {
         // Get the amount for this item
         const amountField = item.amountField as keyof DamagedItemsFormData;
         const amountValue = data[amountField] as string || "";
@@ -179,7 +195,7 @@ export default function DamagedItemsForm({
     console.log("Damaged Objects for API:", damagedObjects);
     
     // Pass both form data and damagedObjects to parent
-    onChange({ ...data, damagedObjects } as any);
+    onChange({ ...data, damagedObjects } as DamagedItemsFormData & { damagedObjects: unknown[] });
     // onNext();
   };
 
@@ -193,7 +209,7 @@ export default function DamagedItemsForm({
   };
 
   // Generate damage items from API data
-  const damageItems = insurableObjects?.map((item: any) => ({
+  const damageItems = insurableObjects?.map((item: InsurableObject) => ({
     id: fieldNameMap[item.samanId]?.id || `custom_${item.id}`,
     label: item.title,
     amountField: fieldNameMap[item.samanId]?.amountField || `custom_${item.id}_amount`,
@@ -240,7 +256,7 @@ export default function DamagedItemsForm({
                 </div>
               ))
             ) : (
-              allDamageItems.map((item: any, index: number) => (
+              allDamageItems.map((item: DamageItem, index: number) => (
               <div key={item.id} className="space-y-2">
                 {/* Checkbox */}
                 <FormField
