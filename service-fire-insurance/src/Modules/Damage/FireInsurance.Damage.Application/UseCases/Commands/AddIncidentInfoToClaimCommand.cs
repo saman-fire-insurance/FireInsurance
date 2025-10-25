@@ -238,6 +238,7 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                 // Associate incident with damage claim
                 damageClaim.IncidentId = incident.Id;
                 damageClaim.Incident = incident;
+                damageClaim.OwnershipType = incident.OwnershipType;
 
                 // Update damage claim status to next stage
                 damageClaim.Status = DamageClaimStatus.DamagedObjects;

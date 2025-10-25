@@ -85,7 +85,7 @@ namespace FireInsurance.Damage.Domain.Entities
             return Result.Success(this);
         }
 
-        public Result<DamageClaim> AddStakeHolders(List<StakeHolder> stakeHolders)
+        public Result<DamageClaim> AddStakeHolders(List<StakeHolder>? stakeHolders)
         {
             if (stakeHolders == null || stakeHolders.Count == 0)
             {

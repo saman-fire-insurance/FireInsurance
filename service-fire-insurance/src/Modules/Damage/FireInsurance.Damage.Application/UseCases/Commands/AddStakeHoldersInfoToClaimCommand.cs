@@ -134,18 +134,21 @@ namespace FireInsurance.Damage.Application.UseCases.Commands
                     }
                 }
 
-                dbContext.StakeHolders.AddRange(stakeHolders);
-
-                // Add stakeholders to the claim using the domain method
-                var result = damageClaim.AddStakeHolders(stakeHolders);
-                if (!result.IsSuccess)
+                if (stakeHolders.Count > 0) 
                 {
-                    if (result.IsInvalid())
-                    {
-                        return Result.Invalid(result.ValidationErrors);
-                    }
+                    dbContext.StakeHolders.AddRange(stakeHolders);
 
-                    return Result.Error(new ErrorList(result.Errors));
+                    // Add stakeholders to the claim using the domain method
+                    var result = damageClaim.AddStakeHolders(stakeHolders);
+                    if (!result.IsSuccess)
+                    {
+                        if (result.IsInvalid())
+                        {
+                            return Result.Invalid(result.ValidationErrors);
+                        }
+
+                        return Result.Error(new ErrorList(result.Errors));
+                    }
                 }
 
                 // Save changes
