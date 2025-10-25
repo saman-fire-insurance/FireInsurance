@@ -104,7 +104,7 @@ export default function ReviewForm({
               <div className="flex justify-start gap-x-2 items-center pb-2">
                 <span className="text-sm text-gray-400">کد ملی:</span>
                 <span className="text-sm font-medium" dir="ltr">
-                  {data.insured?.nationalId || "-"}
+                  {reviewData?.insurer?.nationalID || "-"}
                 </span>
               </div>
               <div className="flex justify-start gap-x-2 items-center pb-2">
@@ -155,7 +155,7 @@ export default function ReviewForm({
                   تحت پوشش سایر بیمه‌‌ها:
                 </span>
                 <span className="text-sm font-medium">
-                  {data.policy?.hasOtherInsurance === "yes" ? "دارد" : "ندارد"}
+                  {!_.isEmpty(reviewData?.thirdPartyCoverage) ? "دارد" : "ندارد"}
                 </span>
               </div>
               {data.policy?.hasOtherInsurance === "yes" && (
@@ -233,19 +233,19 @@ export default function ReviewForm({
               <div className="flex justify-start gap-x-2 items-center pb-2">
                 <span className="text-sm text-gray-400">نوع مالکیت:</span>
                 <span className="text-sm font-medium">
-                  {reviewData?.ownershipType?.title || "-"}
+                  {reviewData?.incident?.ownershipType?.title || "-"}
                 </span>
               </div>
               <div className="flex justify-start gap-x-2 items-center pb-2">
                 <span className="text-sm text-gray-400">محل:</span>
                 <span className="text-sm font-medium text-right">
-                  {reviewData?.incident?.location || "-"}
+                  {reviewData?.incident?.address || "-"}
                 </span>
               </div>
               <div className="flex justify-start gap-x-2 items-center pb-2">
                 <span className="text-sm text-gray-400">کد پستی:</span>
                 <span className="text-sm font-medium" dir="ltr">
-                  {data.accident?.postalCode || "-"}
+                  {reviewData?.incident?.postalCode || "-"}
                 </span>
               </div>
               <div className="flex justify-between items-start">
@@ -310,8 +310,8 @@ export default function ReviewForm({
               <div className="flex justify-start gap-x-2 items-center">
                 <span className="text-sm text-gray-400">جمع تقریبی خسارت:</span>
                 <span className="text-sm font-medium">
-                  {reviewData?.damagedObjects?.estimatedLoss
-                    ? reviewData.damagedObjects.estimatedLoss.toLocaleString()
+                  {reviewData?.damagedObjects && Array.isArray(reviewData.damagedObjects)
+                    ? _.sumBy(reviewData.damagedObjects, 'estimatedLoss').toLocaleString()
                     : "-"}{" "}
                   ریال
                 </span>
@@ -340,7 +340,7 @@ export default function ReviewForm({
                   شماره حساب بیمه گذار:
                 </span>
                 <span className="text-sm font-medium" dir="ltr">
-                  {reviewData?.stakeHolders?.accountNumber || "-"}
+                  {reviewData?.insurer?.accountNumber || "-"}
                 </span>
               </div>
               <div className="flex justify-start gap-x-2 items-center pb-2">
@@ -348,7 +348,7 @@ export default function ReviewForm({
                   شماره شبا بیمه‌گذار:
                 </span>
                 <span className="text-sm font-medium" dir="ltr">
-                  {`IR${reviewData?.stakeHolders?.iban || "-"}`}
+                  {`${reviewData?.insurer?.iban || "-"}`}
                 </span>
               </div>
               <div className="flex justify-start gap-x-2 items-center">
