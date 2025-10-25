@@ -3,10 +3,12 @@ using FireInsurance.Users.Contracts.Enums;
 using FireInsurance.Users.Domain.Common;
 using FireInsurance.Users.Domain.Errors;
 using FireInsurance.Users.Domain.Events.UserEvents;
+using Mapster;
 using Microsoft.AspNetCore.Identity;
 
 namespace FireInsurance.Users.Domain.Entities
 {
+    [AdaptTo("[name]Dto"), GenerateMapper]
     public class User : IdentityUser
     {
         private readonly List<IDomainEvent> _domainEvents = [];
