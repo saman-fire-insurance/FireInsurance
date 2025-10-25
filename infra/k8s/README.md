@@ -59,6 +59,13 @@ k8s/
 
 2. **Vault Secrets**: Store the following secrets in HashiCorp Vault:
 
+   **Container Registry Credentials:**
+   ```
+   secret/data/fireinsurance/registry
+   ├── username                      # noyanregistry
+   └── password                      # ArvanCloud registry password
+   ```
+
    **Stage Environment (includes kubeconfig):**
    ```
    secret/data/fireinsurance/stage

@@ -20,6 +20,9 @@ newName: ghcr.io/your-org/fireinsurance/backend
 
 ```
 secret/data/fireinsurance/
+├── registry/                         # Container registry credentials
+│   ├── username                      # noyanregistry
+│   └── password                      # ArvanCloud registry password
 ├── stage/
 │   ├── kubeconfig                    # Base64-encoded stage kubeconfig
 │   ├── database_connection_string

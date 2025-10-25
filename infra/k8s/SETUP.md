@@ -65,6 +65,22 @@ You need separate kubeconfig files for each environment (stage, prod, preview) f
 
 ## Step 3: Store Application Secrets in Vault
 
+### Container Registry Credentials
+
+Store your ArvanCloud registry password in Vault:
+
+```bash
+vault kv put secret/fireinsurance/registry \
+  username="noyanregistry" \
+  password="<your-arvancloud-registry-password>"
+```
+
+Or use Vault UI:
+- Path: `secret/data/fireinsurance/registry`
+- Keys:
+  - `username` = "noyanregistry"
+  - `password` = "<your-arvancloud-registry-password>"
+
 ### Stage Environment
 ```bash
 vault kv put secret/fireinsurance/stage \
@@ -161,10 +177,10 @@ The workflows need `contents: write` permission to commit changes. This is alrea
 
 ### Verify Vault Integration
 The workflows use the existing Vault setup. Verify it works:
-```bash
-# This should already be working based on vault-test.yml
-# Test by running the vault-test workflow
-```
+1. Go to **Actions** → **Vault Integration Test**
+2. Click **Run workflow** → **Run workflow**
+3. Check that it successfully retrieves secrets from Vault
+4. This confirms your Vault OIDC JWT authentication is working correctly
 
 ## Step 5: Update Workflow Files
 

@@ -51,6 +51,12 @@ docker.io/<username>/fireinsurance-frontend
 
 ### 3. Vault Configuration
 
+#### Store Container Registry Credentials
+- [ ] Path: `secret/data/fireinsurance/registry`
+- [ ] Keys:
+  - [ ] `username` = "noyanregistry"
+  - [ ] `password` = "<your-arvancloud-registry-password>"
+
 #### Store Kubeconfigs (Separate for Each Environment)
 - [ ] Stage kubeconfig:
   - Path: `secret/data/fireinsurance/stage`
@@ -128,9 +134,11 @@ echo "NextAuth Secret: $NEXTAUTH_SECRET"
 - [ ] Set deployment branches to `main` or `master` only
 
 #### Verify Vault Integration
-- [ ] Workflow exists: `.github/workflows/vault-test.yml`
-- [ ] Run workflow: Actions → "Vault Integration Test" → Run workflow
-- [ ] Check that it successfully retrieves secrets
+- [ ] Go to: Actions → "Vault Integration Test"
+- [ ] Click: "Run workflow" → "Run workflow"
+- [ ] Wait for workflow to complete
+- [ ] Check that it successfully retrieves secrets from Vault
+- [ ] Verify output shows: "✅ Successfully retrieved secrets from Vault!"
 
 ### 5. Database Setup
 - [ ] Create stage database (external)

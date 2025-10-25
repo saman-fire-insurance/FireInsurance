@@ -1,9 +1,7 @@
 name: Vault Integration Test
 
 on:
-  push:
-    branches: [ main, master ]
-  workflow_dispatch:
+  workflow_dispatch:  # Manual trigger only
 
 # REQUIRED: Allow GitHub to generate OIDC tokens
 permissions:
