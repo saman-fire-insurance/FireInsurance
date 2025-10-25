@@ -23,9 +23,9 @@ images:
 # Patch replica counts for stage
 replicas:
   - name: backend
-    count: 2
+    count: 1
   - name: frontend
-    count: 2
+    count: 1
 
 # ConfigMap patches for stage environment
 configMapGenerator:

@@ -89,12 +89,9 @@ spec:
         - name: Otp__ExpirationTime
           value: "00:03:00"
         resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
           limits:
             memory: "512Mi"
-            cpu: "500m"
+            cpu: "256m"
         livenessProbe:
           httpGet:
             path: /health

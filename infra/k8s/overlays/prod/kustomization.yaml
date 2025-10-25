@@ -23,9 +23,9 @@ images:
 # Patch replica counts for production
 replicas:
   - name: backend
-    count: 3
+    count: 1
   - name: frontend
-    count: 3
+    count: 1
 
 # ConfigMap patches for production environment
 configMapGenerator:
