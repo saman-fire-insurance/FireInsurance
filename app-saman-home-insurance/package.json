@@ -7,7 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "generate-swagger": "openapi --input /Users/dirtymazh/Desktop/DirtyMazh/swagger.json --output ./src/swagger --useOptions && node ./src/swagger/addTsNoCheck.js"
+    "generate-swagger": "openapi --input C:\\Users\\matta\\Downloads\\swagger.json --output ./src/swagger --useOptions && node ./src/swagger/addTsNoCheck.js"
   },
   "dependencies": {
     "@bprogress/next": "^3.2.12",

@@ -17,12 +17,47 @@ import {
 } from "@/components/ui/accordion";
 import _ from "lodash";
 
+interface ReviewData {
+  serialNumber?: string;
+  thirdPartyCoverage?: unknown;
+  insurer?: {
+    firstName?: string;
+    lastName?: string;
+    nationalID?: string;
+    phoneNumber?: string;
+    accountNumber?: string;
+    iban?: string;
+  };
+  incident?: {
+    incidentType?: {
+      title?: string;
+    };
+    incidentCause?: string;
+    occuranceDate?: string;
+    ownershipType?: {
+      title?: string;
+    };
+    address?: string;
+    postalCode?: string;
+    fireStationName?: string;
+  };
+  damagedObjects?: Array<{
+    insurableObject?: {
+      title?: string;
+    };
+    estimatedLoss?: number;
+  }>;
+  stakeHolders?: {
+    isOwner?: boolean;
+  };
+}
+
 interface ReviewFormProps {
   formData: Record<string, unknown>;
   onSubmit: () => void;
   onPrevious: () => void;
   isSubmitting: boolean;
-  reviewData: any;
+  reviewData: ReviewData;
   reviewDataIsLoading: boolean;
 }
 
@@ -288,8 +323,7 @@ export default function ReviewForm({
                     <span className="text-sm font-medium">
                       {item.insurableObject?.title +
                         "، " +
-                        item.estimatedLoss &&
-                        item.estimatedLoss.toLocaleString()}{" "}
+                        (item.estimatedLoss ? item.estimatedLoss.toLocaleString() : "-")}{" "}
                       ریال
                     </span>
                   </div>
