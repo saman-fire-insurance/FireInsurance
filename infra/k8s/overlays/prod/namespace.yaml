@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fireinsurance-prod
+  labels:
+    name: fireinsurance-prod
+    environment: prod

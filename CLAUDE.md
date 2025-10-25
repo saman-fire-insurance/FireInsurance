@@ -207,3 +207,44 @@ When backend API changes:
 - **SMS Provider** (Zobdeh) for OTP delivery
 - **Saman Services** for insurance-related integrations
 - **HashiCorp Vault** for secrets management (OIDC JWT auth from GitHub Actions)
+
+## Deployment
+
+### Kubernetes with Kustomize
+
+The project uses Kustomize for Kubernetes deployments with three environments:
+
+**Environments:**
+- **Stage** (`fireinsurance-stage`): Auto-deploys on push to `main`/`master`
+- **Production** (`fireinsurance-prod`): Deploys on release or manual trigger
+- **Preview** (`fireinsurance-pr-<number>`): Ephemeral environments for each PR
+
+**Key Files:**
+```
+infra/k8s/
+├── base/           # Base Kubernetes manifests (backend, frontend)
+├── overlays/       # Environment-specific configs (stage, prod, preview)
+└── README.md       # Detailed deployment documentation
+```
+
+**GitHub Actions Workflows:**
+- `build-and-push.yml`: Builds and pushes Docker images to registry
+- `deploy-stage.yml`: Deploys to staging environment
+- `deploy-prod.yml`: Deploys to production environment
+- `deploy-pr-preview.yml`: Creates preview environments for PRs
+- `cleanup-pr-preview.yml`: Cleans up PR preview environments
+
+**Quick Commands:**
+```bash
+# Deploy to stage manually
+cd infra/k8s/overlays/stage
+kustomize build . | kubectl apply -f -
+
+# Check deployment status
+kubectl get all -n fireinsurance-stage
+
+# View logs
+kubectl logs -f deployment/backend -n fireinsurance-stage
+```
+
+**Setup:** See [infra/k8s/SETUP.md](infra/k8s/SETUP.md) for complete deployment setup instructions.

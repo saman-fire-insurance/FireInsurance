@@ -1,0 +1,158 @@
+name: Deploy to Production
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Image tag to deploy (e.g., v1.0.0 or main-abc1234)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  # TODO: Replace with your actual registry
+  REGISTRY: ghcr.io
+  REGISTRY_USERNAME: ${{ github.repository_owner }}
+  BACKEND_IMAGE_NAME: ${{ github.repository }}/backend
+  FRONTEND_IMAGE_NAME: ${{ github.repository }}/frontend
+  ENVIRONMENT: prod
+  NAMESPACE: fireinsurance-prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Retrieve secrets from Vault
+        uses: hashicorp/vault-action@v3
+        with:
+          method: jwt
+          url: https://noyanvault.paratechco.com
+          role: github-actions
+          secrets: |
+            secret/data/fireinsurance/k8s kubeconfig | KUBECONFIG_CONTENT ;
+            secret/data/fireinsurance/prod database_connection_string | DATABASE_CONNECTION_STRING ;
+            secret/data/fireinsurance/prod jwt_signing_key | JWT_SIGNING_KEY ;
+            secret/data/fireinsurance/prod sms_provider_base_url | SMS_PROVIDER_BASE_URL ;
+            secret/data/fireinsurance/prod sms_provider_username | SMS_PROVIDER_USERNAME ;
+            secret/data/fireinsurance/prod sms_provider_password | SMS_PROVIDER_PASSWORD ;
+            secret/data/fireinsurance/prod saman_services_base_url | SAMAN_SERVICES_BASE_URL ;
+            secret/data/fireinsurance/prod saman_services_key | SAMAN_SERVICES_KEY ;
+            secret/data/fireinsurance/prod nextauth_secret | NEXTAUTH_SECRET ;
+            secret/data/fireinsurance/prod recaptcha_site_key | RECAPTCHA_SITE_KEY
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p $HOME/.kube
+          echo "$KUBECONFIG_CONTENT" > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Test kubectl connection
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Set up Kustomize
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Determine image tag
+        id: image-tag
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            # For release events, use the tag name
+            IMAGE_TAG="${{ github.event.release.tag_name }}"
+          elif [ -n "${{ inputs.image_tag }}" ]; then
+            # For manual workflow dispatch, use the provided tag
+            IMAGE_TAG="${{ inputs.image_tag }}"
+          else
+            # Fallback to commit SHA
+            IMAGE_TAG="main-${GITHUB_SHA::7}"
+          fi
+          echo "tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "Deploying with image tag: ${IMAGE_TAG}"
+
+      - name: Update kustomization with image tags
+        run: |
+          cd infra/k8s/overlays/prod
+
+          IMAGE_TAG="${{ steps.image-tag.outputs.tag }}"
+
+          # Update backend image
+          kustomize edit set image backend=${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${IMAGE_TAG}
+
+          # Update frontend image
+          kustomize edit set image frontend=${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${IMAGE_TAG}
+
+          cat kustomization.yaml
+
+      - name: Create/Update secrets in Kubernetes
+        run: |
+          # Create namespace if it doesn't exist
+          kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+          # Create/update backend secrets
+          kubectl create secret generic backend-secrets \
+            --from-literal=database-connection-string="${DATABASE_CONNECTION_STRING}" \
+            --from-literal=jwt-signing-key="${JWT_SIGNING_KEY}" \
+            --from-literal=sms-provider-base-url="${SMS_PROVIDER_BASE_URL}" \
+            --from-literal=sms-provider-username="${SMS_PROVIDER_USERNAME}" \
+            --from-literal=sms-provider-password="${SMS_PROVIDER_PASSWORD}" \
+            --from-literal=saman-services-base-url="${SAMAN_SERVICES_BASE_URL}" \
+            --from-literal=saman-services-key="${SAMAN_SERVICES_KEY}" \
+            --namespace=${{ env.NAMESPACE }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          # Create/update frontend secrets
+          kubectl create secret generic frontend-secrets \
+            --from-literal=nextauth-secret="${NEXTAUTH_SECRET}" \
+            --from-literal=recaptcha-site-key="${RECAPTCHA_SITE_KEY}" \
+            --namespace=${{ env.NAMESPACE }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy to Kubernetes
+        run: |
+          cd infra/k8s/overlays/prod
+          kustomize build . | kubectl apply -f -
+
+      - name: Wait for deployment to be ready
+        run: |
+          kubectl rollout status deployment/backend -n ${{ env.NAMESPACE }} --timeout=10m
+          kubectl rollout status deployment/frontend -n ${{ env.NAMESPACE }} --timeout=10m
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -n ${{ env.NAMESPACE }}
+          kubectl get services -n ${{ env.NAMESPACE }}
+          kubectl get deployments -n ${{ env.NAMESPACE }}
+
+      - name: Run smoke tests
+        run: |
+          echo "TODO: Add smoke tests here"
+          # Example:
+          # BACKEND_POD=$(kubectl get pod -n ${{ env.NAMESPACE }} -l app=backend -o jsonpath='{.items[0].metadata.name}')
+          # kubectl exec -n ${{ env.NAMESPACE }} $BACKEND_POD -- curl -f http://localhost/health || exit 1
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "## Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ env.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Namespace**: ${{ env.NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image Tag**: ${{ steps.image-tag.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend Image**: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${{ steps.image-tag.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend Image**: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ steps.image-tag.outputs.tag }}" >> $GITHUB_STEP_SUMMARY

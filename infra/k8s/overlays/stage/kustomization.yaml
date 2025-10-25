@@ -1,0 +1,41 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: fireinsurance-stage
+
+resources:
+  - ../../base/backend
+  - ../../base/frontend
+  - namespace.yaml
+
+commonLabels:
+  environment: stage
+
+# Image tags will be set via kustomize edit in CI/CD
+images:
+  - name: backend
+    newName: REGISTRY_PLACEHOLDER/backend
+    newTag: latest
+  - name: frontend
+    newName: REGISTRY_PLACEHOLDER/frontend
+    newTag: latest
+
+# Patch replica counts for stage
+replicas:
+  - name: backend
+    count: 2
+  - name: frontend
+    count: 2
+
+# ConfigMap patches for stage environment
+configMapGenerator:
+  - name: backend-config
+    behavior: merge
+    literals:
+      - jwt-issuer=https://api-stage.fireinsurance.example.com
+      - jwt-audience=https://api-stage.fireinsurance.example.com
+  - name: frontend-config
+    behavior: merge
+    literals:
+      - nextauth-url=https://stage.fireinsurance.example.com
+      - api-url=http://backend:80

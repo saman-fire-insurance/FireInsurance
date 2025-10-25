@@ -1,0 +1,205 @@
+name: Deploy PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, master]
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+env:
+  # TODO: Replace with your actual registry
+  REGISTRY: ghcr.io
+  REGISTRY_USERNAME: ${{ github.repository_owner }}
+  BACKEND_IMAGE_NAME: ${{ github.repository }}/backend
+  FRONTEND_IMAGE_NAME: ${{ github.repository }}/frontend
+  ENVIRONMENT: preview
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set environment variables
+        id: env
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          NAMESPACE="fireinsurance-pr-${PR_NUMBER}"
+          IMAGE_TAG="pr-${PR_NUMBER}-${GITHUB_SHA::7}"
+
+          echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          echo "namespace=${NAMESPACE}" >> $GITHUB_OUTPUT
+          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+
+          echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
+          echo "NAMESPACE=${NAMESPACE}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+
+      - name: Retrieve secrets from Vault
+        uses: hashicorp/vault-action@v3
+        with:
+          method: jwt
+          url: https://noyanvault.paratechco.com
+          role: github-actions
+          secrets: |
+            secret/data/fireinsurance/k8s kubeconfig | KUBECONFIG_CONTENT ;
+            secret/data/fireinsurance/preview database_connection_string | DATABASE_CONNECTION_STRING ;
+            secret/data/fireinsurance/preview jwt_signing_key | JWT_SIGNING_KEY ;
+            secret/data/fireinsurance/preview sms_provider_base_url | SMS_PROVIDER_BASE_URL ;
+            secret/data/fireinsurance/preview sms_provider_username | SMS_PROVIDER_USERNAME ;
+            secret/data/fireinsurance/preview sms_provider_password | SMS_PROVIDER_PASSWORD ;
+            secret/data/fireinsurance/preview saman_services_base_url | SAMAN_SERVICES_BASE_URL ;
+            secret/data/fireinsurance/preview saman_services_key | SAMAN_SERVICES_KEY ;
+            secret/data/fireinsurance/preview nextauth_secret | NEXTAUTH_SECRET ;
+            secret/data/fireinsurance/preview recaptcha_site_key | RECAPTCHA_SITE_KEY
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p $HOME/.kube
+          echo "$KUBECONFIG_CONTENT" > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Test kubectl connection
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Set up Kustomize
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Create namespace for PR
+        run: |
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: ${{ env.NAMESPACE }}
+            labels:
+              name: ${{ env.NAMESPACE }}
+              environment: preview
+              pr-number: "${{ env.PR_NUMBER }}"
+          EOF
+
+      - name: Prepare kustomization for PR
+        run: |
+          cd infra/k8s/overlays/preview
+
+          # Set namespace
+          kustomize edit set namespace ${{ env.NAMESPACE }}
+
+          # Update image tags
+          kustomize edit set image backend=${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          kustomize edit set image frontend=${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+          # Update ConfigMaps with PR-specific values
+          kustomize edit add configmap backend-config --behavior=merge \
+            --from-literal=jwt-issuer="https://api-pr-${{ env.PR_NUMBER }}.fireinsurance.example.com" \
+            --from-literal=jwt-audience="https://api-pr-${{ env.PR_NUMBER }}.fireinsurance.example.com"
+
+          kustomize edit add configmap frontend-config --behavior=merge \
+            --from-literal=nextauth-url="https://pr-${{ env.PR_NUMBER }}.fireinsurance.example.com" \
+            --from-literal=api-url="http://backend:80"
+
+          cat kustomization.yaml
+
+      - name: Create/Update secrets in Kubernetes
+        run: |
+          # Create/update backend secrets
+          kubectl create secret generic backend-secrets \
+            --from-literal=database-connection-string="${DATABASE_CONNECTION_STRING}" \
+            --from-literal=jwt-signing-key="${JWT_SIGNING_KEY}" \
+            --from-literal=sms-provider-base-url="${SMS_PROVIDER_BASE_URL}" \
+            --from-literal=sms-provider-username="${SMS_PROVIDER_USERNAME}" \
+            --from-literal=sms-provider-password="${SMS_PROVIDER_PASSWORD}" \
+            --from-literal=saman-services-base-url="${SAMAN_SERVICES_BASE_URL}" \
+            --from-literal=saman-services-key="${SAMAN_SERVICES_KEY}" \
+            --namespace=${{ env.NAMESPACE }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          # Create/update frontend secrets
+          kubectl create secret generic frontend-secrets \
+            --from-literal=nextauth-secret="${NEXTAUTH_SECRET}" \
+            --from-literal=recaptcha-site-key="${RECAPTCHA_SITE_KEY}" \
+            --namespace=${{ env.NAMESPACE }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy to Kubernetes
+        run: |
+          cd infra/k8s/overlays/preview
+          kustomize build . | kubectl apply -f -
+
+      - name: Wait for deployment to be ready
+        run: |
+          kubectl rollout status deployment/backend -n ${{ env.NAMESPACE }} --timeout=5m
+          kubectl rollout status deployment/frontend -n ${{ env.NAMESPACE }} --timeout=5m
+
+      - name: Get deployment status
+        id: deployment
+        run: |
+          kubectl get pods -n ${{ env.NAMESPACE }}
+          kubectl get services -n ${{ env.NAMESPACE }}
+
+          # Get service URLs (adjust based on your setup)
+          BACKEND_SERVICE=$(kubectl get svc backend -n ${{ env.NAMESPACE }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}' || echo "pending")
+          FRONTEND_SERVICE=$(kubectl get svc frontend -n ${{ env.NAMESPACE }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}' || echo "pending")
+
+          echo "backend_url=${BACKEND_SERVICE}" >> $GITHUB_OUTPUT
+          echo "frontend_url=${FRONTEND_SERVICE}" >> $GITHUB_OUTPUT
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = ${{ env.PR_NUMBER }};
+            const namespace = '${{ env.NAMESPACE }}';
+            const imageTag = '${{ env.IMAGE_TAG }}';
+
+            const comment = `## 🚀 Preview Environment Deployed
+
+            Your PR preview environment has been deployed successfully!
+
+            **Details:**
+            - **Namespace**: \`${namespace}\`
+            - **Image Tag**: \`${imageTag}\`
+            - **Backend Image**: \`${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${imageTag}\`
+            - **Frontend Image**: \`${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${imageTag}\`
+
+            **Note**: URLs depend on your ArvanCloud configuration. Check your cluster's service/ingress setup.
+
+            To view the deployment:
+            \`\`\`bash
+            kubectl get all -n ${namespace}
+            \`\`\`
+
+            This preview environment will be automatically deleted when the PR is closed.
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "## PR Preview Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR Number**: #${{ env.PR_NUMBER }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Namespace**: ${{ env.NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image Tag**: ${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend Image**: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend Image**: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY

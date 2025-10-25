@@ -1,0 +1,106 @@
+name: Cleanup PR Preview
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main, master]
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set environment variables
+        id: env
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          NAMESPACE="fireinsurance-pr-${PR_NUMBER}"
+
+          echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          echo "namespace=${NAMESPACE}" >> $GITHUB_OUTPUT
+
+          echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
+          echo "NAMESPACE=${NAMESPACE}" >> $GITHUB_ENV
+
+      - name: Retrieve secrets from Vault
+        uses: hashicorp/vault-action@v3
+        with:
+          method: jwt
+          url: https://noyanvault.paratechco.com
+          role: github-actions
+          secrets: |
+            secret/data/fireinsurance/k8s kubeconfig | KUBECONFIG_CONTENT
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p $HOME/.kube
+          echo "$KUBECONFIG_CONTENT" > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Test kubectl connection
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Delete namespace
+        run: |
+          if kubectl get namespace ${{ env.NAMESPACE }} &> /dev/null; then
+            echo "Deleting namespace ${{ env.NAMESPACE }}..."
+            kubectl delete namespace ${{ env.NAMESPACE }} --timeout=5m
+            echo "✅ Namespace ${{ env.NAMESPACE }} deleted successfully"
+          else
+            echo "ℹ️ Namespace ${{ env.NAMESPACE }} does not exist, nothing to clean up"
+          fi
+
+      - name: Verify cleanup
+        run: |
+          if kubectl get namespace ${{ env.NAMESPACE }} &> /dev/null; then
+            echo "⚠️ Warning: Namespace still exists"
+            kubectl get all -n ${{ env.NAMESPACE }}
+          else
+            echo "✅ Cleanup verified: namespace has been removed"
+          fi
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = ${{ env.PR_NUMBER }};
+            const namespace = '${{ env.NAMESPACE }}';
+
+            const comment = `## 🧹 Preview Environment Cleaned Up
+
+            The preview environment for this PR has been deleted.
+
+            **Cleaned up:**
+            - **Namespace**: \`${namespace}\`
+            - All deployments, services, and resources in this namespace have been removed.
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Cleanup summary
+        if: always()
+        run: |
+          echo "## PR Preview Cleanup Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR Number**: #${{ env.PR_NUMBER }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Namespace**: ${{ env.NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Cleaned up successfully ✅" >> $GITHUB_STEP_SUMMARY

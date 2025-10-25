@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  labels:
+    app: backend
+    component: api
+data:
+  jwt-issuer: "https://api.fireinsurance.example.com"
+  jwt-audience: "https://api.fireinsurance.example.com"
+  captcha-minimum-score: "0.1"
