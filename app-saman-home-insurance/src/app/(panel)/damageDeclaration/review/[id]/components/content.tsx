@@ -3,12 +3,23 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { X, Save, User, BookCheck, Home, List, FileText, CircleCheck } from "lucide-react";
+import {
+  X,
+  Save,
+  User,
+  BookCheck,
+  Home,
+  List,
+  FileText,
+  CircleCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import WizardSteps from "../../../components/wizardSteps";
 import ReviewForm from "../../../components/review-form";
 import Image from "next/image";
+import { GetDamageClaim } from "@/swr/review";
+import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 
 const STORAGE_KEY = "damage-declaration-form-data";
 
@@ -21,7 +32,6 @@ const steps = [
   { id: "review", label: "بررسی", icon: CircleCheck },
 ];
 
-
 interface ContentProps {
   declarationId: string;
 }
@@ -31,20 +41,26 @@ export default function Content({ declarationId }: ContentProps) {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [completedSteps, setCompletedSteps] = useState<number[]>([0, 1, 2, 3, 4]); // Steps 1-5 completed
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [completedSteps, setCompletedSteps] = useState<number[]>([
+    0, 1, 2, 3, 4,
+  ]); // Steps 1-5 completed
   const currentStep = 5; // This is step 6 (index 5)
 
-  useEffect(() => {
-    const savedData = localStorage.getItem(`${STORAGE_KEY}-${declarationId}`);
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData);
-        setFormData(parsed);
-      } catch (error) {
-        console.error("Error loading saved data:", error);
-      }
-    }
-  }, [declarationId]);
+  const { reviewData, reviewDataIsLoading } = GetDamageClaim(declarationId);
+
+  // useEffect(() => {
+  //   const savedData = localStorage.getItem(`${STORAGE_KEY}-${declarationId}`);
+  //   if (savedData) {
+  //     try {
+  //       const parsed = JSON.parse(savedData);
+  //       setFormData(parsed);
+  //     } catch (error) {
+  //       console.error("Error loading saved data:", error);
+  //     }
+  //   }
+  // }, [declarationId]);
 
   const handleTemporarySave = async () => {
     setIsSaving(true);
@@ -70,24 +86,9 @@ export default function Content({ declarationId }: ContentProps) {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // TODO: Replace with actual API call for final submission
-      // await fetch(`/api/damage-declaration/${declarationId}/submit`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData),
-      // });
+      setTrackingNumber("۱۴۷۵۷۵۲");
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Clear localStorage after successful submission
-      localStorage.removeItem(`${STORAGE_KEY}-${declarationId}`);
-
-      toast.success("فرم با موفقیت ثبت شد");
-
-      // Navigate to success page or main page
-      setTimeout(() => {
-        router.push("/");
-      }, 1500);
+      setShowSuccessDialog(true);
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("خطا در ثبت فرم");
@@ -109,7 +110,7 @@ export default function Content({ declarationId }: ContentProps) {
       `/damageDeclaration/documents/${declarationId}`,
       `/damageDeclaration/review/${declarationId}`,
     ];
-    
+
     if (stepRoutes[index]) {
       router.push(stepRoutes[index]);
     }
@@ -129,7 +130,7 @@ export default function Content({ declarationId }: ContentProps) {
           </Button>
           <Button
             variant="destructive"
-            className="border border-destructive text-destructive cursor-pointer hover:!text-destructive bg-transparent"
+            className="border border-destructive text-destructive cursor-pointer hover:text-destructive! bg-transparent"
             onClick={handleTemporarySave}
             disabled={isSaving}
           >
@@ -148,9 +149,7 @@ export default function Content({ declarationId }: ContentProps) {
                 height={64}
               />
             </div>
-            <h1 className="text-2xl font-bold text-primary">
-              فرم اعلام خسارت
-            </h1>
+            <h1 className="text-2xl font-bold text-primary">فرم اعلام خسارت</h1>
           </div>
 
           {/* Wizard Steps */}
@@ -167,12 +166,66 @@ export default function Content({ declarationId }: ContentProps) {
               onSubmit={handleSubmit}
               onPrevious={handlePrevious}
               isSubmitting={isSubmitting}
+              reviewData={reviewData}
+              reviewDataIsLoading={reviewDataIsLoading}
             />
           </div>
         </div>
 
         <Toaster position="top-center" dir="rtl" richColors />
       </div>
+
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md" showCloseButton={true}>
+          <DialogHeader className="flex flex-col items-center text-center gap-y-6">
+            <button
+              onClick={() => setShowSuccessDialog(false)}
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              {/* <X className="size-5 text-gray-600" /> */}
+            </button>
+
+            <div className="flex justify-center">
+              <Image
+                src="/img/damageDeclarationSuccessful.png"
+                alt="Success"
+                width={200}
+                height={200}
+                className="object-contain w-1/2"
+              />
+            </div>
+
+            <div className="flex flex-col gap-y-4 w-full">
+              <h2 className="text-xl font-bold text-primary">
+                اعلام خسارت شما با موفقیت ثبت شد.
+              </h2>
+
+              <div className="flex flex-col gap-y-2">
+                <p className="text-base text-primary font-semibold">
+                  کد پیگیری شما:{" "}
+                  <span className="text-destructive">{trackingNumber}</span>
+                </p>
+                <p className="text-sm text-gray-600">
+                  پس از بررسی و تأیید اطلاعات ثبت‌شده، کارشناسان بیمه سامان برای
+                  هماهنگی زمان ارزیابی خسارت با شما تماس می‌گیرند.
+                </p>
+              </div>
+
+              {/* <Button
+                onClick={() => {
+                  setShowSuccessDialog(false);
+                  // Navigate to tracking page or home
+                  router.push("/");
+                }}
+                className="w-full mt-2"
+              >
+                پیگیری خسارت
+              </Button> */}
+            </div>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

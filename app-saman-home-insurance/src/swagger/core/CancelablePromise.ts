@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */

@@ -2,7 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type GetDamageClaimDetailsRequest = {
-    damageClaimId?: string;
+export type StakeHolderItemRequest = {
+    fullName?: string | null;
+    phoneNumber?: string | null;
+    isOwner?: boolean;
 };
 

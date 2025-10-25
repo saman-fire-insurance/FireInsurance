@@ -2,15 +2,36 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AddDamagedObjectsToClaimRequest } from '../models/AddDamagedObjectsToClaimRequest';
 import type { AddIncidentInfoToClaimRequest } from '../models/AddIncidentInfoToClaimRequest';
 import type { AddInsuranceInfoToClaimRequest } from '../models/AddInsuranceInfoToClaimRequest';
+import type { AddStakeHoldersInfoToClaimRequest } from '../models/AddStakeHoldersInfoToClaimRequest';
 import type { CreateDamageClaimRequest } from '../models/CreateDamageClaimRequest';
-import type { GetDamageClaimDetailsRequest } from '../models/GetDamageClaimDetailsRequest';
 import type { GridifyQuery } from '../models/GridifyQuery';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class DamageClaimService {
+    /**
+     * @returns any OK
+     * @throws ApiError
+     */
+    public static postApiV1DamageClaimAddDamagedObjects({
+        requestBody,
+    }: {
+        requestBody: AddDamagedObjectsToClaimRequest,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/DamageClaim/AddDamagedObjects',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+            },
+        });
+    }
     /**
      * @returns any OK
      * @throws ApiError
@@ -55,6 +76,26 @@ export class DamageClaimService {
      * @returns any OK
      * @throws ApiError
      */
+    public static postApiV1DamageClaimAddStakeHolders({
+        requestBody,
+    }: {
+        requestBody: AddStakeHoldersInfoToClaimRequest,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/DamageClaim/AddStakeHolders',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+            },
+        });
+    }
+    /**
+     * @returns any OK
+     * @throws ApiError
+     */
     public static postApiV1DamageClaimCreate({
         requestBody,
     }: {
@@ -75,16 +116,17 @@ export class DamageClaimService {
      * @returns any OK
      * @throws ApiError
      */
-    public static postApiV1DamageClaimGetClaim({
-        requestBody,
+    public static getApiV1DamageClaim({
+        id,
     }: {
-        requestBody: GetDamageClaimDetailsRequest,
+        id: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/v1/DamageClaim/GetClaim',
-            body: requestBody,
-            mediaType: 'application/json',
+            method: 'GET',
+            url: '/api/v1/DamageClaim/{id}',
+            path: {
+                'id': id,
+            },
             errors: {
                 401: `Unauthorized`,
                 403: `Forbidden`,
@@ -95,16 +137,26 @@ export class DamageClaimService {
      * @returns any OK
      * @throws ApiError
      */
-    public static postApiV1DamageClaimGetClaims({
-        requestBody,
+    public static getApiV1DamageClaim1({
+        page,
+        pageSize,
+        orderBy,
+        filter,
     }: {
-        requestBody: GridifyQuery,
+        page: number,
+        pageSize: number,
+        orderBy?: string,
+        filter?: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/v1/DamageClaim/GetClaims',
-            body: requestBody,
-            mediaType: 'application/json',
+            method: 'GET',
+            url: '/api/v1/DamageClaim',
+            query: {
+                'Page': page,
+                'PageSize': pageSize,
+                'OrderBy': orderBy,
+                'Filter': filter,
+            },
             errors: {
                 401: `Unauthorized`,
                 403: `Forbidden`,
