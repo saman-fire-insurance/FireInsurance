@@ -27,7 +27,7 @@ const beneficiariesSchema = z.object({
   insurerIban: z
     .string()
     .min(1, "شماره شبا بیمه گذار الزامی است")
-    .regex(/^\d{16}$/, "شماره شبا باید 16 رقم باشد"),
+    .regex(/^\d{24}$/, "شماره شبا باید 24 رقم باشد"),
   hasOtherBeneficiary: z.enum(["yes", "no"]),
   beneficiaryName: z.string().optional(),
   beneficiaryPhone: z.string().optional(),
@@ -122,10 +122,10 @@ export default function BeneficiariesForm({
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder="شماره شبا 16 رقمی"
+                    placeholder="شماره شبا 24 رقمی"
                     className="text-right"
                     dir="ltr"
-                    maxLength={16}
+                    maxLength={24}
                   />
                 </FormControl>
                 <FormMessage />

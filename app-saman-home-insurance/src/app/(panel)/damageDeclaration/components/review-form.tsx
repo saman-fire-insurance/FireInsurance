@@ -281,33 +281,38 @@ export default function ReviewForm({
           </AccordionTrigger>
           <AccordionContent>
             <div className="space-y-3 pt-2">
-              {_.map(reviewData?.damagedObjects?.insurableObject, (item, i) => {
+              {_.map(reviewData?.damagedObjects, (item, i) => {
                 return (
                   <div className="flex justify-start gap-x-2 items-center pb-2">
                     <span className="text-sm text-gray-400">مورد {i + 1}:</span>
                     <span className="text-sm font-medium">
-                      {item.title + "، " + item.title}
+                      {item.insurableObject?.title +
+                        "، " +
+                        item.estimatedLoss &&
+                        item.estimatedLoss.toLocaleString()}{" "}
+                      ریال
                     </span>
                   </div>
                 );
               })}
-              <div className="flex justify-start gap-x-2 items-center pb-2">
+              {/* <div className="flex justify-start gap-x-2 items-center pb-2">
                 <span className="text-sm text-gray-400">مورد ۱:</span>
                 <span className="text-sm font-medium">
                   اثاثیه، {data.cases?.[0]?.amount || "۱۵,۰۰۰,۰۰۰"} ریال
                 </span>
-              </div>
-              <div className="flex justify-start gap-x-2 items-center pb-2">
+              </div> */}
+              {/* <div className="flex justify-start gap-x-2 items-center pb-2">
                 <span className="text-sm text-gray-400">مورد ۱:</span>
                 <span className="text-sm font-medium">
                   پنجره‌ها، {data.cases?.[1]?.amount || "۲۵,۰۰۰,۰۰۰"} ریال
                 </span>
-              </div>
+              </div> */}
               <div className="flex justify-start gap-x-2 items-center">
                 <span className="text-sm text-gray-400">جمع تقریبی خسارت:</span>
                 <span className="text-sm font-medium">
-                  {reviewData?.damagedObjects?.estimatedLoss.toLocaleString() ||
-                    "-"}{" "}
+                  {reviewData?.damagedObjects?.estimatedLoss
+                    ? reviewData.damagedObjects.estimatedLoss.toLocaleString()
+                    : "-"}{" "}
                   ریال
                 </span>
               </div>

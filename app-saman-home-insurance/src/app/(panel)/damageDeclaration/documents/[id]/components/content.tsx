@@ -56,7 +56,7 @@ export default function Content({ declarationId }: ContentProps) {
         data.hasOtherBeneficiary === "yes"
           ? ([
               {
-                firstName: data.beneficiaryName,
+                fullName: data.beneficiaryName,
                 phoneNumber: data.beneficiaryPhone,
               },
             ] as StakeHolderItemRequest[])
@@ -67,7 +67,7 @@ export default function Content({ declarationId }: ContentProps) {
         data.accidentCausedByDispute === "yes"
           ? ([
               {
-                firstName: data.disputeName,
+                fullName: data.disputeName,
                 phoneNumber: data.disputePhone,
               },
             ] as StakeHolderItemRequest[])

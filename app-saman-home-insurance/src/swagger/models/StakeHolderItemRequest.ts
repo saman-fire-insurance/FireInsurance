@@ -3,8 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type StakeHolderItemRequest = {
-    firstName?: string | null;
-    lastName?: string | null;
+    fullName?: string | null;
     phoneNumber?: string | null;
     isOwner?: boolean;
 };

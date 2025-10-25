@@ -183,7 +183,7 @@ export default function Content({ declarationId }: ContentProps) {
               onClick={() => setShowSuccessDialog(false)}
               className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
-              <X className="size-5 text-gray-600" />
+              {/* <X className="size-5 text-gray-600" /> */}
             </button>
 
             <div className="flex justify-center">
@@ -192,7 +192,7 @@ export default function Content({ declarationId }: ContentProps) {
                 alt="Success"
                 width={200}
                 height={200}
-                className="object-contain"
+                className="object-contain w-1/2"
               />
             </div>
 
@@ -212,7 +212,7 @@ export default function Content({ declarationId }: ContentProps) {
                 </p>
               </div>
 
-              <Button
+              {/* <Button
                 onClick={() => {
                   setShowSuccessDialog(false);
                   // Navigate to tracking page or home
@@ -221,7 +221,7 @@ export default function Content({ declarationId }: ContentProps) {
                 className="w-full mt-2"
               >
                 پیگیری خسارت
-              </Button>
+              </Button> */}
             </div>
           </DialogHeader>
         </DialogContent>
