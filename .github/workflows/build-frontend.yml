@@ -1,0 +1,67 @@
+name: Build Frontend
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'app-saman-home-insurance/**'
+      - '.github/workflows/build-frontend.yml'
+      - '.github/actions/build-and-push-image/**'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'app-saman-home-insurance/**'
+      - '.github/workflows/build-frontend.yml'
+      - '.github/actions/build-and-push-image/**'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+env:
+  REGISTRY: registry-3272c4a82a-fireinsurance-prod.apps.ir-central1.arvancaas.ir
+  REGISTRY_USERNAME: noyanregistry
+  IMAGE_NAME: frontend
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.build.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Retrieve registry credentials from Vault
+        uses: hashicorp/vault-action@v3
+        with:
+          method: jwt
+          url: https://noyanvault.paratechco.com
+          role: github-actions
+          secrets: |
+            secret/data/fireinsurance/registry password | REGISTRY_PASSWORD
+
+      - name: Build and push frontend image
+        id: build
+        uses: ./.github/actions/build-and-push-image
+        with:
+          registry: ${{ env.REGISTRY }}
+          registry-username: ${{ env.REGISTRY_USERNAME }}
+          registry-password: ${{ env.REGISTRY_PASSWORD }}
+          image-name: ${{ env.IMAGE_NAME }}
+          context: ./app-saman-home-insurance
+          dockerfile: ./app-saman-home-insurance/Dockerfile
+          platforms: linux/amd64
+
+      - name: Build summary
+        if: always()
+        run: |
+          echo "## Frontend Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image**: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tags**: ${{ steps.build.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Digest**: ${{ steps.build.outputs.digest }}" >> $GITHUB_STEP_SUMMARY

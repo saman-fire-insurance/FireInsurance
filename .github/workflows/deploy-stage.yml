@@ -2,10 +2,10 @@ name: Deploy to Stage
 
 on:
   workflow_run:
-    workflows: ["Build and Push Docker Images"]
+    workflows: ["Build Backend", "Build Frontend"]
     types: [completed]
     branches: [main, master]
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:
     inputs:
       deploy_backend:
         description: 'Deploy backend service'
@@ -19,23 +19,27 @@ on:
         default: true
 
 permissions:
-  contents: write  # Need write to commit kustomization changes
+  contents: write
   id-token: write
 
 env:
   REGISTRY: registry-3272c4a82a-fireinsurance-prod.apps.ir-central1.arvancaas.ir
   REGISTRY_USERNAME: noyanregistry
-  BACKEND_IMAGE_NAME: backend
-  FRONTEND_IMAGE_NAME: frontend
   ENVIRONMENT: stage
   NAMESPACE: fireinsurance-stage
 
 jobs:
-  deploy:
+  deploy-backend:
     runs-on: ubuntu-latest
     environment: stage
-    # Only run if build workflow succeeded (skip if manually triggered)
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    # Run if:
+    # 1. Manual trigger with deploy_backend=true, OR
+    # 2. Build Backend workflow completed successfully
+    if: |
+      (github.event_name == 'workflow_dispatch' && inputs.deploy_backend) ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.name == 'Build Backend')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -66,43 +70,18 @@ jobs:
         with:
           kubeconfig-content: ${{ env.KUBECONFIG_CONTENT }}
 
-      - name: Update kustomization with image tags
-        run: |
-          cd infra/k8s/overlays/stage
+      - name: Update kustomization for backend
+        uses: ./.github/actions/update-kustomization
+        with:
+          overlay-path: infra/k8s/overlays/stage
+          service-name: backend
+          registry: ${{ env.REGISTRY }}
+          image-name: backend
+          image-tag: main-${{ github.sha }}
+          environment: ${{ env.ENVIRONMENT }}
+          branch: ${{ github.ref_name }}
 
-          # Set image tags to git commit SHA
-          IMAGE_TAG="${GITHUB_SHA::7}"
-
-          # Update backend image
-          kustomize edit set image backend=${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:main-${IMAGE_TAG}
-
-          # Update frontend image
-          kustomize edit set image frontend=${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:main-${IMAGE_TAG}
-
-          cat kustomization.yaml
-
-      - name: Commit kustomization changes to git
-        run: |
-          # Configure git
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Commit changes
-          git add infra/k8s/overlays/stage/kustomization.yaml
-          git commit -m "chore(k8s): deploy stage - backend:main-${GITHUB_SHA::7}, frontend:main-${GITHUB_SHA::7}
-
-          Deployed images:
-          - Backend: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:main-${GITHUB_SHA::7}
-          - Frontend: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:main-${GITHUB_SHA::7}
-
-          Triggered by: ${{ github.actor }}
-          Workflow: ${{ github.workflow }}
-          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-          # Push to repository
-          git push origin HEAD:${{ github.ref_name }}
-
-      - name: Manage Kubernetes secrets
+      - name: Manage backend secrets
         uses: ./.github/actions/manage-k8s-secrets
         with:
           namespace: ${{ env.NAMESPACE }}
@@ -116,20 +95,102 @@ jobs:
           nextauth-secret: ${{ env.NEXTAUTH_SECRET }}
           recaptcha-site-key: ${{ env.RECAPTCHA_SITE_KEY }}
 
-      - name: Deploy to Kubernetes
+      - name: Deploy backend to Kubernetes
         uses: ./.github/actions/deploy-to-k8s
         with:
           overlay-path: infra/k8s/overlays/stage
           namespace: ${{ env.NAMESPACE }}
-          deploy-backend: ${{ inputs.deploy_backend || 'true' }}
-          deploy-frontend: ${{ inputs.deploy_frontend || 'true' }}
+          deploy-backend: 'true'
+          deploy-frontend: 'false'
           timeout: 5m
 
       - name: Deployment summary
         if: always()
         run: |
-          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## Backend Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **Environment**: ${{ env.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Namespace**: ${{ env.NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Backend Image**: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:main-${GITHUB_SHA::7}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Frontend Image**: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:main-${GITHUB_SHA::7}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend Image**: ${{ env.REGISTRY }}/backend:main-${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    environment: stage
+    # Run if:
+    # 1. Manual trigger with deploy_frontend=true, OR
+    # 2. Build Frontend workflow completed successfully
+    if: |
+      (github.event_name == 'workflow_dispatch' && inputs.deploy_frontend) ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.name == 'Build Frontend')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Retrieve secrets from Vault
+        uses: hashicorp/vault-action@v3
+        with:
+          method: jwt
+          url: https://noyanvault.paratechco.com
+          role: github-actions
+          secrets: |
+            secret/data/fireinsurance/stage kubeconfig | KUBECONFIG_CONTENT ;
+            secret/data/fireinsurance/stage database_connection_string | DATABASE_CONNECTION_STRING ;
+            secret/data/fireinsurance/stage jwt_signing_key | JWT_SIGNING_KEY ;
+            secret/data/fireinsurance/stage sms_provider_base_url | SMS_PROVIDER_BASE_URL ;
+            secret/data/fireinsurance/stage sms_provider_username | SMS_PROVIDER_USERNAME ;
+            secret/data/fireinsurance/stage sms_provider_password | SMS_PROVIDER_PASSWORD ;
+            secret/data/fireinsurance/stage saman_services_base_url | SAMAN_SERVICES_BASE_URL ;
+            secret/data/fireinsurance/stage saman_services_key | SAMAN_SERVICES_KEY ;
+            secret/data/fireinsurance/stage nextauth_secret | NEXTAUTH_SECRET ;
+            secret/data/fireinsurance/stage recaptcha_site_key | RECAPTCHA_SITE_KEY
+
+      - name: Setup Kubernetes tools
+        uses: ./.github/actions/setup-k8s-tools
+
+      - name: Configure kubectl
+        uses: ./.github/actions/configure-kubectl
+        with:
+          kubeconfig-content: ${{ env.KUBECONFIG_CONTENT }}
+
+      - name: Update kustomization for frontend
+        uses: ./.github/actions/update-kustomization
+        with:
+          overlay-path: infra/k8s/overlays/stage
+          service-name: frontend
+          registry: ${{ env.REGISTRY }}
+          image-name: frontend
+          image-tag: main-${{ github.sha }}
+          environment: ${{ env.ENVIRONMENT }}
+          branch: ${{ github.ref_name }}
+
+      - name: Manage frontend secrets
+        uses: ./.github/actions/manage-k8s-secrets
+        with:
+          namespace: ${{ env.NAMESPACE }}
+          database-connection-string: ${{ env.DATABASE_CONNECTION_STRING }}
+          jwt-signing-key: ${{ env.JWT_SIGNING_KEY }}
+          sms-provider-base-url: ${{ env.SMS_PROVIDER_BASE_URL }}
+          sms-provider-username: ${{ env.SMS_PROVIDER_USERNAME }}
+          sms-provider-password: ${{ env.SMS_PROVIDER_PASSWORD }}
+          saman-services-base-url: ${{ env.SAMAN_SERVICES_BASE_URL }}
+          saman-services-key: ${{ env.SAMAN_SERVICES_KEY }}
+          nextauth-secret: ${{ env.NEXTAUTH_SECRET }}
+          recaptcha-site-key: ${{ env.RECAPTCHA_SITE_KEY }}
+
+      - name: Deploy frontend to Kubernetes
+        uses: ./.github/actions/deploy-to-k8s
+        with:
+          overlay-path: infra/k8s/overlays/stage
+          namespace: ${{ env.NAMESPACE }}
+          deploy-backend: 'false'
+          deploy-frontend: 'true'
+          timeout: 5m
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "## Frontend Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ env.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Namespace**: ${{ env.NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend Image**: ${{ env.REGISTRY }}/frontend:main-${{ github.sha }}" >> $GITHUB_STEP_SUMMARY

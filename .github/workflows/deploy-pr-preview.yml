@@ -2,14 +2,14 @@ name: Deploy PR Preview
 
 on:
   workflow_run:
-    workflows: ["Build and Push Docker Images"]
+    workflows: ["Build Backend", "Build Frontend"]
     types: [completed]
-    # Note: This triggers on PR builds
 
 permissions:
-  contents: write  # Need write to commit kustomization changes
+  contents: write
   id-token: write
   pull-requests: write
+  actions: read
 
 env:
   REGISTRY: registry-3272c4a82a-fireinsurance-prod.apps.ir-central1.arvancaas.ir
@@ -34,23 +34,59 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const response = await github.rest.actions.listWorkflowRunArtifacts({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.payload.workflow_run.id
-            });
-
-            // Get PR number from workflow run
             const prNumber = context.payload.workflow_run.pull_requests[0]?.number;
             if (!prNumber) {
               core.setFailed('Could not find PR number');
               return;
             }
-
             core.setOutput('number', prNumber);
             return prNumber;
 
+      - name: Check if both builds are complete
+        id: check-builds
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = context.payload.workflow_run.head_sha;
+            const prNumber = ${{ steps.pr.outputs.number }};
+
+            // Get workflow runs for this SHA
+            const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event: 'pull_request',
+              head_sha: sha,
+              status: 'completed'
+            });
+
+            // Check if both Build Backend and Build Frontend succeeded
+            const backendBuild = runs.workflow_runs.find(r => r.name === 'Build Backend' && r.conclusion === 'success');
+            const frontendBuild = runs.workflow_runs.find(r => r.name === 'Build Frontend' && r.conclusion === 'success');
+
+            const bothComplete = backendBuild && frontendBuild;
+
+            core.setOutput('both_complete', bothComplete ? 'true' : 'false');
+            core.setOutput('backend_ready', backendBuild ? 'true' : 'false');
+            core.setOutput('frontend_ready', frontendBuild ? 'true' : 'false');
+
+            if (!bothComplete) {
+              console.log('⏳ Waiting for both builds to complete...');
+              console.log(`Backend: ${backendBuild ? '✅' : '⏸️'}`);
+              console.log(`Frontend: ${frontendBuild ? '✅' : '⏸️'}`);
+            }
+
+            return bothComplete;
+
+      - name: Skip deployment if builds not ready
+        if: steps.check-builds.outputs.both_complete != 'true'
+        run: |
+          echo "⏸️ Skipping deployment - waiting for all builds to complete"
+          echo "Backend build: ${{ steps.check-builds.outputs.backend_ready }}"
+          echo "Frontend build: ${{ steps.check-builds.outputs.frontend_ready }}"
+          exit 0
+
       - name: Set environment variables
+        if: steps.check-builds.outputs.both_complete == 'true'
         id: env
         run: |
           PR_NUMBER=${{ steps.pr.outputs.number }}
@@ -66,6 +102,7 @@ jobs:
           echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
 
       - name: Retrieve secrets from Vault
+        if: steps.check-builds.outputs.both_complete == 'true'
         uses: hashicorp/vault-action@v3
         with:
           method: jwt
@@ -84,14 +121,17 @@ jobs:
             secret/data/fireinsurance/preview recaptcha_site_key | RECAPTCHA_SITE_KEY
 
       - name: Setup Kubernetes tools
+        if: steps.check-builds.outputs.both_complete == 'true'
         uses: ./.github/actions/setup-k8s-tools
 
       - name: Configure kubectl
+        if: steps.check-builds.outputs.both_complete == 'true'
         uses: ./.github/actions/configure-kubectl
         with:
           kubeconfig-content: ${{ env.KUBECONFIG_CONTENT }}
 
       - name: Create namespace for PR
+        if: steps.check-builds.outputs.both_complete == 'true'
         run: |
           cat <<EOF | kubectl apply -f -
           apiVersion: v1
@@ -105,6 +145,7 @@ jobs:
           EOF
 
       - name: Prepare kustomization for PR
+        if: steps.check-builds.outputs.both_complete == 'true'
         run: |
           cd infra/k8s/overlays/preview
 
@@ -127,6 +168,7 @@ jobs:
           cat kustomization.yaml
 
       - name: Commit kustomization changes to git
+        if: steps.check-builds.outputs.both_complete == 'true'
         run: |
           # Configure git
           git config --global user.name "github-actions[bot]"
@@ -149,6 +191,7 @@ jobs:
           git push origin HEAD:${{ github.head_ref }}
 
       - name: Manage Kubernetes secrets
+        if: steps.check-builds.outputs.both_complete == 'true'
         uses: ./.github/actions/manage-k8s-secrets
         with:
           namespace: ${{ env.NAMESPACE }}
@@ -163,6 +206,7 @@ jobs:
           recaptcha-site-key: ${{ env.RECAPTCHA_SITE_KEY }}
 
       - name: Deploy to Kubernetes
+        if: steps.check-builds.outputs.both_complete == 'true'
         uses: ./.github/actions/deploy-to-k8s
         with:
           overlay-path: infra/k8s/overlays/preview
@@ -172,6 +216,7 @@ jobs:
           timeout: 5m
 
       - name: Get deployment status
+        if: steps.check-builds.outputs.both_complete == 'true'
         id: deployment
         run: |
           # Get service URLs (adjust based on your setup)
@@ -182,6 +227,7 @@ jobs:
           echo "frontend_url=${FRONTEND_SERVICE}" >> $GITHUB_OUTPUT
 
       - name: Comment on PR
+        if: steps.check-builds.outputs.both_complete == 'true'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -220,9 +266,16 @@ jobs:
       - name: Deployment summary
         if: always()
         run: |
-          echo "## PR Preview Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **PR Number**: #${{ env.PR_NUMBER }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Namespace**: ${{ env.NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Image Tag**: ${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Backend Image**: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Frontend Image**: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check-builds.outputs.both_complete }}" == "true" ]; then
+            echo "## PR Preview Deployment Summary" >> $GITHUB_STEP_SUMMARY
+            echo "- **PR Number**: #${{ env.PR_NUMBER }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Namespace**: ${{ env.NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Image Tag**: ${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Backend Image**: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Frontend Image**: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## PR Preview Deployment Skipped" >> $GITHUB_STEP_SUMMARY
+            echo "⏸️ Waiting for both backend and frontend builds to complete" >> $GITHUB_STEP_SUMMARY
+            echo "- Backend build: ${{ steps.check-builds.outputs.backend_ready }}" >> $GITHUB_STEP_SUMMARY
+            echo "- Frontend build: ${{ steps.check-builds.outputs.frontend_ready }}" >> $GITHUB_STEP_SUMMARY
+          fi

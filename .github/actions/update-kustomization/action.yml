@@ -1,0 +1,69 @@
+name: 'Update Kustomization'
+description: 'Update kustomization file with new image tag and commit to git'
+
+inputs:
+  overlay-path:
+    description: 'Path to kustomize overlay directory (e.g., infra/k8s/overlays/stage)'
+    required: true
+  service-name:
+    description: 'Service name (backend or frontend)'
+    required: true
+  registry:
+    description: 'Container registry URL'
+    required: true
+  image-name:
+    description: 'Image name'
+    required: true
+  image-tag:
+    description: 'Image tag to set'
+    required: true
+  environment:
+    description: 'Environment name (stage, prod, preview)'
+    required: true
+  commit-message:
+    description: 'Git commit message'
+    required: false
+  branch:
+    description: 'Branch to push to'
+    required: false
+    default: 'main'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Update kustomization with image tag
+      shell: bash
+      run: |
+        cd ${{ inputs.overlay-path }}
+
+        # Update image
+        kustomize edit set image ${{ inputs.service-name }}=${{ inputs.registry }}/${{ inputs.image-name }}:${{ inputs.image-tag }}
+
+        echo "Updated kustomization.yaml:"
+        cat kustomization.yaml
+
+    - name: Commit kustomization changes to git
+      shell: bash
+      run: |
+        # Configure git
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+        # Commit changes
+        git add ${{ inputs.overlay-path }}/kustomization.yaml
+
+        if [ -n "${{ inputs.commit-message }}" ]; then
+          git commit -m "${{ inputs.commit-message }}"
+        else
+          git commit -m "chore(k8s): deploy ${{ inputs.service-name }} to ${{ inputs.environment }} - ${{ inputs.image-tag }}
+
+          Deployed image:
+          - ${{ inputs.service-name }}: ${{ inputs.registry }}/${{ inputs.image-name }}:${{ inputs.image-tag }}
+
+          Triggered by: ${GITHUB_ACTOR}
+          Workflow: ${GITHUB_WORKFLOW}
+          Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+        fi
+
+        # Push to repository
+        git push origin HEAD:${{ inputs.branch }}
