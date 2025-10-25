@@ -4,21 +4,21 @@ kind: Kustomization
 namespace: fireinsurance-stage
 
 resources:
-  - ../../base/backend
-  - ../../base/frontend
-  - namespace.yaml
+- ../../base/backend
+- ../../base/frontend
+- namespace.yaml
 
 commonLabels:
   environment: stage
 
 # Image tags will be set via kustomize edit in CI/CD
 images:
-  - name: backend
-    newName: registry-3272c4a82a-fireinsurance-prod.apps.ir-central1.arvancaas.ir/backend
-    newTag: latest
-  - name: frontend
-    newName: registry-3272c4a82a-fireinsurance-prod.apps.ir-central1.arvancaas.ir/frontend
-    newTag: latest
+- name: backend
+  newName: registry-3272c4a82a-fireinsurance-prod.apps.ir-central1.arvancaas.ir/backend
+  newTag: latest
+- name: frontend
+  newName: registry-3272c4a82a-fireinsurance-prod.apps.ir-central1.arvancaas.ir/frontend
+  newTag: main-9285024b35da6cf01f69cb96d1cf815f9bb0e94e
 
 # Patch replica counts for stage
 replicas:
@@ -29,13 +29,13 @@ replicas:
 
 # ConfigMap patches for stage environment
 configMapGenerator:
-  - name: backend-config
-    behavior: merge
-    literals:
-      - jwt-issuer=https://api-stage.fireinsurance.example.com
-      - jwt-audience=https://api-stage.fireinsurance.example.com
-  - name: frontend-config
-    behavior: merge
-    literals:
-      - nextauth-url=https://stage.fireinsurance.example.com
-      - api-url=http://backend:80
+- behavior: merge
+  literals:
+  - jwt-issuer=https://api-stage.fireinsurance.example.com
+  - jwt-audience=https://api-stage.fireinsurance.example.com
+  name: backend-config
+- behavior: merge
+  literals:
+  - nextauth-url=https://stage.fireinsurance.example.com
+  - api-url=http://backend:80
+  name: frontend-config
