@@ -13,11 +13,10 @@ permissions:
   id-token: write
 
 env:
-  # TODO: Replace with your actual registry
-  REGISTRY: ghcr.io
-  REGISTRY_USERNAME: ${{ github.repository_owner }}
-  BACKEND_IMAGE_NAME: ${{ github.repository }}/backend
-  FRONTEND_IMAGE_NAME: ${{ github.repository }}/frontend
+  REGISTRY: registry-3272c4a82a-fireinsurance-prod.apps.ir-central1.arvancaas.ir
+  REGISTRY_USERNAME: noyanregistry
+  BACKEND_IMAGE_NAME: backend
+  FRONTEND_IMAGE_NAME: frontend
 
 jobs:
   build-backend:
