@@ -48,6 +48,8 @@ namespace FireInsurance.Damage.Application.UseCases.Queries
                     .Include(dc => dc.Incident)
                         .ThenInclude(i => i.IncidentType)
                     .Include(dc => dc.Incident)
+                        .ThenInclude(i => i.OwnershipType)
+                    .Include(dc => dc.Incident)
                         .ThenInclude(i => i.Province)
                     .Include(dc => dc.Incident)
                         .ThenInclude(i => i.City)
