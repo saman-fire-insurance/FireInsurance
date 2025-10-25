@@ -24,7 +24,7 @@ namespace FireInsurance.Users.Infrastructure.Mocks
 
             return Task.FromResult<Result<PersonInquiryResponse>>(new PersonInquiryResponse
             {
-                FirstName = "تستعلی",
+                FirstName = "یوزر",
                 LastName = "تستی پور",
                 FatherName = "آزمون",
                 Gender = true,
