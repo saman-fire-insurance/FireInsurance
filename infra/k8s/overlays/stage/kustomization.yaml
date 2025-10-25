@@ -18,14 +18,14 @@ images:
   newTag: latest
 - name: frontend
   newName: registry-3272c4a82a-fireinsurance-prod.apps.ir-central1.arvancaas.ir/frontend
-  newTag: main-9285024b35da6cf01f69cb96d1cf815f9bb0e94e
+  newTag: main-d6f63717ef61e68d5415442065d3f1a3e4732c73
 
 # Patch replica counts for stage
 replicas:
-  - name: backend
-    count: 1
-  - name: frontend
-    count: 1
+- count: 1
+  name: backend
+- count: 1
+  name: frontend
 
 # ConfigMap patches for stage environment
 configMapGenerator:
