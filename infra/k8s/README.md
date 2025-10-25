@@ -183,12 +183,18 @@ Deploys the latest images to the staging environment.
 
 **Triggers:**
 - **After** "Build and Push Docker Images" workflow completes successfully on `main`/`master`
-- Manual dispatch
+- Manual dispatch (with service selection options)
 
 **Workflow Dependencies:**
 - Waits for build workflow to complete successfully before deploying
 - Ensures images are built before attempting deployment
 - Uses exact image tags from the build
+
+**Service Selection:**
+When manually triggered, you can choose which services to deploy:
+- Deploy backend only
+- Deploy frontend only
+- Deploy both services (default for automatic triggers)
 
 **Steps:**
 1. Retrieves secrets from Vault
@@ -196,20 +202,26 @@ Deploys the latest images to the staging environment.
 3. Updates Kustomize with new image tags
 4. Commits kustomization changes to git (GitOps)
 5. Creates/updates Kubernetes secrets
-6. Applies manifests to the cluster
-7. Waits for rollout to complete
+6. Applies manifests to the cluster (filtered by service selection)
+7. Waits for rollout to complete (only for selected services)
 
 ### 3. Deploy to Production (`deploy-prod.yml`)
 Deploys images to the production environment.
 
 **Triggers:**
 - **After** "Build and Push Docker Images" workflow completes successfully (when triggered by a release)
-- Manual dispatch with image tag input
+- Manual dispatch with image tag input and service selection
 
 **Workflow Dependencies:**
 - Automatically deploys after a release is published (build runs first, then deploy)
 - Manual deployments allow specifying exact image tag
 - Only deploys if build workflow succeeded
+
+**Service Selection:**
+When manually triggered, you can choose which services to deploy:
+- Deploy backend only
+- Deploy frontend only
+- Deploy both services (default for automatic triggers)
 
 **Features:**
 - Requires manual approval (if GitHub environment protection is enabled)
@@ -245,6 +257,63 @@ Removes preview environments when PRs are closed.
 **Actions:**
 - Deletes the entire namespace and all resources
 - Comments on PR confirming cleanup
+
+### 6. Deploy from Kustomization (`deploy-from-kustomization.yml`)
+Deploys using existing image tags from kustomization files **without rebuilding**.
+
+**Triggers:**
+- Manual dispatch only
+
+**Use Cases:**
+- Rollback to a previous deployment (use tags from git history)
+- Re-deploy after infrastructure changes (secrets, configmaps)
+- Deploy to a different environment with the same images
+- Restart deployments after cluster maintenance
+- Deploy specific services independently without rebuilding
+
+**Inputs:**
+- **Environment**: Choose `stage` or `prod`
+- **Deploy Backend**: Boolean (deploy backend service)
+- **Deploy Frontend**: Boolean (deploy frontend service)
+- **Reason**: Optional description for audit trail
+
+**How It Works:**
+1. Reads current kustomization.yaml from the selected environment
+2. Uses the exact image tags already defined in the file
+3. Deploys only the selected services (backend, frontend, or both)
+4. Does NOT build new images or update kustomization.yaml
+5. Commits a deployment record to git with the reason provided
+
+**Example Usage:**
+```bash
+# Scenario 1: Rollback production to a previous version
+# 1. Find the commit with the desired image tags
+git log --oneline --grep="chore(k8s): deploy production" -- infra/k8s/overlays/prod/kustomization.yaml
+
+# 2. Revert to that commit
+git revert <commit-hash> --no-commit
+git commit -m "chore(k8s): rollback production to v1.2.3"
+git push
+
+# 3. Trigger workflow manually:
+# - Environment: prod
+# - Deploy Backend: true
+# - Deploy Frontend: true
+# - Reason: "Rollback to v1.2.3 due to issue in v1.2.4"
+
+# Scenario 2: Update secrets without redeploying
+# Trigger workflow to restart pods and pick up new secrets:
+# - Environment: stage
+# - Deploy Backend: true
+# - Deploy Frontend: false
+# - Reason: "Restart backend to pick up updated database credentials"
+
+# Scenario 3: Deploy only frontend after configuration change
+# - Environment: prod
+# - Deploy Backend: false
+# - Deploy Frontend: true
+# - Reason: "Deploy frontend with updated CORS configuration"
+```
 
 ## Manual Deployment
 

@@ -1,0 +1,65 @@
+name: 'Manage Kubernetes Secrets'
+description: 'Create or update Kubernetes secrets for backend and frontend'
+
+inputs:
+  namespace:
+    description: 'Kubernetes namespace'
+    required: true
+  database-connection-string:
+    description: 'Database connection string'
+    required: true
+  jwt-signing-key:
+    description: 'JWT signing key'
+    required: true
+  sms-provider-base-url:
+    description: 'SMS provider base URL'
+    required: true
+  sms-provider-username:
+    description: 'SMS provider username'
+    required: true
+  sms-provider-password:
+    description: 'SMS provider password'
+    required: true
+  saman-services-base-url:
+    description: 'Saman services base URL'
+    required: true
+  saman-services-key:
+    description: 'Saman services key'
+    required: true
+  nextauth-secret:
+    description: 'NextAuth secret'
+    required: true
+  recaptcha-site-key:
+    description: 'reCAPTCHA site key'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Create namespace if needed
+      shell: bash
+      run: |
+        kubectl create namespace ${{ inputs.namespace }} --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Create/update backend secrets
+      shell: bash
+      run: |
+        kubectl create secret generic backend-secrets \
+          --from-literal=database-connection-string="${{ inputs.database-connection-string }}" \
+          --from-literal=jwt-signing-key="${{ inputs.jwt-signing-key }}" \
+          --from-literal=sms-provider-base-url="${{ inputs.sms-provider-base-url }}" \
+          --from-literal=sms-provider-username="${{ inputs.sms-provider-username }}" \
+          --from-literal=sms-provider-password="${{ inputs.sms-provider-password }}" \
+          --from-literal=saman-services-base-url="${{ inputs.saman-services-base-url }}" \
+          --from-literal=saman-services-key="${{ inputs.saman-services-key }}" \
+          --namespace=${{ inputs.namespace }} \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Create/update frontend secrets
+      shell: bash
+      run: |
+        kubectl create secret generic frontend-secrets \
+          --from-literal=nextauth-secret="${{ inputs.nextauth-secret }}" \
+          --from-literal=recaptcha-site-key="${{ inputs.recaptcha-site-key }}" \
+          --namespace=${{ inputs.namespace }} \
+          --dry-run=client -o yaml | kubectl apply -f -

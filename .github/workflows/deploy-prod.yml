@@ -11,6 +11,16 @@ on:
         description: 'Image tag to deploy (e.g., v1.0.0 or main-abc1234)'
         required: true
         type: string
+      deploy_backend:
+        description: 'Deploy backend service'
+        required: true
+        type: boolean
+        default: true
+      deploy_frontend:
+        description: 'Deploy frontend service'
+        required: true
+        type: boolean
+        default: true
 
 permissions:
   contents: write  # Need write to commit kustomization changes
@@ -57,26 +67,13 @@ jobs:
             secret/data/fireinsurance/prod nextauth_secret | NEXTAUTH_SECRET ;
             secret/data/fireinsurance/prod recaptcha_site_key | RECAPTCHA_SITE_KEY
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
+      - name: Setup Kubernetes tools
+        uses: ./.github/actions/setup-k8s-tools
 
       - name: Configure kubectl
-        run: |
-          mkdir -p $HOME/.kube
-          echo "$KUBECONFIG_CONTENT" > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-
-      - name: Test kubectl connection
-        run: |
-          kubectl cluster-info
-          kubectl get nodes
-
-      - name: Set up Kustomize
-        run: |
-          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
-          sudo mv kustomize /usr/local/bin/
+        uses: ./.github/actions/configure-kubectl
+        with:
+          kubeconfig-content: ${{ env.KUBECONFIG_CONTENT }}
 
       - name: Determine image tag
         id: image-tag
@@ -131,45 +128,28 @@ jobs:
           # Push to repository
           git push origin HEAD:${{ github.ref_name }}
 
-      - name: Create/Update secrets in Kubernetes
-        run: |
-          # Create namespace if it doesn't exist
-          kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
-
-          # Create/update backend secrets
-          kubectl create secret generic backend-secrets \
-            --from-literal=database-connection-string="${DATABASE_CONNECTION_STRING}" \
-            --from-literal=jwt-signing-key="${JWT_SIGNING_KEY}" \
-            --from-literal=sms-provider-base-url="${SMS_PROVIDER_BASE_URL}" \
-            --from-literal=sms-provider-username="${SMS_PROVIDER_USERNAME}" \
-            --from-literal=sms-provider-password="${SMS_PROVIDER_PASSWORD}" \
-            --from-literal=saman-services-base-url="${SAMAN_SERVICES_BASE_URL}" \
-            --from-literal=saman-services-key="${SAMAN_SERVICES_KEY}" \
-            --namespace=${{ env.NAMESPACE }} \
-            --dry-run=client -o yaml | kubectl apply -f -
-
-          # Create/update frontend secrets
-          kubectl create secret generic frontend-secrets \
-            --from-literal=nextauth-secret="${NEXTAUTH_SECRET}" \
-            --from-literal=recaptcha-site-key="${RECAPTCHA_SITE_KEY}" \
-            --namespace=${{ env.NAMESPACE }} \
-            --dry-run=client -o yaml | kubectl apply -f -
+      - name: Manage Kubernetes secrets
+        uses: ./.github/actions/manage-k8s-secrets
+        with:
+          namespace: ${{ env.NAMESPACE }}
+          database-connection-string: ${{ env.DATABASE_CONNECTION_STRING }}
+          jwt-signing-key: ${{ env.JWT_SIGNING_KEY }}
+          sms-provider-base-url: ${{ env.SMS_PROVIDER_BASE_URL }}
+          sms-provider-username: ${{ env.SMS_PROVIDER_USERNAME }}
+          sms-provider-password: ${{ env.SMS_PROVIDER_PASSWORD }}
+          saman-services-base-url: ${{ env.SAMAN_SERVICES_BASE_URL }}
+          saman-services-key: ${{ env.SAMAN_SERVICES_KEY }}
+          nextauth-secret: ${{ env.NEXTAUTH_SECRET }}
+          recaptcha-site-key: ${{ env.RECAPTCHA_SITE_KEY }}
 
       - name: Deploy to Kubernetes
-        run: |
-          cd infra/k8s/overlays/prod
-          kustomize build . | kubectl apply -f -
-
-      - name: Wait for deployment to be ready
-        run: |
-          kubectl rollout status deployment/backend -n ${{ env.NAMESPACE }} --timeout=10m
-          kubectl rollout status deployment/frontend -n ${{ env.NAMESPACE }} --timeout=10m
-
-      - name: Verify deployment
-        run: |
-          kubectl get pods -n ${{ env.NAMESPACE }}
-          kubectl get services -n ${{ env.NAMESPACE }}
-          kubectl get deployments -n ${{ env.NAMESPACE }}
+        uses: ./.github/actions/deploy-to-k8s
+        with:
+          overlay-path: infra/k8s/overlays/prod
+          namespace: ${{ env.NAMESPACE }}
+          deploy-backend: ${{ inputs.deploy_backend || 'true' }}
+          deploy-frontend: ${{ inputs.deploy_frontend || 'true' }}
+          timeout: 10m
 
       - name: Run smoke tests
         run: |

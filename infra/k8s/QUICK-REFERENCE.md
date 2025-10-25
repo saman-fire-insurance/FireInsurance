@@ -44,13 +44,20 @@ secret/data/fireinsurance/
 
 ## Deployment Triggers
 
-| Environment | Trigger | Workflow |
-|------------|---------|----------|
-| **Stage** | After build completes (on `main`/`master`) | `deploy-stage.yml` |
-| **Production** | After build completes (on release) OR manual | `deploy-prod.yml` |
-| **Preview** | After build completes (on PR) | `deploy-pr-preview.yml` |
+| Environment | Trigger | Workflow | Service Selection |
+|------------|---------|----------|-------------------|
+| **Stage** | After build completes (on `main`/`master`) | `deploy-stage.yml` | Auto: both<br>Manual: selectable |
+| **Production** | After build completes (on release) OR manual | `deploy-prod.yml` | Auto: both<br>Manual: selectable |
+| **Preview** | After build completes (on PR) | `deploy-pr-preview.yml` | Both services |
+| **From Kustomization** | Manual only (no build) | `deploy-from-kustomization.yml` | Selectable |
 
-**Note:** All deployments wait for the "Build and Push Docker Images" workflow to complete successfully first. This ensures images are built before attempting deployment.
+**Note:** All automatic deployments wait for the "Build and Push Docker Images" workflow to complete successfully first. This ensures images are built before attempting deployment.
+
+### Service Selection
+When manually triggering `deploy-stage.yml`, `deploy-prod.yml`, or `deploy-from-kustomization.yml`, you can choose:
+- Deploy backend only
+- Deploy frontend only
+- Deploy both services
 
 ## GitOps: Viewing Deployment History
 
@@ -134,14 +141,33 @@ kubectl rollout status deployment/frontend -n fireinsurance-prod
 
 ### Manually Trigger Workflows
 
-1. **Deploy to Production:**
+1. **Deploy to Production (with build):**
    - Go to: Actions → "Deploy to Production" → "Run workflow"
-   - Input: Image tag (e.g., `v1.0.0` or `main-abc1234`)
+   - Inputs:
+     - Image tag (e.g., `v1.0.0` or `main-abc1234`)
+     - Deploy backend: true/false
+     - Deploy frontend: true/false
 
-2. **Deploy to Stage:**
+2. **Deploy to Stage (with build):**
    - Go to: Actions → "Deploy to Stage" → "Run workflow"
+   - Inputs:
+     - Deploy backend: true/false
+     - Deploy frontend: true/false
 
-3. **Build Images:**
+3. **Deploy from Kustomization (without build):**
+   - Go to: Actions → "Deploy from Kustomization" → "Run workflow"
+   - Inputs:
+     - Environment: stage or prod
+     - Deploy backend: true/false
+     - Deploy frontend: true/false
+     - Reason: optional description for audit trail
+   - Use cases:
+     - Rollback to previous version
+     - Re-deploy after secret updates
+     - Deploy only one service
+     - Restart after cluster maintenance
+
+4. **Build Images:**
    - Go to: Actions → "Build and Push Docker Images" → "Run workflow"
 
 ## Troubleshooting Quick Checks

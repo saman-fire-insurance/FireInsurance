@@ -1,0 +1,132 @@
+name: Deploy from Kustomization (No Build)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - stage
+          - prod
+      deploy_backend:
+        description: 'Deploy backend service'
+        required: true
+        type: boolean
+        default: true
+      deploy_frontend:
+        description: 'Deploy frontend service'
+        required: true
+        type: boolean
+        default: true
+      reason:
+        description: 'Reason for deployment (optional)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  REGISTRY: registry-3272c4a82a-fireinsurance-prod.apps.ir-central1.arvancaas.ir
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment == 'prod' && 'production' || 'stage' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set environment variables
+        id: env-vars
+        run: |
+          ENV="${{ inputs.environment }}"
+          NAMESPACE="fireinsurance-${ENV}"
+
+          echo "environment=${ENV}" >> $GITHUB_OUTPUT
+          echo "namespace=${NAMESPACE}" >> $GITHUB_OUTPUT
+
+          echo "ENVIRONMENT=${ENV}" >> $GITHUB_ENV
+          echo "NAMESPACE=${NAMESPACE}" >> $GITHUB_ENV
+
+      - name: Retrieve secrets from Vault
+        uses: hashicorp/vault-action@v3
+        with:
+          method: jwt
+          url: https://noyanvault.paratechco.com
+          role: github-actions
+          secrets: |
+            secret/data/fireinsurance/${{ inputs.environment }} kubeconfig | KUBECONFIG_CONTENT ;
+            secret/data/fireinsurance/${{ inputs.environment }} database_connection_string | DATABASE_CONNECTION_STRING ;
+            secret/data/fireinsurance/${{ inputs.environment }} jwt_signing_key | JWT_SIGNING_KEY ;
+            secret/data/fireinsurance/${{ inputs.environment }} sms_provider_base_url | SMS_PROVIDER_BASE_URL ;
+            secret/data/fireinsurance/${{ inputs.environment }} sms_provider_username | SMS_PROVIDER_USERNAME ;
+            secret/data/fireinsurance/${{ inputs.environment }} sms_provider_password | SMS_PROVIDER_PASSWORD ;
+            secret/data/fireinsurance/${{ inputs.environment }} saman_services_base_url | SAMAN_SERVICES_BASE_URL ;
+            secret/data/fireinsurance/${{ inputs.environment }} saman_services_key | SAMAN_SERVICES_KEY ;
+            secret/data/fireinsurance/${{ inputs.environment }} nextauth_secret | NEXTAUTH_SECRET ;
+            secret/data/fireinsurance/${{ inputs.environment }} recaptcha_site_key | RECAPTCHA_SITE_KEY
+
+      - name: Setup Kubernetes tools
+        uses: ./.github/actions/setup-k8s-tools
+
+      - name: Configure kubectl
+        uses: ./.github/actions/configure-kubectl
+        with:
+          kubeconfig-content: ${{ env.KUBECONFIG_CONTENT }}
+
+      - name: Display current kustomization
+        run: |
+          echo "📋 Current kustomization for ${{ inputs.environment }}:"
+          cat infra/k8s/overlays/${{ inputs.environment }}/kustomization.yaml
+
+          echo ""
+          echo "🎯 Deploying:"
+          echo "  - Backend: ${{ inputs.deploy_backend }}"
+          echo "  - Frontend: ${{ inputs.deploy_frontend }}"
+
+          if [ -n "${{ inputs.reason }}" ]; then
+            echo "  - Reason: ${{ inputs.reason }}"
+          fi
+
+      - name: Manage Kubernetes secrets
+        uses: ./.github/actions/manage-k8s-secrets
+        with:
+          namespace: ${{ env.NAMESPACE }}
+          database-connection-string: ${{ env.DATABASE_CONNECTION_STRING }}
+          jwt-signing-key: ${{ env.JWT_SIGNING_KEY }}
+          sms-provider-base-url: ${{ env.SMS_PROVIDER_BASE_URL }}
+          sms-provider-username: ${{ env.SMS_PROVIDER_USERNAME }}
+          sms-provider-password: ${{ env.SMS_PROVIDER_PASSWORD }}
+          saman-services-base-url: ${{ env.SAMAN_SERVICES_BASE_URL }}
+          saman-services-key: ${{ env.SAMAN_SERVICES_KEY }}
+          nextauth-secret: ${{ env.NEXTAUTH_SECRET }}
+          recaptcha-site-key: ${{ env.RECAPTCHA_SITE_KEY }}
+
+      - name: Deploy to Kubernetes
+        uses: ./.github/actions/deploy-to-k8s
+        with:
+          overlay-path: infra/k8s/overlays/${{ inputs.environment }}
+          namespace: ${{ env.NAMESPACE }}
+          deploy-backend: ${{ inputs.deploy_backend }}
+          deploy-frontend: ${{ inputs.deploy_frontend }}
+          timeout: 5m
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "## Deployment Summary (From Kustomization)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Namespace**: ${{ env.NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend Deployed**: ${{ inputs.deploy_backend }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend Deployed**: ${{ inputs.deploy_frontend }}" >> $GITHUB_STEP_SUMMARY
+
+          if [ -n "${{ inputs.reason }}" ]; then
+            echo "- **Reason**: ${{ inputs.reason }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note**: Deployed using existing image tags from kustomization.yaml (no new build)" >> $GITHUB_STEP_SUMMARY

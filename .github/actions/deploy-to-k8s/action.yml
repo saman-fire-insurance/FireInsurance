@@ -1,0 +1,69 @@
+name: 'Deploy to Kubernetes'
+description: 'Deploy selected services to Kubernetes using Kustomize'
+
+inputs:
+  overlay-path:
+    description: 'Path to kustomize overlay directory (e.g., infra/k8s/overlays/stage)'
+    required: true
+  namespace:
+    description: 'Kubernetes namespace'
+    required: true
+  deploy-backend:
+    description: 'Deploy backend service (true/false)'
+    required: true
+    default: 'true'
+  deploy-frontend:
+    description: 'Deploy frontend service (true/false)'
+    required: true
+    default: 'true'
+  timeout:
+    description: 'Rollout timeout (e.g., 5m, 10m)'
+    required: false
+    default: '5m'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Deploy to Kubernetes
+      shell: bash
+      run: |
+        cd ${{ inputs.overlay-path }}
+
+        # Build the full manifest
+        MANIFEST=$(kustomize build .)
+
+        # Filter based on service selection
+        if [ "${{ inputs.deploy-backend }}" == "true" ] && [ "${{ inputs.deploy-frontend }}" == "true" ]; then
+          echo "✅ Deploying both backend and frontend..."
+          echo "$MANIFEST" | kubectl apply -f -
+        elif [ "${{ inputs.deploy-backend }}" == "true" ]; then
+          echo "✅ Deploying backend only..."
+          echo "$MANIFEST" | kubectl apply -f - --selector=app=backend
+        elif [ "${{ inputs.deploy-frontend }}" == "true" ]; then
+          echo "✅ Deploying frontend only..."
+          echo "$MANIFEST" | kubectl apply -f - --selector=app=frontend
+        else
+          echo "⚠️ No services selected for deployment!"
+          exit 1
+        fi
+
+    - name: Wait for deployment to be ready
+      shell: bash
+      run: |
+        if [ "${{ inputs.deploy-backend }}" == "true" ]; then
+          echo "⏳ Waiting for backend deployment..."
+          kubectl rollout status deployment/backend -n ${{ inputs.namespace }} --timeout=${{ inputs.timeout }}
+        fi
+
+        if [ "${{ inputs.deploy-frontend }}" == "true" ]; then
+          echo "⏳ Waiting for frontend deployment..."
+          kubectl rollout status deployment/frontend -n ${{ inputs.namespace }} --timeout=${{ inputs.timeout }}
+        fi
+
+    - name: Verify deployment
+      shell: bash
+      run: |
+        echo "📊 Deployment Status:"
+        kubectl get pods -n ${{ inputs.namespace }}
+        kubectl get services -n ${{ inputs.namespace }}
+        kubectl get deployments -n ${{ inputs.namespace }}

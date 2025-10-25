@@ -1,0 +1,23 @@
+name: 'Configure kubectl'
+description: 'Configure kubectl with kubeconfig and test connection'
+
+inputs:
+  kubeconfig-content:
+    description: 'Base64-encoded kubeconfig content'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure kubectl
+      shell: bash
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ inputs.kubeconfig-content }}" > $HOME/.kube/config
+        chmod 600 $HOME/.kube/config
+
+    - name: Test kubectl connection
+      shell: bash
+      run: |
+        kubectl cluster-info
+        kubectl get nodes
