@@ -70,6 +70,10 @@ jobs:
         with:
           kubeconfig-content: ${{ env.KUBECONFIG_CONTENT }}
 
+      - name: Get short SHA
+        id: sha
+        run: echo "short=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
       - name: Update kustomization for backend
         uses: ./.github/actions/update-kustomization
         with:
@@ -77,7 +81,7 @@ jobs:
           service-name: backend
           registry: ${{ env.REGISTRY }}
           image-name: backend
-          image-tag: main-${{ github.sha }}
+          image-tag: main-${{ steps.sha.outputs.short }}
           environment: ${{ env.ENVIRONMENT }}
           branch: ${{ github.ref_name }}
 
@@ -110,7 +114,7 @@ jobs:
           echo "## Backend Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **Environment**: ${{ env.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Namespace**: ${{ env.NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Backend Image**: ${{ env.REGISTRY }}/backend:main-${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend Image**: ${{ env.REGISTRY }}/backend:main-${{ steps.sha.outputs.short }}" >> $GITHUB_STEP_SUMMARY
 
   deploy-frontend:
     runs-on: ubuntu-latest
@@ -153,6 +157,10 @@ jobs:
         with:
           kubeconfig-content: ${{ env.KUBECONFIG_CONTENT }}
 
+      - name: Get short SHA
+        id: sha
+        run: echo "short=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
       - name: Update kustomization for frontend
         uses: ./.github/actions/update-kustomization
         with:
@@ -160,7 +168,7 @@ jobs:
           service-name: frontend
           registry: ${{ env.REGISTRY }}
           image-name: frontend
-          image-tag: main-${{ github.sha }}
+          image-tag: main-${{ steps.sha.outputs.short }}
           environment: ${{ env.ENVIRONMENT }}
           branch: ${{ github.ref_name }}
 
@@ -193,4 +201,4 @@ jobs:
           echo "## Frontend Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **Environment**: ${{ env.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Namespace**: ${{ env.NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Frontend Image**: ${{ env.REGISTRY }}/frontend:main-${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend Image**: ${{ env.REGISTRY }}/frontend:main-${{ steps.sha.outputs.short }}" >> $GITHUB_STEP_SUMMARY

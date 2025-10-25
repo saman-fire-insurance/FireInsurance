@@ -91,7 +91,9 @@ jobs:
         run: |
           PR_NUMBER=${{ steps.pr.outputs.number }}
           NAMESPACE="fireinsurance-pr-${PR_NUMBER}"
-          IMAGE_TAG="pr-${PR_NUMBER}-${{ github.event.workflow_run.head_sha }}"
+          SHORT_SHA="${{ github.event.workflow_run.head_sha }}"
+          SHORT_SHA="${SHORT_SHA:0:7}"
+          IMAGE_TAG="pr-${PR_NUMBER}-${SHORT_SHA}"
 
           echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
           echo "namespace=${NAMESPACE}" >> $GITHUB_OUTPUT
