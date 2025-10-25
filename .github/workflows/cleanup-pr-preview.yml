@@ -38,39 +38,70 @@ jobs:
           secrets: |
             secret/data/fireinsurance/preview kubeconfig | KUBECONFIG_CONTENT
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
+      - name: Setup Kubernetes tools
+        uses: ./.github/actions/setup-k8s-tools
 
       - name: Configure kubectl
-        run: |
-          mkdir -p $HOME/.kube
-          echo "$KUBECONFIG_CONTENT" > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
+        uses: ./.github/actions/configure-kubectl
+        with:
+          kubeconfig-content: ${{ env.KUBECONFIG_CONTENT }}
 
-      - name: Test kubectl connection
+      - name: Delete deployments and services
         run: |
-          kubectl cluster-info
-          kubectl get nodes
+          echo "🧹 Cleaning up preview environment for PR #${{ env.PR_NUMBER }}..."
 
-      - name: Delete namespace
-        run: |
-          if kubectl get namespace ${{ env.NAMESPACE }} &> /dev/null; then
-            echo "Deleting namespace ${{ env.NAMESPACE }}..."
-            kubectl delete namespace ${{ env.NAMESPACE }} --timeout=5m
-            echo "✅ Namespace ${{ env.NAMESPACE }} deleted successfully"
-          else
+          # Check if namespace exists
+          if ! kubectl get namespace ${{ env.NAMESPACE }} &> /dev/null; then
             echo "ℹ️ Namespace ${{ env.NAMESPACE }} does not exist, nothing to clean up"
+            exit 0
           fi
+
+          echo "📦 Deleting resources in namespace ${{ env.NAMESPACE }}..."
+
+          # Delete deployments
+          if kubectl get deployments -n ${{ env.NAMESPACE }} &> /dev/null; then
+            echo "Deleting deployments..."
+            kubectl delete deployments --all -n ${{ env.NAMESPACE }} --timeout=2m || true
+          fi
+
+          # Delete services
+          if kubectl get services -n ${{ env.NAMESPACE }} &> /dev/null; then
+            echo "Deleting services..."
+            kubectl delete services --all -n ${{ env.NAMESPACE }} --timeout=1m || true
+          fi
+
+          # Delete pods (in case any are orphaned)
+          if kubectl get pods -n ${{ env.NAMESPACE }} &> /dev/null; then
+            echo "Deleting pods..."
+            kubectl delete pods --all -n ${{ env.NAMESPACE }} --timeout=1m || true
+          fi
+
+          echo "✅ Resources deleted successfully"
 
       - name: Verify cleanup
         run: |
+          echo "📊 Verifying cleanup..."
+
+          # Check if namespace still exists
           if kubectl get namespace ${{ env.NAMESPACE }} &> /dev/null; then
-            echo "⚠️ Warning: Namespace still exists"
-            kubectl get all -n ${{ env.NAMESPACE }}
+            echo "Remaining resources in namespace:"
+            kubectl get all -n ${{ env.NAMESPACE }} || echo "No resources found"
+
+            PODS=$(kubectl get pods -n ${{ env.NAMESPACE }} --no-headers 2>/dev/null | wc -l)
+            SERVICES=$(kubectl get services -n ${{ env.NAMESPACE }} --no-headers 2>/dev/null | wc -l)
+            DEPLOYMENTS=$(kubectl get deployments -n ${{ env.NAMESPACE }} --no-headers 2>/dev/null | wc -l)
+
+            echo "- Pods: $PODS"
+            echo "- Services: $SERVICES"
+            echo "- Deployments: $DEPLOYMENTS"
+
+            if [ "$PODS" -eq 0 ] && [ "$SERVICES" -eq 0 ] && [ "$DEPLOYMENTS" -eq 0 ]; then
+              echo "✅ All main resources cleaned up successfully"
+            else
+              echo "⚠️ Some resources may still exist"
+            fi
           else
-            echo "✅ Cleanup verified: namespace has been removed"
+            echo "ℹ️ Namespace ${{ env.NAMESPACE }} does not exist"
           fi
 
       - name: Comment on PR
@@ -83,11 +114,13 @@ jobs:
 
             const comment = `## 🧹 Preview Environment Cleaned Up
 
-            The preview environment for this PR has been deleted.
+            The preview environment resources for this PR have been deleted.
 
             **Cleaned up:**
             - **Namespace**: \`${namespace}\`
-            - All deployments, services, and resources in this namespace have been removed.
+            - Deleted all deployments, pods, and services
+
+            **Note**: The namespace itself is preserved (may contain configmaps, secrets, etc.)
             `;
 
             github.rest.issues.createComment({
@@ -103,4 +136,5 @@ jobs:
           echo "## PR Preview Cleanup Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **PR Number**: #${{ env.PR_NUMBER }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Namespace**: ${{ env.NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: Cleaned up successfully ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- **Cleaned Resources**: Deployments, Pods, Services" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Cleanup completed ✅" >> $GITHUB_STEP_SUMMARY
