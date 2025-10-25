@@ -1,9 +1,11 @@
 name: Deploy to Stage
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Build and Push Docker Images"]
+    types: [completed]
     branches: [main, master]
-  workflow_dispatch:
+  workflow_dispatch:  # Allow manual trigger
 
 permissions:
   contents: write  # Need write to commit kustomization changes
@@ -21,6 +23,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: stage
+    # Only run if build workflow succeeded (skip if manually triggered)
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

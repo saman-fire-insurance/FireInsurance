@@ -137,57 +137,104 @@ Run: https://github.com/owner/repo/actions/runs/12345
 
 ## GitHub Actions Workflows
 
+### Workflow Orchestration
+
+The CI/CD pipeline uses **workflow dependencies** to ensure deployments happen only after successful builds:
+
+```
+┌─────────────────────────────────┐
+│ Build and Push Docker Images   │
+│ (Triggered on push/PR/release)  │
+└────────────┬────────────────────┘
+             │
+             ├─── (on main/master) ──→ Deploy to Stage
+             │
+             ├─── (on release) ─────→ Deploy to Production
+             │
+             └─── (on PR) ──────────→ Deploy PR Preview
+```
+
+**Key Benefits:**
+- ✅ Deployments only run after successful builds
+- ✅ Prevents deploying non-existent images
+- ✅ Ensures image tags match what was built
+- ✅ Failed builds don't trigger deployments
+
 ### 1. Build and Push (`build-and-push.yml`)
 Builds Docker images for both backend and frontend and pushes them to the container registry.
 
 **Triggers:**
 - Push to `main`/`master`
 - Pull requests
+- Release publication
 - Manual dispatch
 
 **Images Built:**
 - Backend: `<registry>/<repo>/backend:<tag>`
 - Frontend: `<registry>/<repo>/frontend:<tag>`
 
+**What Happens Next:**
+- On `main`/`master`: Triggers "Deploy to Stage"
+- On release: Triggers "Deploy to Production"
+- On PR: Triggers "Deploy PR Preview"
+
 ### 2. Deploy to Stage (`deploy-stage.yml`)
 Deploys the latest images to the staging environment.
 
 **Triggers:**
-- Push to `main`/`master` (automatic)
+- **After** "Build and Push Docker Images" workflow completes successfully on `main`/`master`
 - Manual dispatch
+
+**Workflow Dependencies:**
+- Waits for build workflow to complete successfully before deploying
+- Ensures images are built before attempting deployment
+- Uses exact image tags from the build
 
 **Steps:**
 1. Retrieves secrets from Vault
 2. Configures kubectl with kubeconfig from Vault
 3. Updates Kustomize with new image tags
-4. Creates/updates Kubernetes secrets
-5. Applies manifests to the cluster
-6. Waits for rollout to complete
+4. Commits kustomization changes to git (GitOps)
+5. Creates/updates Kubernetes secrets
+6. Applies manifests to the cluster
+7. Waits for rollout to complete
 
 ### 3. Deploy to Production (`deploy-prod.yml`)
 Deploys images to the production environment.
 
 **Triggers:**
-- Release publication (automatic)
+- **After** "Build and Push Docker Images" workflow completes successfully (when triggered by a release)
 - Manual dispatch with image tag input
+
+**Workflow Dependencies:**
+- Automatically deploys after a release is published (build runs first, then deploy)
+- Manual deployments allow specifying exact image tag
+- Only deploys if build workflow succeeded
 
 **Features:**
 - Requires manual approval (if GitHub environment protection is enabled)
 - Supports deploying specific image tags
-- Higher resource limits
+- Higher resource limits (3 replicas, more CPU/memory)
 - Extended rollout timeout
+- GitOps: commits deployment to git history
 
 ### 4. Deploy PR Preview (`deploy-pr-preview.yml`)
 Creates ephemeral preview environments for pull requests.
 
 **Triggers:**
-- PR opened, synchronized, or reopened
+- **After** "Build and Push Docker Images" workflow completes successfully for a PR
+
+**Workflow Dependencies:**
+- Waits for build workflow to complete successfully before deploying
+- Automatically extracts PR number from workflow run
+- Only deploys if images were successfully built
 
 **Features:**
 - Creates namespace: `fireinsurance-pr-<number>`
 - Deploys with PR-specific image tags
 - Comments on PR with deployment details
-- Minimal resources for cost efficiency
+- Minimal resources for cost efficiency (1 replica each)
+- GitOps: commits deployment to git history (on PR branch)
 
 ### 5. Cleanup PR Preview (`cleanup-pr-preview.yml`)
 Removes preview environments when PRs are closed.

@@ -1,8 +1,10 @@
 name: Deploy to Production
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["Build and Push Docker Images"]
+    types: [completed]
+    branches: [main, master]  # This covers release builds too
   workflow_dispatch:
     inputs:
       image_tag:
@@ -26,6 +28,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production
+    # Only run if:
+    # 1. Manually triggered, OR
+    # 2. Build workflow succeeded AND was triggered by a release
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'release')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

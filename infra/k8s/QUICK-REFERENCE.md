@@ -46,9 +46,11 @@ secret/data/fireinsurance/
 
 | Environment | Trigger | Workflow |
 |------------|---------|----------|
-| **Stage** | Push to `main`/`master` | `deploy-stage.yml` |
-| **Production** | Release published OR manual | `deploy-prod.yml` |
-| **Preview** | PR opened/updated | `deploy-pr-preview.yml` |
+| **Stage** | After build completes (on `main`/`master`) | `deploy-stage.yml` |
+| **Production** | After build completes (on release) OR manual | `deploy-prod.yml` |
+| **Preview** | After build completes (on PR) | `deploy-pr-preview.yml` |
+
+**Note:** All deployments wait for the "Build and Push Docker Images" workflow to complete successfully first. This ensures images are built before attempting deployment.
 
 ## GitOps: Viewing Deployment History
 
